@@ -54,6 +54,7 @@ export default function Account() {
   const [remember, setRemember] = useState(authStorage.remembers);
   const [busy, setBusy] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
   const [form, setForm] = useState<Profile>({});
   const [nationalId, setNationalId] = useState('');
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
@@ -113,7 +114,10 @@ export default function Account() {
         language,
       });
       setUser(result.user);
-      if (result.confirmation) setConfirmation(true);
+      if (result.confirmation) {
+        setPendingEmail(String(data.get('email')).trim());
+        setConfirmation(true);
+      }
       else {
         setEditing(mode === 'register');
         toast(t('welcomeBack'));
@@ -190,12 +194,13 @@ export default function Account() {
     }
   }
   async function resend() {
-    if (!supabase || !user) return;
+    const email = user?.email || pendingEmail;
+    if (!supabase || !email) return;
     setBusy(true);
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: user.email,
+        email,
         options: { emailRedirectTo: window.location.origin + '/#account' },
       });
       if (error) throw error;
