@@ -28,6 +28,7 @@ import {
 import { Badge, Empty, Field } from './components';
 import { AuthField, AuthIllustration } from './Auth';
 import { authStorage } from './auth-storage';
+import { afterSignIn, authMode, authRoutes, type AuthMode } from './navigation';
 import { languages } from './i18n';
 import { useApp } from './state';
 import type { DocumentRecord, Profile } from './types';
@@ -46,8 +47,9 @@ export default function Account() {
     online,
     recovery,
     setRecovery,
+    route,
   } = useApp();
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('register');
+  const mode = authMode(route);
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(authStorage.remembers);
   const [busy, setBusy] = useState(false);
@@ -60,9 +62,18 @@ export default function Account() {
   const [uploading, setUploading] = useState('');
   const [inlineError, setInlineError] = useState('');
   const profileId = user?.id;
+  function changeMode(next: AuthMode) {
+    setShowPassword(false);
+    setConfirmation(false);
+    setInlineError('');
+    navigate(authRoutes[next]);
+  }
   useLayoutEffect(() => {
-    if (!profileId || recovery) window.scrollTo(0, 0);
-  }, [mode, profileId, recovery]);
+    if (!profileId || recovery) {
+      window.scrollTo(0, 0);
+      setShowPassword(false);
+    }
+  }, [mode, profileId, recovery, language]);
   useEffect(() => {
     if (!profileId) return;
     let active = true;
@@ -91,7 +102,7 @@ export default function Account() {
         });
         if (error) throw error;
         toast(t('resetSent'));
-        setMode('login');
+        changeMode('login');
         return;
       }
       authStorage.setRemember(remember);
@@ -106,6 +117,7 @@ export default function Account() {
       else {
         setEditing(mode === 'register');
         toast(t('welcomeBack'));
+        if (result.user) navigate(afterSignIn(result.user.verification));
       }
     } catch (error) {
       notifyError(error);
@@ -121,9 +133,10 @@ export default function Account() {
       const password = String(new FormData(event.currentTarget).get('password'));
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      setRecovery(false);
-      toast(t('passwordReset'));
       await refreshUser();
+      setRecovery(false);
+      navigate(afterSignIn(user?.verification || 'draft'));
+      toast(t('passwordReset'));
     } catch (error) {
       notifyError(error);
     } finally {
@@ -154,6 +167,7 @@ export default function Account() {
       await refreshUser();
       setEditing(false);
       toast(t('submitted'));
+      navigate('home');
     } catch (error) {
       notifyError(error);
     } finally {
@@ -334,8 +348,7 @@ export default function Account() {
                       type="button"
                       className="auth-forgot"
                       onClick={() => {
-                        setMode('forgot');
-                        setShowPassword(false);
+                        changeMode('forgot');
                       }}
                     >
                       {t('forgot')}
@@ -372,10 +385,7 @@ export default function Account() {
               {mode === 'forgot' ? '' : t(registering ? 'haveAccount' : 'newAccount')}{' '}
               <button
                 onClick={() => {
-                  setMode(registering || mode === 'forgot' ? 'login' : 'register');
-                  setShowPassword(false);
-                  setConfirmation(false);
-                  setInlineError('');
+                  changeMode(registering || mode === 'forgot' ? 'login' : 'register');
                 }}
               >
                 {t(mode === 'forgot' ? 'backToSignIn' : registering ? 'signIn' : 'signUp')}
@@ -421,6 +431,7 @@ export default function Account() {
               await supabase?.auth.signOut();
               setUser(null);
               setEditing(false);
+              navigate('signin');
             } catch (error) {
               notifyError(error);
             }

@@ -1,4 +1,4 @@
-const CACHE = 'hamiya-shell-v3';
+const CACHE = 'hamiya-shell-v4';
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) => cache.addAll(['/', '/icon.svg', '/manifest.webmanifest'])),

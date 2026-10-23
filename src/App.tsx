@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
+  ArrowLeft,
   ArrowUpRight,
   Building2,
   CarFront,
@@ -23,6 +24,7 @@ import { CategoryCard, Empty } from './components';
 import { Cart, CatalogPage, OrdersPage } from './Commerce';
 import { languages } from './i18n';
 import { useApp } from './state';
+import { appView } from './navigation';
 const Account = lazy(() => import('./Account'));
 const Admin = lazy(() => import('./Admin'));
 const navigation = [
@@ -37,6 +39,7 @@ export default function App() {
     route,
     navigate,
     user,
+    authLoading,
     language,
     setLanguage,
     cart,
@@ -44,11 +47,27 @@ export default function App() {
     cartOpen,
     online,
     catalog,
+    recovery,
   } = useApp();
+  const root = route.split('/')[0];
+  const view = appView({
+    authLoading,
+    signedIn: !!user,
+    recovery,
+    route,
+    needsProfile: user?.role === 'customer' && user.verification === 'draft',
+  });
+  const standalone = view !== 'dashboard';
   const [drawer, setDrawer] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (!drawer) return;
+    if (standalone) {
+      setDrawer(false);
+      setCartOpen(false);
+    }
+  }, [standalone, setCartOpen]);
+  useEffect(() => {
+    if (!drawer || standalone) return;
     const previousFocus = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -75,12 +94,58 @@ export default function App() {
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus();
     };
-  }, [drawer]);
-  const root = route.split('/')[0];
+  }, [drawer, standalone]);
   function go(value: string) {
     navigate(value);
     setDrawer(false);
   }
+  if (standalone)
+    return (
+      <div className={'entry-screen entry-' + view}>
+        {view === 'information' && (
+          <header className="entry-header">
+            <button
+              className="entry-back"
+              onClick={() => navigate(user || recovery ? 'account' : 'signin')}
+            >
+              <ArrowLeft size={18} />
+              {t(user ? 'account' : 'backToSignIn')}
+            </button>
+            <label className="language-select">
+              <Globe2 size={16} />
+              <select
+                aria-label={t('language')}
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as typeof language)}
+              >
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </header>
+        )}
+        {!online && (
+          <div className="entry-offline" role="status">
+            <WifiOff size={16} />
+            {t('offline')}
+          </div>
+        )}
+        <main id="main" className="entry-main" tabIndex={-1}>
+          {view === 'loading' ? (
+            <EntryLoading />
+          ) : view === 'information' ? (
+            <Information page={root} />
+          ) : (
+            <Suspense fallback={<EntryLoading />}>
+              <Account key={user?.id || 'guest'} />
+            </Suspense>
+          )}
+        </main>
+      </div>
+    );
   return (
     <div className="app">
       <a
@@ -289,6 +354,15 @@ export default function App() {
         ))}
       </nav>
       {cartOpen && <Cart />}
+    </div>
+  );
+}
+function EntryLoading() {
+  const { t } = useApp();
+  return (
+    <div className="entry-loading" role="status">
+      <strong>hamiya</strong>
+      <span>{t('loading')}</span>
     </div>
   );
 }

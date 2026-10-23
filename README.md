@@ -96,7 +96,7 @@ Template files are supplied in the repository; uploading them to Auth configurat
 
 ## Registration and privacy
 
-Customers can browse published catalogues. Orders and purchase enquiries require a complete, approved profile and verified email. Required information includes legal and business names, phone, email, address, landmark, National ID, trade license, profile photo and supporting documents. Sub-city, woreda and kebele are collected where applicable. GPS is optional; manual address completion remains available.
+The app opens on standalone sign-in. Registration and password recovery use dedicated entry routes, without the dashboard header, sidebar, cart or mobile navigation. New customers complete the required profile before entering the dashboard. Customers can then browse published catalogues. Orders and purchase enquiries require a complete, approved profile and verified email. Required information includes legal and business names, phone, email, address, landmark, National ID, trade license, profile photo and supporting documents. Sub-city, woreda and kebele are collected where applicable. GPS is optional; manual address completion remains available.
 
 Progress can be saved to the authenticated profile. National ID text and documents are not stored in catalogue/cart caches. The database retains a salted National ID hash and a masked suffix; the supporting document is private. Uploads use unique immutable names, a bucket-enforced size/MIME allow list and client file-signature checks. Authorized document links expire after 60 seconds and document access is audited.
 
@@ -106,7 +106,7 @@ Before collecting real identity documents, the company must review the provision
 
 `tests/database.test.mjs` executes the actual schema and RPC in PGlite, a PostgreSQL runtime, with test-only Supabase Auth and Storage schema fixtures. It tests ownership policies, staff permissions, required documents, National ID masking, publishing gates, stale prices, duplicate orders, competing reservations, cancellation, fulfilment and sold-vehicle rejection.
 
-`tests/auth-storage.test.mjs` checks remembered and tab-only sessions, persistence changes, sign-out cleanup and browsers with disabled storage.
+`tests/auth-storage.test.mjs` checks remembered and tab-only sessions, persistence changes, sign-out cleanup and browsers with disabled storage. `tests/navigation.test.mjs` covers session restoration, guest deep links, profile onboarding, recovery, public information pages and sign-out boundaries.
 
 The database tests validate SQL behaviour; they do not replace a real multi-connection load test or a hosted customer signup/email/upload journey. See `docs/VERIFICATION.md` for live checks and remaining launch inputs.
 

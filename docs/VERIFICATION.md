@@ -47,10 +47,21 @@ Performance advisors reported unused indexes on the new empty operational tables
 - Replaced serif accents with consistent sans-serif typography, retaining Ethiopic font fallbacks.
 - Sign-in, registration and recovery share an illustrated white card, icon fields, rounded controls and a full-width navy action.
 - Password visibility and “Remember me” have translated accessible labels. Session persistence is handled through Supabase's custom-storage interface.
-- `pnpm build` passed; `pnpm test` passed all 16 reported tests, including session persistence, tab-only sessions, sign-out cleanup and disabled browser storage.
+- `pnpm build` passed; `pnpm test` passed all 22 reported tests, including session persistence, tab-only sessions, sign-out cleanup and disabled browser storage.
 - Reviewed both authentication modes on desktop and at a 390px iframe width, including English, Amharic and Afaan Oromo. No horizontal overflow was observed.
 - Verified password visibility, the persistence switch, recovery navigation and language changes without entering credentials or sending authentication emails.
 - Production email delivery, registration confirmation and customer document uploads remain launch checks listed below.
+
+## Standalone entry flow correction
+
+- Opening the app while signed out shows sign-in; register and forgot-password modes have their own hash routes and support browser Back / reload.
+- Dashboard header, sidebar, cart, mobile navigation and dashboard footer are not mounted in the entry flow.
+- Session restoration shows a neutral loading view before selecting the entry or dashboard layout.
+- New customer profiles stay in a separate onboarding layout until submitted. Existing submitted profiles enter the dashboard after sign-in.
+- Recovery remains standalone even when Supabase has established a recovery session.
+- Privacy, terms and help remain reachable through a minimal standalone information layout.
+- Browser checks confirmed guest entry, mode switching, recovery navigation, privacy return navigation and mobile language layouts without entering credentials or sending emails.
+- Route-policy tests cover the authenticated transition, incomplete profiles, recovery sessions and sign-out. A real signup / email-confirmation / authenticated dashboard journey remains an owner-controlled launch check.
 
 ## Inputs still needed before business launch
 

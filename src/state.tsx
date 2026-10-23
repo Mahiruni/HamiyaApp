@@ -44,6 +44,7 @@ interface AppContextValue {
   t: (key: string) => string;
   setLanguage: (language: Language) => void;
   user: Customer | null;
+  authLoading: boolean;
   setUser: (user: Customer | null) => void;
   refreshUser: () => Promise<void>;
   catalog: Catalog;
@@ -71,6 +72,7 @@ export function Provider({ children }: { children: ReactNode }) {
     return languages.some((l) => l.code === value) ? (value as Language) : 'en';
   });
   const [user, setUser] = useState<Customer | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [catalog, setCatalog] = useState<Catalog>(() =>
     stored('hamiya-catalog-v1', initialCatalog),
   );
@@ -119,8 +121,12 @@ export function Provider({ children }: { children: ReactNode }) {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
   const refreshUser = useCallback(async () => {
-    const { user } = await currentProfile();
-    setUser(user);
+    try {
+      const { user } = await currentProfile();
+      setUser(user);
+    } finally {
+      setAuthLoading(false);
+    }
   }, []);
   const refreshCatalog = useCallback(async () => {
     try {
@@ -244,6 +250,7 @@ export function Provider({ children }: { children: ReactNode }) {
         t,
         setLanguage,
         user,
+        authLoading,
         setUser,
         refreshUser,
         catalog,
