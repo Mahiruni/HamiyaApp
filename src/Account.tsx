@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   FileCheck2,
+  Globe2,
   LocateFixed,
   LockKeyhole,
   LogOut,
@@ -403,18 +404,12 @@ export default function Account() {
             <button onClick={() => navigate('terms')}>{t('terms')}</button>
           </div>
         </div>
-        <div className="language-pills auth-languages" aria-label={t('language')}>
-          {languages.map((l) => (
-            <button
-              key={l.code}
-              className={language === l.code ? 'active' : ''}
-              aria-pressed={language === l.code}
-              onClick={() => setLanguage(l.code)}
-            >
-              {l.label}
-            </button>
-          ))}
-        </div>
+        <label className="auth-language-icon" aria-label={t('language')}>
+          <Globe2 size={22} aria-hidden="true" />
+          <select value={language} aria-label={t('language')} onChange={(event) => setLanguage(event.target.value as typeof language)}>
+            {languages.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+          </select>
+        </label>
       </section>
     );
   }
