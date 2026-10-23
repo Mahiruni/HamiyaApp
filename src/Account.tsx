@@ -4,6 +4,7 @@ import {
   Check,
   CheckCircle2,
   ChevronRight,
+  ChevronDown,
   Eye,
   EyeOff,
   FileCheck2,
@@ -405,7 +406,8 @@ export default function Account() {
           </div>
         </div>
         <label className="auth-language-icon" aria-label={t('language')}>
-          <Globe2 size={22} aria-hidden="true" />
+          <Globe2 size={20} aria-hidden="true" />
+          <ChevronDown size={13} aria-hidden="true" />
           <select value={language} aria-label={t('language')} onChange={(event) => setLanguage(event.target.value as typeof language)}>
             {languages.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
           </select>
