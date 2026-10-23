@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { authStorage } from './auth-storage';
 import { projectUrl, projectPublishableKey } from './project';
 import type { Catalog, Product, Customer, DocumentRecord } from './types';
 const env = import.meta.env;
@@ -14,6 +15,7 @@ export const supabase = configured
       auth: {
         flowType: 'pkce',
         persistSession: true,
+        storage: authStorage,
         autoRefreshToken: true,
         detectSessionInUrl: true,
       },

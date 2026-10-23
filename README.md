@@ -10,6 +10,8 @@ The interface supports **English, Amharic and Afaan Oromo**. Customer profiles, 
 
 ![Hamiya customer app preview](docs/preview.jpg)
 
+![Matching sign-in and registration screens](docs/auth-preview.jpg)
+
 ## Run locally
 
 Requirements: Node.js 24 or later and pnpm 11.25.
@@ -104,6 +106,8 @@ Before collecting real identity documents, the company must review the provision
 
 `tests/database.test.mjs` executes the actual schema and RPC in PGlite, a PostgreSQL runtime, with test-only Supabase Auth and Storage schema fixtures. It tests ownership policies, staff permissions, required documents, National ID masking, publishing gates, stale prices, duplicate orders, competing reservations, cancellation, fulfilment and sold-vehicle rejection.
 
-These tests validate SQL behaviour; they do not replace a real multi-connection load test or a hosted customer signup/email/upload journey. See `docs/VERIFICATION.md` for live checks and remaining launch inputs.
+`tests/auth-storage.test.mjs` checks remembered and tab-only sessions, persistence changes, sign-out cleanup and browsers with disabled storage.
 
-The current visual identity is a provisional Hamiya wordmark and restrained olive/cream palette. Product photos, coffee listings, vehicle listings, contact details and stock have not been fabricated. Replace the provisional assets with the owner's approved branding before public launch.
+The database tests validate SQL behaviour; they do not replace a real multi-connection load test or a hosted customer signup/email/upload journey. See `docs/VERIFICATION.md` for live checks and remaining launch inputs.
+
+The visual identity uses the owner’s reference: navy (#193b4d), blue-gray (#52778c / #a3bdcc), white surfaces, rounded controls and consistent sans-serif typography. Sign-in, registration and password recovery share original vector illustrations and accessible icon fields. “Remember me” chooses persistent browser storage or storage for the current tab. Product photos, coffee listings, vehicle listings, contact details and stock have not been fabricated. The Hamiya wordmark remains provisional until an official logo is supplied.

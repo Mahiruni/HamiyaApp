@@ -1,9 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useLayoutEffect, useState, type FormEvent } from 'react';
 import {
   ArrowRight,
   Check,
   CheckCircle2,
   ChevronRight,
+  Eye,
+  EyeOff,
   FileCheck2,
   LocateFixed,
   LockKeyhole,
@@ -24,6 +26,8 @@ import {
   uploadDocument,
 } from './api';
 import { Badge, Empty, Field } from './components';
+import { AuthField, AuthIllustration } from './Auth';
+import { authStorage } from './auth-storage';
 import { languages } from './i18n';
 import { useApp } from './state';
 import type { DocumentRecord, Profile } from './types';
@@ -44,6 +48,8 @@ export default function Account() {
     setRecovery,
   } = useApp();
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('register');
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(authStorage.remembers);
   const [busy, setBusy] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
   const [form, setForm] = useState<Profile>({});
@@ -54,6 +60,9 @@ export default function Account() {
   const [uploading, setUploading] = useState('');
   const [inlineError, setInlineError] = useState('');
   const profileId = user?.id;
+  useLayoutEffect(() => {
+    if (!profileId || recovery) window.scrollTo(0, 0);
+  }, [mode, profileId, recovery]);
   useEffect(() => {
     if (!profileId) return;
     let active = true;
@@ -85,6 +94,7 @@ export default function Account() {
         setMode('login');
         return;
       }
+      authStorage.setRemember(remember);
       const result = await authenticate(mode, {
         email: String(data.get('email')),
         password: String(data.get('password')),
@@ -224,72 +234,34 @@ export default function Account() {
       />
     );
   }
-  if (recovery)
+  if (recovery || !user) {
+    const registering = !recovery && mode === 'register';
+    const resetting = recovery || mode === 'forgot';
     return (
-      <section className="account-auth">
-        <div className="form-panel">
-          <span className="round-icon">
-            <LockKeyhole />
-          </span>
-          <h1>{t('resetPassword')}</h1>
-          <form onSubmit={reset}>
-            <Field
-              label={t('password')}
-              name="password"
-              type="password"
-              minLength={12}
-              maxLength={128}
-              required
-              autoComplete="new-password"
-              hint={t('passwordHint')}
-            />
-            <button className="button primary" disabled={busy || !online}>
-              {t('save')}
-            </button>
-          </form>
-        </div>
-      </section>
-    );
-  if (!user)
-    return (
-      <section className="account-auth">
-        <div className="auth-story">
-          <span className="eyebrow">HAMIYA INVESTMENT GROUP</span>
-          <h1>{t('businessHome')}</h1>
-          <p>{t('accountIntro')}</p>
-          <div className="auth-graphic">
-            <ShieldCheck size={140} strokeWidth={0.7} />
-            <div className="auth-graphic-label">
-              <LockKeyhole size={16} />
-              {t('privateDocs')}
-            </div>
+      <section className="account-auth" aria-labelledby="auth-title">
+        <span className="auth-orbit one" aria-hidden="true" />
+        <span className="auth-orbit two" aria-hidden="true" />
+        <div className="auth-card">
+          <div className="auth-brand">
+            HAMIYA <span>INVESTMENT GROUP</span>
           </div>
-          <div className="language-pills">
-            {languages.map((l) => (
-              <button
-                key={l.code}
-                className={language === l.code ? 'active' : ''}
-                onClick={() => setLanguage(l.code)}
-              >
-                {l.label}
-              </button>
-            ))}
+          <AuthIllustration register={registering} />
+          <div className="auth-heading">
+            <h1 id="auth-title">
+              {t(resetting ? 'resetPassword' : registering ? 'register' : 'signIn')}
+            </h1>
+            <p>
+              {t(
+                recovery
+                  ? 'newPasswordIntro'
+                  : resetting
+                    ? 'resetIntro'
+                    : registering
+                      ? 'registerIntro'
+                      : 'loginIntro',
+              )}
+            </p>
           </div>
-        </div>
-        <div className="form-panel">
-          <span className="round-icon">
-            <UserRound />
-          </span>
-          <h2>
-            {t(
-              mode === 'register'
-                ? 'createAccount'
-                : mode === 'forgot'
-                  ? 'resetPassword'
-                  : 'welcomeBack',
-            )}
-          </h2>
-          <p>{t('accountGate')}</p>
           {confirmation && (
             <div className="notice good" role="status">
               <Mail size={20} />
@@ -297,9 +269,10 @@ export default function Account() {
             </div>
           )}
           {!configured && <div className="notice">{t('servicePending')}</div>}
-          <form onSubmit={submitAuth}>
-            {mode === 'register' && (
-              <Field
+          <form onSubmit={recovery ? reset : submitAuth} aria-busy={busy}>
+            {registering && (
+              <AuthField
+                icon={UserRound}
                 label={t('fullName')}
                 name="full_name"
                 autoComplete="name"
@@ -307,66 +280,129 @@ export default function Account() {
                 maxLength={120}
               />
             )}
-            <Field
-              label={t('email')}
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              maxLength={254}
-            />
-            {mode !== 'forgot' && (
-              <Field
-                label={t('password')}
-                name="password"
-                type="password"
-                autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+            {!recovery && (
+              <AuthField
+                icon={Mail}
+                label={t('email')}
+                name="email"
+                type="email"
+                autoComplete="email"
+                autoCapitalize="none"
+                spellCheck={false}
                 required
-                minLength={mode === 'register' ? 12 : 1}
-                maxLength={128}
-                hint={mode === 'register' ? t('passwordHint') : undefined}
+                maxLength={254}
               />
             )}
-            <p className="field-error" role="alert">
-              {inlineError}
-            </p>
-            <button className="button primary full" disabled={busy || !online || !configured}>
+            {(recovery || mode !== 'forgot') && (
+              <AuthField
+                icon={LockKeyhole}
+                label={t('password')}
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete={registering || recovery ? 'new-password' : 'current-password'}
+                required
+                minLength={registering || recovery ? 12 : 1}
+                maxLength={128}
+                hint={registering || recovery ? t('passwordHint') : undefined}
+              >
+                <button
+                  className="password-toggle"
+                  type="button"
+                  aria-label={t(showPassword ? 'hidePassword' : 'showPassword')}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
+              </AuthField>
+            )}
+            {!resetting && (
+              <>
+                <div className="auth-options">
+                  <label className="remember-switch">
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      checked={remember}
+                      onChange={(e) => setRemember(e.target.checked)}
+                    />
+                    <span>{t('rememberMe')}</span>
+                    <span className="switch-track" aria-hidden="true" />
+                  </label>
+                  {mode === 'login' && (
+                    <button
+                      type="button"
+                      className="auth-forgot"
+                      onClick={() => {
+                        setMode('forgot');
+                        setShowPassword(false);
+                      }}
+                    >
+                      {t('forgot')}
+                    </button>
+                  )}
+                </div>
+                {!remember && <p className="auth-session-hint">{t('sessionOnly')}</p>}
+              </>
+            )}
+            {inlineError && (
+              <p className="field-error" role="alert">
+                {inlineError}
+              </p>
+            )}
+            <button
+              className="button primary full auth-submit"
+              disabled={busy || !online || !configured}
+            >
               {busy
                 ? t('loading')
                 : t(
-                    mode === 'register'
-                      ? 'createAccount'
-                      : mode === 'forgot'
+                    recovery
+                      ? 'save'
+                      : resetting
                         ? 'resetPassword'
-                        : 'signIn',
+                        : registering
+                          ? 'signUp'
+                          : 'signIn',
                   )}
-              <ArrowRight size={17} />
             </button>
           </form>
-          {mode === 'login' && (
-            <button className="text-button" onClick={() => setMode('forgot')}>
-              {t('forgot')}
-            </button>
+          {!recovery && (
+            <p className="auth-switch">
+              {mode === 'forgot' ? '' : t(registering ? 'haveAccount' : 'newAccount')}{' '}
+              <button
+                onClick={() => {
+                  setMode(registering || mode === 'forgot' ? 'login' : 'register');
+                  setShowPassword(false);
+                  setConfirmation(false);
+                  setInlineError('');
+                }}
+              >
+                {t(mode === 'forgot' ? 'backToSignIn' : registering ? 'signIn' : 'signUp')}
+              </button>
+            </p>
           )}
-          <p className="auth-switch">
-            {t(mode === 'register' ? 'haveAccount' : 'newAccount')}{' '}
-            <button
-              onClick={() => {
-                setMode(mode === 'register' ? 'login' : 'register');
-                setConfirmation(false);
-              }}
-            >
-              {t(mode === 'register' ? 'signIn' : 'register')}
-            </button>
-          </p>
           <div className="auth-legal">
             <button onClick={() => navigate('privacy')}>{t('privacy')}</button>
-            <span>·</span>
+            <span aria-hidden="true">·</span>
             <button onClick={() => navigate('terms')}>{t('terms')}</button>
           </div>
         </div>
+        <div className="language-pills auth-languages" aria-label={t('language')}>
+          {languages.map((l) => (
+            <button
+              key={l.code}
+              className={language === l.code ? 'active' : ''}
+              aria-pressed={language === l.code}
+              onClick={() => setLanguage(l.code)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
       </section>
     );
+  }
   const steps = ['business', 'location', 'documents', 'review'];
   return (
     <section className="account-page">

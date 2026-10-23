@@ -41,11 +41,22 @@ Performance advisors reported unused indexes on the new empty operational tables
 - Changing language survived a reload.
 - No real customer account, payment, order, government ID or verification document was created as part of browser testing.
 
+## Reference branding and authentication refresh
+
+- Applied the supplied navy, blue-gray and white palette to the customer app, staff workspace, installable app icons and supplied email templates.
+- Replaced serif accents with consistent sans-serif typography, retaining Ethiopic font fallbacks.
+- Sign-in, registration and recovery share an illustrated white card, icon fields, rounded controls and a full-width navy action.
+- Password visibility and “Remember me” have translated accessible labels. Session persistence is handled through Supabase's custom-storage interface.
+- `pnpm build` passed; `pnpm test` passed all 16 reported tests, including session persistence, tab-only sessions, sign-out cleanup and disabled browser storage.
+- Reviewed both authentication modes on desktop and at a 390px iframe width, including English, Amharic and Afaan Oromo. No horizontal overflow was observed.
+- Verified password visibility, the persistence switch, recovery navigation and language changes without entering credentials or sending authentication emails.
+- Production email delivery, registration confirmation and customer document uploads remain launch checks listed below.
+
 ## Inputs still needed before business launch
 
 1. Confirm each selling unit and actual opening stock; supply Cappuccino Softi's count.
 2. Register the owner's account and grant the intended staff role explicitly.
-3. Approve branding and provide actual product photographs, coffee and vehicle listings.
+3. Provide the official logo and actual product photographs, coffee and vehicle listings.
 4. Provide business contact/collection details and any delivery fee.
 5. Review Amharic and Afaan Oromo wording with native speakers.
 6. Approve privacy/trading notices and define document retention/deletion operations.
