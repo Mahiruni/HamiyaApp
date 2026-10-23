@@ -1,0 +1,471 @@
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Building2,
+  CarFront,
+  ChevronRight,
+  CircleHelp,
+  Coffee,
+  Globe2,
+  House,
+  LayoutGrid,
+  Menu,
+  ShieldCheck,
+  ShoppingBag,
+  UserRound,
+  Wheat,
+  X,
+  WifiOff,
+} from 'lucide-react';
+import { configured } from './api';
+import { CategoryCard, Empty } from './components';
+import { Cart, CatalogPage, OrdersPage } from './Commerce';
+import { languages } from './i18n';
+import { useApp } from './state';
+const Account = lazy(() => import('./Account'));
+const Admin = lazy(() => import('./Admin'));
+const navigation = [
+  { route: 'home', label: 'home', icon: House },
+  { route: 'catalog', label: 'categories', icon: LayoutGrid },
+  { route: 'orders', label: 'orders', icon: ShoppingBag },
+  { route: 'account', label: 'account', icon: UserRound },
+];
+export default function App() {
+  const {
+    t,
+    route,
+    navigate,
+    user,
+    language,
+    setLanguage,
+    cart,
+    setCartOpen,
+    cartOpen,
+    online,
+    catalog,
+  } = useApp();
+  const [drawer, setDrawer] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!drawer) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    drawerRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDrawer(false);
+      if (event.key !== 'Tab') return;
+      const controls = Array.from(
+        drawerRef.current?.querySelectorAll<HTMLElement>('button, a, select') || [],
+      ).filter((element) => element.offsetParent !== null);
+      const first = controls[0],
+        last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [drawer]);
+  const root = route.split('/')[0];
+  function go(value: string) {
+    navigate(value);
+    setDrawer(false);
+  }
+  return (
+    <div className="app">
+      <a
+        className="skip-link"
+        href="#main"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById('main')?.focus();
+        }}
+      >
+        {t('continue')}
+      </a>
+      <aside ref={drawerRef} className={'sidebar ' + (drawer ? 'open' : '')}>
+        <div className="sidebar-brand">
+          <button className="brand" aria-label="Hamiya" onClick={() => go('home')}>
+            <span className="brand-mark">
+              h<span />
+            </span>
+            <span className="brand-name">
+              hamiya<small>INVESTMENT GROUP</small>
+            </span>
+          </button>
+          <button
+            className="icon-button mobile-only"
+            aria-label={t('close')}
+            onClick={() => setDrawer(false)}
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className="sidebar-divider" />
+        <nav aria-label={t('home')}>
+          {navigation.map(({ route: destination, label, icon: Icon }) => (
+            <button
+              key={destination}
+              className={'nav-link ' + (root === destination ? 'active' : '')}
+              onClick={() => go(destination)}
+            >
+              <Icon size={19} strokeWidth={1.7} />
+              {t(label)}
+              {root === destination && <span className="nav-active-dot" />}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-section-label">{t('family')}</div>
+        <div className="sidebar-businesses">
+          {(
+            [
+              { key: 'food', icon: Wheat },
+              { key: 'coffee', icon: Coffee },
+              { key: 'vehicles', icon: CarFront },
+            ] as const
+          ).map(({ key, icon: Icon }) => (
+            <button key={key} onClick={() => go('catalog/' + key)}>
+              <span className={'business-dot ' + key}>
+                <Icon size={15} />
+              </span>
+              <span>{t(key + 'Brand')}</span>
+              <ChevronRight size={13} />
+            </button>
+          ))}
+        </div>
+        <div className="sidebar-bottom">
+          {user && user.role !== 'customer' && (
+            <button
+              className={'nav-link ' + (root === 'admin' ? 'active' : '')}
+              onClick={() => go('admin')}
+            >
+              <Building2 size={19} />
+              {t('admin')}
+            </button>
+          )}
+          <button className="nav-link" onClick={() => go('help')}>
+            <CircleHelp size={19} />
+            {t('help')}
+          </button>
+          <div className="sidebar-note">
+            <ShieldCheck size={19} />
+            <span>{t('businessHomeText')}</span>
+          </div>
+          <div className="sidebar-copyright">© {new Date().getFullYear()} Hamiya</div>
+        </div>
+      </aside>
+      {drawer && (
+        <button
+          className="drawer-backdrop"
+          aria-label={t('close')}
+          onClick={() => setDrawer(false)}
+        />
+      )}
+      <div className="app-body" inert={drawer}>
+        <header className="topbar">
+          <div className="topbar-left">
+            <button
+              className="icon-button mobile-only"
+              aria-label={t('categories')}
+              onClick={() => setDrawer(true)}
+            >
+              <Menu size={23} />
+            </button>
+            <div className="breadcrumb">
+              <span>Hamiya</span>
+              <ChevronRight size={13} />
+              <strong>
+                {t(
+                  root === 'catalog'
+                    ? 'categories'
+                    : ['home', 'orders', 'account', 'admin', 'help', 'privacy', 'terms'].includes(
+                          root,
+                        )
+                      ? root
+                      : 'home',
+                )}
+              </strong>
+            </div>
+            <button className="mobile-wordmark" onClick={() => navigate('home')}>
+              hamiya<span>®</span>
+            </button>
+          </div>
+          <div className="topbar-actions">
+            <label className="language-select">
+              <Globe2 size={16} />
+              <select
+                aria-label={t('language')}
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as typeof language)}
+              >
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <span className="topbar-separator" />
+            <button
+              className="icon-button cart-button"
+              aria-label={t('cart')}
+              onClick={() => setCartOpen(true)}
+            >
+              <ShoppingBag size={21} />
+              {cart.length > 0 && (
+                <span className="cart-count">{cart.reduce((a, b) => a + b.quantity, 0)}</span>
+              )}
+            </button>
+            <button
+              className="topbar-user"
+              onClick={() => navigate('account')}
+              aria-label={t('account')}
+            >
+              {user ? (
+                <span>{user.profile.full_name?.slice(0, 1) || 'H'}</span>
+              ) : (
+                <UserRound size={20} />
+              )}
+            </button>
+          </div>
+        </header>
+        {!online && (
+          <div className="offline-banner">
+            <WifiOff size={16} />
+            {t('offline')}
+          </div>
+        )}
+        {catalog.settings.announcement[language] && (
+          <div className="announcement-bar">{catalog.settings.announcement[language]}</div>
+        )}
+        <main id="main" tabIndex={-1}>
+          <Suspense fallback={<div className="loading-row">{t('loading')}</div>}>
+            {root === 'home' ? (
+              <Home />
+            ) : root === 'catalog' ? (
+              <CatalogPage />
+            ) : root === 'orders' ? (
+              <OrdersPage />
+            ) : root === 'account' ? (
+              <Account key={user?.id || 'guest'} />
+            ) : root === 'admin' ? (
+              <Admin />
+            ) : ['help', 'privacy', 'terms'].includes(root) ? (
+              <Information page={root} />
+            ) : (
+              <Home />
+            )}
+          </Suspense>
+        </main>
+        <footer className="site-footer">
+          <span>Hamiya Investment Group</span>
+          <div>
+            <button onClick={() => navigate('privacy')}>{t('privacy')}</button>
+            <button onClick={() => navigate('terms')}>{t('terms')}</button>
+            <button onClick={() => navigate('help')}>{t('help')}</button>
+          </div>
+        </footer>
+      </div>
+      <nav className="mobile-nav" aria-label={t('categories')} inert={drawer}>
+        {navigation.map(({ route: destination, label, icon: Icon }) => (
+          <button
+            key={destination}
+            className={root === destination ? 'active' : ''}
+            onClick={() => go(destination)}
+          >
+            <Icon size={21} strokeWidth={root === destination ? 2 : 1.7} />
+            <span>{t(label)}</span>
+          </button>
+        ))}
+      </nav>
+      {cartOpen && <Cart />}
+    </div>
+  );
+}
+function Home() {
+  const { t, navigate, user } = useApp();
+  return (
+    <div className="home-page">
+      <div className="home-intro">
+        <div>
+          <span className="intro-dot" />
+          {t(user ? 'welcomeBack' : 'welcome')}
+          {user && `, ${user.profile.full_name?.split(' ')[0]}`}
+        </div>
+        <span className="intro-location">
+          {t('country')} <span>·</span> ETB
+        </span>
+      </div>
+      <section className="hero">
+        <div className="hero-copy">
+          <div className="hero-label">
+            <span />
+            {t('eyebrow')}
+          </div>
+          <h1>
+            {t('heroTitle')}
+            <br />
+            <em>{t('heroAccent')}</em>
+          </h1>
+          <p>{t('heroText')}</p>
+          <div className="hero-actions">
+            <button className="button primary" onClick={() => navigate('catalog')}>
+              {t('explore')}
+              <ArrowUpRight size={18} />
+            </button>
+            {!user && (
+              <button className="hero-register" onClick={() => navigate('account')}>
+                {t('createAccount')}
+                <ArrowRight size={16} />
+              </button>
+            )}
+          </div>
+          <div className="hero-footnote">
+            <span className="language-stack">
+              አ<span>En</span>
+              <b>Af</b>
+            </span>
+            <span>
+              አማርኛ <i>·</i> English <i>·</i> Afaan Oromoo
+            </span>
+          </div>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          <div className="art-orbit orbit-1" />
+          <div className="art-orbit orbit-2" />
+          <div className="art-sun" />
+          <div className="art-pedestal tall">
+            <div className="art-food">
+              <Wheat size={92} strokeWidth={0.9} />
+            </div>
+            <span>HAMIYA</span>
+          </div>
+          <div className="art-pedestal short">
+            <div className="art-coffee">
+              <Coffee size={86} strokeWidth={0.9} />
+            </div>
+            <span>HAWINET</span>
+          </div>
+          <div className="art-car">
+            <CarFront size={104} strokeWidth={0.9} />
+          </div>
+          <span className="art-spark spark-1">✦</span>
+          <span className="art-spark spark-2">✦</span>
+          <div className="art-caption">
+            <span className="connected-dot" />
+            {t('businessHome')}
+          </div>
+        </div>
+      </section>
+      <section className="businesses-section">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">HAMIYA INVESTMENT GROUP</span>
+            <h2>{t('ourBusinesses')}</h2>
+          </div>
+          <button className="text-button" onClick={() => navigate('catalog')}>
+            {t('viewAll')}
+            <ArrowRight size={17} />
+          </button>
+        </div>
+        <div className="business-grid">
+          {(['food', 'coffee', 'vehicles'] as const).map((category, index) => (
+            <CategoryCard key={category} category={category} index={index} />
+          ))}
+        </div>
+      </section>
+      <section className="how-section">
+        <div className="section-heading">
+          <div>
+            <h2>{t('howWorks')}</h2>
+            <p>{t('howIntro')}</p>
+          </div>
+          <span className="how-flower">✳</span>
+        </div>
+        <div className="how-grid">
+          {[
+            { key: 'stepOne', icon: UserRound },
+            { key: 'stepTwo', icon: ShieldCheck },
+            { key: 'stepThree', icon: ShoppingBag },
+          ].map(({ key, icon: Icon }, i) => (
+            <div className="how-step" key={key}>
+              <span className="how-icon">
+                <Icon size={23} strokeWidth={1.4} />
+              </span>
+              <div>
+                <small>0{i + 1}</small>
+                <h3>{t(key)}</h3>
+                <p>{t(key + 'Text')}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="local-banner">
+        <span className="local-banner-icon">
+          <Globe2 size={36} strokeWidth={1} />
+        </span>
+        <div>
+          <span className="eyebrow">{t('localFirst')}</span>
+          <h3>{t('localText')}</h3>
+        </div>
+        <button
+          className="icon-button"
+          onClick={() => navigate('account')}
+          aria-label={t('createAccount')}
+        >
+          <ArrowUpRight size={25} />
+        </button>
+      </section>
+    </div>
+  );
+}
+function Information({ page }: { page: string }) {
+  const { t, catalog, navigate } = useApp();
+  const settings = catalog.settings;
+  return (
+    <section className="information-page">
+      <span className="round-icon">{page === 'help' ? <CircleHelp /> : <ShieldCheck />}</span>
+      <span className="eyebrow">HAMIYA INVESTMENT GROUP</span>
+      <h1>{t(page)}</h1>
+      <p className="information-intro">{t(page === 'help' ? 'supportText' : page + 'Text')}</p>
+      {page === 'help' && (
+        <div className="panel contact-list">
+          {settings.contact_phone && (
+            <a href={'tel:' + settings.contact_phone}>
+              {settings.contact_phone}
+              <ArrowUpRight size={18} />
+            </a>
+          )}
+          {settings.contact_email && (
+            <a href={'mailto:' + settings.contact_email}>
+              {settings.contact_email}
+              <ArrowUpRight size={18} />
+            </a>
+          )}
+          {settings.pickup_address && <p>{settings.pickup_address}</p>}
+          {!settings.contact_phone && !settings.contact_email && (
+            <Empty title={t('contactPending')} />
+          )}
+        </div>
+      )}
+      {page !== 'help' && (
+        <button className="button secondary" onClick={() => navigate('account')}>
+          {t('account')}
+          <ArrowRight size={17} />
+        </button>
+      )}
+      {!configured && <div className="notice">{t('servicePending')}</div>}
+    </section>
+  );
+}
