@@ -4084,3 +4084,18 @@
 .auth-language-icon:focus-within { outline: 3px solid #85b3cb; outline-offset: 3px; }
 
 @layer components { .account-auth .auth-language-icon { position: absolute; z-index: 5; top: 16px; right: 16px; width: 62px; height: 42px; margin: 0; gap: 4px; border-radius: 24px; } }
+
+@font-face {
+  font-family: 'Hamiya Benaiah';
+  src: url('/fonts/Benaiah.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+html[lang='am'] body,
+html[lang='am'] button,
+html[lang='am'] input,
+html[lang='am'] select,
+html[lang='am'] textarea {
+  font-family: 'Hamiya Benaiah', 'Noto Sans Ethiopic', sans-serif;
+}
