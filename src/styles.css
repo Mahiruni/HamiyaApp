@@ -4083,7 +4083,26 @@
 .auth-language-icon select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; }
 .auth-language-icon:focus-within { outline: 3px solid #85b3cb; outline-offset: 3px; }
 
-@layer components { .account-auth .auth-language-icon { position: absolute; z-index: 5; top: 16px; right: 16px; width: 62px; height: 42px; margin: 0; gap: 4px; border-radius: 24px; } }
+/* Top-right language menu: unlayered to override the earlier base selector. */
+.entry-main .account-auth { position: relative; }
+.entry-main .account-auth .auth-language-icon {
+  position: absolute;
+  z-index: 10;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  width: 48px;
+  height: 44px;
+  margin: 0;
+  gap: 2px;
+  border: 1px solid #dce5ea;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgb(25 59 77 / 7%);
+}
+.entry-main .account-auth .auth-language-icon select { appearance: none; }
+@media (min-width: 720px) {
+  .entry-main .account-auth .auth-language-icon { right: 22px; top: 18px; }
+}
 
 @font-face {
   font-family: 'Hamiya Benaiah';
