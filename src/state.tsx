@@ -102,6 +102,9 @@ export function Provider({ children }: { children: ReactNode }) {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const languageRef = useRef(language);
   languageRef.current = language;
+  useEffect(() => {
+    document.documentElement.lang = language === 'am' ? 'am' : language === 'om' ? 'om' : 'en';
+  }, [language]);
   const t = useCallback((key: string) => translate(language, key), [language]);
   const toast = useCallback((message: string) => {
     setMessage(message);
