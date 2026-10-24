@@ -5,6 +5,12 @@ import {
   ArrowUpRight,
   Building2,
   CarFront,
+  ClipboardList,
+  Package,
+  Users,
+  Settings2,
+  MessageCircle,
+  BarChart3,
   ChevronRight,
   CircleHelp,
   Coffee,
@@ -58,8 +64,22 @@ export default function App() {
     needsProfile: user?.role === 'customer' && user.verification === 'draft',
   });
   const standalone = view !== 'dashboard';
+  const isStaff = !!user && user.role !== 'customer';
+  const adminNavigation = [
+    { route: 'admin', label: 'Command center', icon: BarChart3 },
+    { route: 'admin/customers', label: 'Customer verification', icon: Users },
+    { route: 'admin/orders', label: 'Orders', icon: ClipboardList },
+    { route: 'admin/products', label: 'Inventory', icon: Package },
+    { route: 'admin/requests', label: 'Enquiries', icon: MessageCircle },
+    { route: 'admin/settings', label: 'Settings', icon: Settings2 },
+  ];
   const [drawer, setDrawer] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (isStaff && view === 'dashboard' && root !== 'admin' && root !== 'account') {
+      navigate('admin');
+    }
+  }, [isStaff, view, root, navigate]);
   useEffect(() => {
     if (standalone) {
       setDrawer(false);
@@ -147,7 +167,7 @@ export default function App() {
       </div>
     );
   return (
-    <div className="app">
+    <div className={isStaff ? "app admin-app-shell" : "app"}>
       <a
         className="skip-link"
         href="#main"
@@ -160,7 +180,7 @@ export default function App() {
       </a>
       <aside ref={drawerRef} className={'sidebar ' + (drawer ? 'open' : '')}>
         <div className="sidebar-brand">
-          <button className="brand" aria-label="Hamiya" onClick={() => go('home')}>
+          <button className="brand" aria-label="Hamiya" onClick={() => go(isStaff ? 'admin' : 'home')}>
             <span className="brand-mark">
               h<span />
             </span>
@@ -178,20 +198,20 @@ export default function App() {
         </div>
         <div className="sidebar-divider" />
         <nav aria-label={t('home')}>
-          {navigation.map(({ route: destination, label, icon: Icon }) => (
+          {(isStaff ? adminNavigation : navigation).map(({ route: destination, label, icon: Icon }) => (
             <button
               key={destination}
-              className={'nav-link ' + (root === destination ? 'active' : '')}
+              className={'nav-link ' + ((isStaff ? route === destination : root === destination) ? 'active' : '')}
               onClick={() => go(destination)}
             >
               <Icon size={19} strokeWidth={1.7} />
-              {t(label)}
+              {isStaff ? label : t(label)}
               {root === destination && <span className="nav-active-dot" />}
             </button>
           ))}
         </nav>
-        <div className="sidebar-section-label">{t('family')}</div>
-        <div className="sidebar-businesses">
+        {!isStaff && <div className="sidebar-section-label">{t('family')}</div>}
+        {!isStaff && <div className="sidebar-businesses">
           {(
             [
               { key: 'food', icon: Wheat },
@@ -207,7 +227,7 @@ export default function App() {
               <ChevronRight size={13} />
             </button>
           ))}
-        </div>
+        </div>}
         <div className="sidebar-bottom">
           {user && user.role !== 'customer' && (
             <button
@@ -261,7 +281,7 @@ export default function App() {
                 )}
               </strong>
             </div>
-            <button className="mobile-wordmark" onClick={() => navigate('home')}>
+            <button className="mobile-wordmark" onClick={() => navigate(isStaff ? 'admin' : 'home')}>
               hamiya<span>®</span>
             </button>
           </div>
@@ -281,7 +301,7 @@ export default function App() {
               </select>
             </label>
             <span className="topbar-separator" />
-            <button
+            {!isStaff && <button
               className="icon-button cart-button"
               aria-label={t('cart')}
               onClick={() => setCartOpen(true)}
@@ -290,7 +310,7 @@ export default function App() {
               {cart.length > 0 && (
                 <span className="cart-count">{cart.reduce((a, b) => a + b.quantity, 0)}</span>
               )}
-            </button>
+            </button>}
             <button
               className="topbar-user"
               onClick={() => navigate('account')}
@@ -310,12 +330,14 @@ export default function App() {
             {t('offline')}
           </div>
         )}
-        {catalog.settings.announcement[language] && (
+        {!isStaff && catalog.settings.announcement[language] && (
           <div className="announcement-bar">{catalog.settings.announcement[language]}</div>
         )}
         <main id="main" tabIndex={-1}>
           <Suspense fallback={<div className="loading-row">{t('loading')}</div>}>
-            {root === 'home' ? (
+            {isStaff && root === 'admin' ? (
+              <Admin />
+            ) : root === 'home' ? (
               <Home />
             ) : root === 'catalog' ? (
               <CatalogPage />
@@ -341,7 +363,7 @@ export default function App() {
           </div>
         </footer>
       </div>
-      <nav className="mobile-nav" aria-label={t('categories')} inert={drawer}>
+      {!isStaff && <nav className="mobile-nav" aria-label={t('categories')} inert={drawer}>
         {navigation.map(({ route: destination, label, icon: Icon }) => (
           <button
             key={destination}
@@ -352,8 +374,8 @@ export default function App() {
             <span>{t(label)}</span>
           </button>
         ))}
-      </nav>
-      {cartOpen && <Cart />}
+      </nav>}
+      {!isStaff && cartOpen && <Cart />}
     </div>
   );
 }
