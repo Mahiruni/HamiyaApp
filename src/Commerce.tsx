@@ -77,7 +77,7 @@ export function CatalogPage() {
           <span>
             HAMIYA
             <br />
-            INVESTMENT GROUP
+            FOOD PROCESSING
           </span>
         </div>
       </div>

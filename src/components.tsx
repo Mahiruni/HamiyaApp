@@ -26,7 +26,7 @@ export function HamiyaMark({
 }) {
   return (
     <span className={'hamiya-mark hamiya-mark-' + size} aria-hidden={label ? undefined : true}>
-      <img src="/icon.svg" alt={label || ''} width={48} height={48} />
+      <img src="/brand/hamiya-food-icon-512.png" alt={label || ''} width={48} height={48} />
     </span>
   );
 }

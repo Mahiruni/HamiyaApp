@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.hamiyainvestmentgroup.customer',
-  appName: 'HAMIYA',
+  appName: 'HAMIYA FOOD PROCESSING',
   webDir: 'dist',
   bundledWebRuntime: false,
   android: {

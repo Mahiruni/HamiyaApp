@@ -137,3 +137,17 @@ export function AuthIllustration({ register = false }: { register?: boolean }) {
     </svg>
   );
 }
+
+export function FoodBrandAuthIllustration() {
+  return (
+    <div className="auth-illustration food-auth-illustration" aria-hidden="true">
+      <span className="food-auth-orbit" />
+      <span className="food-auth-accent orange" />
+      <span className="food-auth-accent green" />
+      <span className="food-auth-accent black" />
+      <span className="food-auth-logo">
+        <img src="/brand/hamiya-food-icon-512.png" alt="" width={512} height={512} />
+      </span>
+    </div>
+  );
+}

@@ -1,8 +1,15 @@
-const CACHE = 'hamiya-shell-v5';
+const CACHE = 'hamiya-shell-v6';
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
-      cache.addAll(['/', '/icon.svg', '/icon-192.png', '/manifest.webmanifest']),
+      cache.addAll([
+        '/',
+        '/icon-192.png',
+        '/icon-512.png',
+        '/brand/hamiya-food-icon-512.png',
+        '/brand/hamiya-food-processing.jpg',
+        '/manifest.webmanifest',
+      ]),
     ),
   );
   self.skipWaiting();
@@ -47,7 +54,13 @@ self.addEventListener('fetch', (event) => {
   }
   if (
     url.pathname.startsWith('/assets/') ||
-    ['/icon.svg', '/manifest.webmanifest'].includes(url.pathname)
+    [
+      '/icon-192.png',
+      '/icon-512.png',
+      '/brand/hamiya-food-icon-512.png',
+      '/brand/hamiya-food-processing.jpg',
+      '/manifest.webmanifest',
+    ].includes(url.pathname)
   ) {
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {

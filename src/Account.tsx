@@ -28,7 +28,7 @@ import {
   uploadDocument,
 } from './api';
 import { Badge, Empty, Field, HamiyaMark } from './components';
-import { AuthField, AuthIllustration } from './Auth';
+import { AuthField, FoodBrandAuthIllustration } from './Auth';
 import { authStorage } from './auth-storage';
 import { afterSignIn, authMode, authRoutes, type AuthMode } from './navigation';
 import { languages } from './i18n';
@@ -265,10 +265,10 @@ export default function Account() {
           <div className="auth-brand">
             <HamiyaMark size="tiny" />
             <span>
-              HAMIYA <small>INVESTMENT GROUP</small>
+              HAMIYA <small>FOOD PROCESSING</small>
             </span>
           </div>
-          <AuthIllustration register={registering} />
+          <FoodBrandAuthIllustration />
           <div className="auth-heading">
             <h1 id="auth-title">
               {t(resetting ? 'resetPassword' : registering ? 'register' : 'signIn')}

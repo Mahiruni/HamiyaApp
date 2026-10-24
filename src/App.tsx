@@ -187,7 +187,7 @@ export default function App() {
           >
             <HamiyaMark size="sm" />
             <span className="brand-name">
-              hamiya<small>INVESTMENT GROUP</small>
+              hamiya<small>FOOD PROCESSING</small>
             </span>
           </button>
           <button
@@ -299,7 +299,7 @@ export default function App() {
             >
               <HamiyaMark size="tiny" />
               <span>
-                hamiya<small>®</small>
+                hamiya<small>FOOD</small>
               </span>
             </button>
           </div>
@@ -379,7 +379,7 @@ export default function App() {
           </Suspense>
         </main>
         <footer className="site-footer">
-          <span>Hamiya Investment Group</span>
+          <span>Hamiya Food Processing</span>
           <div>
             <button onClick={() => navigate('privacy')}>{t('privacy')}</button>
             <button onClick={() => navigate('terms')}>{t('terms')}</button>
@@ -629,7 +629,7 @@ function Information({ page }: { page: string }) {
   return (
     <section className="information-page">
       <span className="round-icon">{page === 'help' ? <CircleHelp /> : <ShieldCheck />}</span>
-      <span className="eyebrow">HAMIYA INVESTMENT GROUP</span>
+      <span className="eyebrow">HAMIYA FOOD PROCESSING</span>
       <h1>{t(page)}</h1>
       <p className="information-intro">{t(page === 'help' ? 'supportText' : page + 'Text')}</p>
       {page === 'help' && (

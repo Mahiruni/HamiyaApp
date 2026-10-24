@@ -1,6 +1,6 @@
 /* HAMIYA 2026 customer experience — visual layer only.
    Retains all existing routes, data, verification and commerce behavior. */
-:root{--hig-ink:#153447;--hig-navy:#193b4d;--hig-blue:#315d73;--hig-muted:#647e8d;--hig-line:#dfe8ed;--hig-surface:#fff;--hig-page:#f5f8fa;--hig-radius:18px}
+:root{--brand:#111;--ink:#151515;--muted:#5f6862;--border:#e5e6e1;--surface:#f3f5f1;--brand-light:#fa9d08;--brand-mid:#057437;--hig-ink:#151515;--hig-navy:#111;--hig-blue:#057437;--hig-green:#057437;--hig-orange:#fa9d08;--hig-red:#e71d1b;--hig-black:#111;--hig-muted:#657068;--hig-line:#e3e5df;--hig-surface:#fff;--hig-page:#fafaf8;--hig-radius:18px}
 html{scroll-behavior:smooth;scroll-padding-top:88px}
 body{background:var(--hig-page);-webkit-tap-highlight-color:transparent}
 button,a,input,select,textarea{touch-action:manipulation}
@@ -212,3 +212,42 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(prefers-reduced-motion:reduce){
   .app:not(.admin-app-shell) .hamiya-dash-action-primary,.app:not(.admin-app-shell) .hamiya-dash-action-secondary,.app:not(.admin-app-shell) .hamiya-dash-status,.app:not(.admin-app-shell) .hamiya-division,.app:not(.admin-app-shell) .product-arrow,.app:not(.admin-app-shell) button.order-card,.app:not(.admin-app-shell) .upload-card{transition:none!important}
 }
+
+/* Hamiya Food Processing identity: wheat green, harvest orange, product red and black. */
+.app:not(.admin-app-shell){background:#fafaf8;color:#151515}
+.app:not(.admin-app-shell) .topbar{background:rgba(255,255,255,.95);border-bottom-color:#e2e4df}
+.app:not(.admin-app-shell) .sidebar{border-right-color:#e2e4df}
+.app:not(.admin-app-shell) .nav-link.active{background:#111;color:#fff}
+.app:not(.admin-app-shell) .nav-link:hover,.app:not(.admin-app-shell) .sidebar-businesses button:hover{background:#f0f3ef}
+.app:not(.admin-app-shell) .nav-active-dot{background:#fa9d08}
+.app:not(.admin-app-shell) .hamiya-dash-main{background:linear-gradient(135deg,#0b0b0b 0%,#1b1b1b 64%,#057437 100%)}
+.app:not(.admin-app-shell) .hamiya-dash-main:after{border-color:#fa9d0840;box-shadow:0 0 0 65px #05743718,0 0 0 130px #fa9d0810}
+.app:not(.admin-app-shell) .hamiya-dash-main h2 em{color:#fa9d08}
+.app:not(.admin-app-shell) .hamiya-dash-action-primary{background:#fa9d08;color:#111}
+.app:not(.admin-app-shell) .hamiya-dash-action-primary:hover{background:#ffb52b}
+.app:not(.admin-app-shell) .hamiya-dash-status{background:#edf7f0;color:#057437}
+.app:not(.admin-app-shell) .hamiya-dash-status:hover{background:#dff1e5}
+.app:not(.admin-app-shell) .hamiya-dash-section-heading>button,.app:not(.admin-app-shell) .hamiya-division-bottom{color:#057437}
+.app:not(.admin-app-shell) .hamiya-division.food .hamiya-division-index{color:#057437}
+.app:not(.admin-app-shell) .button.primary{background:#111;border-color:#111}
+.app:not(.admin-app-shell) .button.primary:hover:enabled{background:#2c2c2c}
+.app:not(.admin-app-shell) .category-tabs button.active{background:#111}
+.app:not(.admin-app-shell) .mobile-nav button.active{color:#057437}
+.app:not(.admin-app-shell) .mobile-nav button.active:before{background:#fa9d08}
+.app:not(.admin-app-shell) .topbar-user{background:#111;color:#fff;border-color:#111}
+.app:not(.admin-app-shell) .topbar-user:hover{background:#2c2c2c}
+.app:not(.admin-app-shell) .hamiya-mark img{background:#fafafa;border:1px solid #e5e5df}
+.app:not(.admin-app-shell) .food-brand-icon .hamiya-mark img{border:0}
+.app:not(.admin-app-shell) .auth-submit{background:#111}
+.app:not(.admin-app-shell) .auth-switch button,.app:not(.admin-app-shell) .auth-forgot{color:#057437}
+.entry-main .auth-submit{background:#111;box-shadow:0 11px 20px rgb(17 17 17 / 18%)}
+.entry-main .auth-card{box-shadow:0 26px 75px rgb(17 17 17 / 12%),0 4px 14px rgb(5 116 55 / 5%)}
+.food-auth-illustration{position:relative;display:grid!important;place-items:center;overflow:hidden;border-radius:32px;background:linear-gradient(135deg,#f3f8f3,#fff9ed 70%,#f8f8f6)}
+.food-auth-illustration:before{content:"";position:absolute;width:145px;height:145px;border:1px solid #05743735;border-radius:50%;box-shadow:0 0 0 22px #0574370d,0 0 0 45px #fa9d080b}
+.food-auth-orbit{position:absolute;width:13px;height:13px;border-radius:50%;background:#057437;top:22px;left:39px;box-shadow:0 0 0 5px #05743712}
+.food-auth-accent{position:absolute;border-radius:99px}
+.food-auth-accent.orange{width:8px;height:34px;background:#fa9d08;right:44px;top:27px;transform:rotate(25deg)}
+.food-auth-accent.green{width:7px;height:22px;background:#057437;left:61px;bottom:29px;transform:rotate(-25deg)}
+.food-auth-accent.black{width:7px;height:7px;background:#111;right:72px;bottom:25px}
+.food-auth-logo{position:relative;z-index:1;width:125px;height:125px;padding:12px;border-radius:34px;background:#fff;border:1px solid #e5e5df;box-shadow:0 14px 24px rgb(17 17 17 / 10%)}
+.food-auth-logo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:24px}
