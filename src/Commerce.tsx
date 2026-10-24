@@ -227,7 +227,7 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
   const minimumOrder = product.category === 'food' ? 20 : 1;
   const [quantity, setQuantity] = useState(String(minimumOrder));
   const quantityNumber = Number(quantity);
-  const validQuantity = /^\\d+$/.test(quantity) && Number.isSafeInteger(quantityNumber) && quantityNumber >= minimumOrder && quantityNumber <= product.available_quantity;
+  const validQuantity = /^\d+$/.test(quantity) && Number.isSafeInteger(quantityNumber) && quantityNumber >= minimumOrder && quantityNumber <= product.available_quantity;
   const [enquiring, setEnquiring] = useState(false);
   const [busy, setBusy] = useState(false);
   const key = useRef(crypto.randomUUID());
