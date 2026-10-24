@@ -1,0 +1,60 @@
+import { createClient } from "npm:@supabase/supabase-js@2.57.0";
+
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+const escapeHtml = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c] || c));
+Deno.serve(async (req) => {
+  if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const url = Deno.env.get("SUPABASE_URL");
+  const token = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  const chatId = Deno.env.get("TELEGRAM_ADMIN_CHAT_ID");
+  if (!key || !url) return json({ error: "backend_not_configured" }, 503);
+  const sharedSecret = Deno.env.get("HAMIYA_WORKER_SECRET");
+  const validShared = !!sharedSecret && sharedSecret.length >= 32 && req.headers.get("x-hamiya-worker-secret") === sharedSecret;
+  if (req.headers.get("authorization") !== "Bearer " + key && !validShared) return json({ error: "unauthorized" }, 401);
+  if (!token || !chatId) return json({ error: "telegram_secrets_missing" }, 503);
+  const db = createClient(url, key, { auth: { persistSession: false } });
+  const { data: jobs, error } = await db.from("hamiya_notification_deliveries").select("notification_id,attempts").eq("channel", "telegram").in("state", ["pending", "failed"]).lte("next_attempt_at", new Date().toISOString()).order("next_attempt_at").limit(10);
+  if (error) return json({ error: "queue_unavailable" }, 500);
+  const { data: preferences } = await db.from("hamiya_telegram_preferences").select("event_type,enabled");
+  const enabled = new Map((preferences || []).map((p: {event_type:string;enabled:boolean}) => [p.event_type,p.enabled]));
+  let delivered = 0, failed = 0, skipped = 0;
+  for (const job of jobs || []) {
+    const { data: event } = await db.from("hamiya_admin_notifications").select("order_id,event_type,subject,details").eq("id",job.notification_id).maybeSingle();
+    if (!event) continue;
+    if (enabled.get(event.event_type) === false) {
+      await db.from("hamiya_notification_deliveries").update({state:"delivered",last_error:"Skipped: administrator disabled this alert",delivered_at:new Date().toISOString()}).eq("notification_id",job.notification_id).eq("channel","telegram");
+      skipped++;
+      continue;
+    }
+    const details = event.details || {};
+    let message = "🔔 <b>HAMIYA — " + escapeHtml(event.subject || event.event_type.replaceAll("_"," ").toUpperCase()) + "</b>";
+    if (event.event_type === "order_submitted" && event.order_id) {
+      const { data: order } = await db.from("hamiya_orders").select("id,status,items,total_cents,created_at").eq("id",event.order_id).maybeSingle();
+      if (!order) continue;
+      const items = Array.isArray(order.items) ? order.items : [];
+      const lines = items.slice(0,15).map((item: Record<string,unknown>) => "• " + escapeHtml(item.name || item.product_name || item.product_id || "Product") + " — " + escapeHtml(item.quantity || item.cartons || "?") + " cartons");
+      message = ["🔔 <b>HAMIYA — NEW CUSTOMER ORDER</b>","","🆔 Order: #"+escapeHtml(order.id.slice(0,8).toUpperCase()),"📦 "+(lines.join("\\n")||"Review order in dashboard"),"💰 Total: "+(Number(order.total_cents||0)/100).toLocaleString("en-US")+" ETB","📌 Status: "+escapeHtml(order.status),"Open the HAMIYA administration dashboard to review."].join("\\n");
+    } else if (event.event_type === "customer_verification") {
+      message += "\\n👤 New customer application awaiting review.\\nStatus: "+escapeHtml(details.status || "submitted");
+    } else if (event.event_type === "low_inventory") {
+      message += "\\n📦 Product: "+escapeHtml(details.product)+"\\nAvailable: "+escapeHtml(details.available)+"\\nThreshold: "+escapeHtml(details.threshold);
+    } else if (event.event_type === "payment_evidence") {
+      message += "\\n💳 Payment evidence submitted. Review independently before confirming funds.";
+    } else if (event.event_type === "critical_system") {
+      message += "\\n⚠️ Critical operational event. Check administrator audit logs.";
+    }
+    try {
+      const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML", disable_web_page_preview: true }) });
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error("Telegram HTTP " + response.status + ": " + String(result.description || "delivery failed").slice(0, 160));
+      await db.from("hamiya_notification_deliveries").update({ state: "delivered", attempts: job.attempts + 1, delivered_at: new Date().toISOString(), last_error: null }).eq("notification_id", job.notification_id).eq("channel", "telegram").neq("state", "delivered");
+      delivered++;
+    } catch (err) {
+      const attempts = job.attempts + 1;
+      await db.from("hamiya_notification_deliveries").update({ state: "failed", attempts, last_error: String(err).slice(0, 250), next_attempt_at: new Date(Date.now() + Math.min(3600000, 60000 * 2 ** Math.min(attempts, 6))).toISOString() }).eq("notification_id", job.notification_id).eq("channel", "telegram").neq("state", "delivered");
+      failed++;
+    }
+  }
+  return json({ processed: (jobs || []).length, delivered, failed, skipped });
+});
