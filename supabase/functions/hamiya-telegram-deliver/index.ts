@@ -84,16 +84,84 @@ Deno.serve(async (req) => {
       ];
       message = header.join("\n");
     } else if (event.event_type === "customer_verification") {
-      message += "\\n👤 New customer application awaiting review.\\nStatus: "+escapeHtml(details.status || "submitted");
+      const { data: customer } = details.customer_id
+        ? await db.from("hamiya_profiles").select("profile,customer_id,verification,created_at").eq("id",details.customer_id).maybeSingle()
+        : { data: null };
+      const profile = customer?.profile || {};
+      const company = profile.business_name || details.company || "Not provided";
+      const contact = profile.full_name || details.contact || "Not provided";
+      const city = profile.city || details.city || "Not provided";
+      const reference = customer?.customer_id || details.customer_reference || "Available in dashboard";
+      message = [
+        "🏢 <b>HAMIYA INVESTMENT GROUP</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "👤 <b>NEW CUSTOMER VERIFICATION</b>",
+        "",
+        "🏬 <b>BUSINESS INFORMATION</b>",
+        "Company: <b>" + escapeHtml(company) + "</b>",
+        "Contact: " + escapeHtml(contact),
+        "City: " + escapeHtml(city),
+        "Customer ID: <code>" + escapeHtml(reference) + "</code>",
+        "",
+        "📋 <b>VERIFICATION STATUS</b>",
+        "Status: <b>" + escapeHtml(customer?.verification || details.status || "submitted").toUpperCase() + "</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        "🔎 <b>Next action:</b> Review submitted identification and trade-license documents securely in the administrator dashboard.",
+        "🔒 Identity documents are not included in Telegram."
+      ].join("\n");
     } else if (event.event_type === "low_inventory") {
-      message += "\\n📦 Product: "+escapeHtml(details.product)+"\\nAvailable: "+escapeHtml(details.available)+"\\nThreshold: "+escapeHtml(details.threshold);
+      const available = Number(details.available);
+      const threshold = Number(details.threshold);
+      message = [
+        "🏢 <b>HAMIYA INVESTMENT GROUP</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "⚠️ <b>LOW INVENTORY ALERT</b>",
+        "",
+        "📦 <b>PRODUCT INFORMATION</b>",
+        "Product: <b>" + escapeHtml(details.product || "Unknown product") + "</b>",
+        "Available stock: <b>" + escapeHtml(Number.isFinite(available) ? available : "Unknown") + "</b>",
+        "Alert threshold: " + escapeHtml(Number.isFinite(threshold) ? threshold : "Not configured"),
+        "",
+        "📊 <b>STOCK CONDITION</b>",
+        Number.isFinite(available) && available <= 0 ? "Status: <b>OUT OF STOCK</b>" : "Status: <b>REORDER REQUIRED</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        "🔎 <b>Next action:</b> Review inventory, confirm physical stock and plan replenishment."
+      ].join("\n");
     } else if (event.event_type === "payment_evidence") {
-      message += "\\n💳 Payment evidence submitted. Review independently before confirming funds.";
+      message = [
+        "🏢 <b>HAMIYA INVESTMENT GROUP</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "💳 <b>PAYMENT EVIDENCE RECEIVED</b>",
+        "",
+        "📋 <b>PAYMENT REVIEW</b>",
+        ...(details.order_id ? ["Order: <code>#" + escapeHtml(String(details.order_id).slice(0,8).toUpperCase()) + "</code>"] : []),
+        ...(details.company ? ["Company: <b>" + escapeHtml(details.company) + "</b>"] : []),
+        ...(details.amount_cents != null ? ["Claimed amount: <b>" + (Number(details.amount_cents)/100).toLocaleString("en-US") + " ETB</b>"] : []),
+        "Status: <b>AWAITING MANUAL VERIFICATION</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        "🔎 <b>Next action:</b> Compare the submitted evidence with the actual bank or payment-provider transaction before approving.",
+        "⚠️ A screenshot is not proof of cleared funds."
+      ].join("\n");
     } else if (event.event_type === "critical_system") {
-      message += "\\n⚠️ Critical operational event. Check administrator audit logs.";
+      message = [
+        "🏢 <b>HAMIYA INVESTMENT GROUP</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "🚨 <b>CRITICAL SYSTEM ALERT</b>",
+        "",
+        "📋 <b>INCIDENT DETAILS</b>",
+        "Issue: <b>" + escapeHtml(event.subject || "Operational issue") + "</b>",
+        ...(details.component ? ["Component: " + escapeHtml(details.component)] : []),
+        "Priority: <b>REQUIRES REVIEW</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        "🔎 <b>Next action:</b> Investigate the administrator audit logs and affected service. Do not share credentials in Telegram."
+      ].join("\n");
     }
     try {
-      const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: event.event_type === "order_submitted" ? { inline_keyboard: [[{ text: "📋 Review order in HAMIYA Admin", url: "https://hamiyainvestmentgroup.vercel.app/#admin/orders" }]] } : undefined }) });
+      const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: { inline_keyboard: [[{ text: event.event_type === "order_submitted" ? "📋 Review order" : event.event_type === "customer_verification" ? "👤 Review customer" : event.event_type === "low_inventory" ? "📦 Manage inventory" : event.event_type === "payment_evidence" ? "💳 Review payment" : "🛡️ Open administration", url: "https://hamiyainvestmentgroup.vercel.app/#" + (event.event_type === "order_submitted" || event.event_type === "payment_evidence" ? "admin/orders" : event.event_type === "customer_verification" ? "admin/customers" : event.event_type === "low_inventory" ? "admin/products" : "admin") }]] } }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error("Telegram HTTP " + response.status + ": " + String(result.description || "delivery failed").slice(0, 160));
       await db.from("hamiya_notification_deliveries").update({ state: "delivered", attempts: job.attempts + 1, delivered_at: new Date().toISOString(), last_error: null }).eq("notification_id", job.notification_id).eq("channel", "telegram").neq("state", "delivered");
