@@ -389,7 +389,15 @@ function EntryLoading() {
   );
 }
 function Home() {
-  const { t, navigate, user } = useApp();
+  const { t, navigate, user, catalog, cart } = useApp();
+  const published = catalog.products.filter((product) => product.published);
+  const available = published.filter((product) => product.available_quantity > 0);
+  const divisions = [
+    { id: 'food', title: 'HAMIYA Food Processing', detail: 'Wholesale food and beverage products', icon: Wheat, count: published.filter((p) => p.category === 'food').length },
+    { id: 'coffee', title: 'Hawinet Coffee Export', detail: 'Ethiopian coffee and export enquiries', icon: Coffee, count: published.filter((p) => p.category === 'coffee').length },
+    { id: 'vehicles', title: 'Premium Car Import', detail: 'Vehicle sourcing and import enquiries', icon: CarFront, count: published.filter((p) => p.category === 'vehicles').length },
+  ] as const;
+  const verificationLabel = user?.verification === 'approved' ? 'Verified business' : user?.verification === 'submitted' || user?.verification === 'under_review' ? 'Verification in review' : 'Complete verification';
   return (
     <div className="home-page">
       <div className="home-intro">
@@ -402,6 +410,59 @@ function Home() {
           {t('country')} <span>·</span> ETB
         </span>
       </div>
+      <section className="hamiya-dashboard" aria-label="HAMIYA customer dashboard">
+        <div className="hamiya-dash-head">
+          <div className="hamiya-dash-heading">
+            <span className="hamiya-dash-kicker"><span className="hamiya-live-dot" /> HAMIYA CUSTOMER PORTAL</span>
+            <h1>{user ? `Welcome back, ${user.profile.full_name?.split(' ')[0] || 'partner'}.` : 'Welcome to HAMIYA.'}</h1>
+            <p>{user ? 'Everything your business needs, in one place. Explore products, place orders and manage your account.' : 'Your direct connection to HAMIYA Investment Group. Discover products across our three businesses.'}</p>
+          </div>
+          <div className="hamiya-dash-date"><Building2 size={17} /><span>HAMIYA Investment Group</span></div>
+        </div>
+        <div className="hamiya-dash-grid">
+          <div className="hamiya-dash-main">
+            <div className="hamiya-dash-main-top">
+              <span className="hamiya-dash-overline">YOUR BUSINESS, CONNECTED</span>
+              <span className="hamiya-dash-mark" aria-hidden="true">H.</span>
+            </div>
+            <h2>Discover. Order.<br /><em>Grow together.</em></h2>
+            <p>Food processing, Ethiopian coffee exports and premium vehicles — one trusted business partner.</p>
+            <div className="hamiya-dash-actions">
+              <button className="hamiya-dash-action-primary" onClick={() => navigate('catalog')}>Explore products <ArrowUpRight size={18}/></button>
+              <button className="hamiya-dash-action-secondary" onClick={() => navigate(user ? 'orders' : 'account')}>{user ? 'My orders' : 'Create account'} <ArrowRight size={17}/></button>
+            </div>
+            <div className="hamiya-dash-main-bottom"><span>HAMIYA INVESTMENT GROUP</span><span>ETHIOPIA · ETB</span></div>
+          </div>
+          <div className="hamiya-dash-side">
+            <div className="hamiya-dash-side-label"><span>AT A GLANCE</span><LayoutGrid size={17}/></div>
+            <div className="hamiya-dash-metrics">
+              <div><strong>{divisions.length.toString().padStart(2,'0')}</strong><span>Business divisions</span></div>
+              <div><strong>{published.length}</strong><span>Listed products</span></div>
+              <div><strong>{available.length}</strong><span>In stock now</span></div>
+              <div><strong>{cart.reduce((sum,item) => sum + item.quantity,0)}</strong><span>Items in your cart</span></div>
+            </div>
+            <button className="hamiya-dash-status" onClick={() => navigate('account')}>
+              <ShieldCheck size={19}/>
+              <span><strong>{user ? verificationLabel : 'Secure customer registration'}</strong><small>{user ? 'Manage your business profile' : 'Get started with a verified account'}</small></span>
+              <ChevronRight size={17}/>
+            </button>
+          </div>
+        </div>
+        <div className="hamiya-dash-section-heading">
+          <div><span className="hamiya-dash-overline">EXPLORE HAMIYA</span><h2>Our business divisions</h2></div>
+          <button onClick={() => navigate('catalog')}>Browse catalog <ArrowRight size={16}/></button>
+        </div>
+        <div className="hamiya-division-grid">
+          {divisions.map(({ id, title, detail, icon: Icon, count }, index) => (
+            <button className="hamiya-division" key={id} onClick={() => navigate('catalog/' + id)}>
+              <div className="hamiya-division-top"><span className="hamiya-division-icon"><Icon size={23} strokeWidth={1.6}/></span><ArrowUpRight size={19}/></div>
+              <span className="hamiya-division-index">0{index + 1} / HAMIYA GROUP</span>
+              <strong>{title}</strong><small>{detail}</small>
+              <span className="hamiya-division-bottom">{count ? `${count} listed products` : 'Explore division'} <ArrowRight size={15}/></span>
+            </button>
+          ))}
+        </div>
+      </section>
       <section className="hero">
         <div className="hero-copy">
           <div className="hero-label">
