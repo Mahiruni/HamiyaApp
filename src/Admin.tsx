@@ -45,8 +45,13 @@ const empty: Dashboard = {
 };
 type Tab = 'overview' | 'products' | 'customers' | 'orders' | 'requests' | 'settings' | 'activity';
 export default function Admin() {
-  const { t, user, navigate, notifyError, toast, online, refreshCatalog } = useApp();
-  const [tab, setTab] = useState<Tab>('overview');
+  const { t, user, navigate, route, notifyError, toast, online, refreshCatalog } = useApp();
+  const initialTab = (route.split('/')[1] || 'overview') as Tab;
+  const [tab, setTab] = useState<Tab>(['overview','products','customers','orders','requests','settings','activity'].includes(initialTab) ? initialTab : 'overview');
+  useEffect(() => {
+    const next = route.split('/')[1] || 'overview';
+    if (['overview','products','customers','orders','requests','settings','activity'].includes(next)) setTab(next as Tab);
+  }, [route]);
   const [search, setSearch] = useState('');
   const [data, setData] = useState<Dashboard>(empty);
   const [loading, setLoading] = useState(true);
@@ -87,6 +92,7 @@ export default function Admin() {
     if (error && error.code !== '23505') notifyError(error);
     setReadIds((old) => [...new Set([...old, id])]);
     setTab('orders');
+    navigate('admin/orders');
     setNotificationOpen(false);
     void load();
   }
@@ -191,7 +197,7 @@ export default function Admin() {
       {unreadOrders > 0 && (
         <div className="notice" role="status" aria-live="polite">
           <strong>{unreadOrders} new customer order{unreadOrders === 1 ? '' : 's'} received.</strong>{' '}
-          <button className="button secondary" onClick={() => { setTab('orders'); setUnreadOrders(0); }}>
+          <button className="button secondary" onClick={() => { setTab('orders'); navigate('admin/orders'); setUnreadOrders(0); }}>
             View orders <ArrowRight size={16} />
           </button>
         </div>
@@ -222,6 +228,7 @@ export default function Admin() {
             key={value}
             onClick={() => {
               setTab(value);
+              navigate(value === 'overview' ? 'admin' : 'admin/' + value);
               setSearch('');
             }}
           >
