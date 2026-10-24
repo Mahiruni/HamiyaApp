@@ -1,0 +1,55 @@
+/* HAMIYA 2026 customer experience — visual layer only.
+   Retains all existing routes, data, verification and commerce behavior. */
+:root{--hig-ink:#153447;--hig-navy:#193b4d;--hig-blue:#315d73;--hig-muted:#647e8d;--hig-line:#dfe8ed;--hig-surface:#fff;--hig-page:#f5f8fa;--hig-radius:18px}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{background:var(--hig-page);-webkit-tap-highlight-color:transparent}
+button,a,input,select,textarea{touch-action:manipulation}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #7db4d0;outline-offset:3px}
+.app:not(.admin-app-shell){background:var(--hig-page);color:var(--hig-ink)}
+.app:not(.admin-app-shell) .topbar{background:rgba(255,255,255,.93);border-bottom:1px solid var(--hig-line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.app:not(.admin-app-shell) .sidebar{background:#fff;border-right:1px solid var(--hig-line)}
+.app:not(.admin-app-shell) .nav-link{border-radius:13px;min-height:46px;transition:background .16s ease,color .16s ease}
+.app:not(.admin-app-shell) .nav-link.active{background:#eaf2f6;color:#193b4d;font-weight:750}
+.app:not(.admin-app-shell) .sidebar-businesses button{border-radius:12px;min-height:44px}
+.app:not(.admin-app-shell) .icon-button{border-radius:12px;min-width:42px;min-height:42px}
+.app:not(.admin-app-shell) .topbar-user{border-radius:13px}
+.app:not(.admin-app-shell) .home-page,.app:not(.admin-app-shell) .catalog-page,.app:not(.admin-app-shell) .orders-page,.app:not(.admin-app-shell) .account-page{max-width:1260px;margin-inline:auto}
+.app:not(.admin-app-shell) .hamiya-dash-main{background:linear-gradient(135deg,#102d40 0%,#20495e 70%,#3b687a 100%);box-shadow:0 18px 44px rgba(16,45,64,.13);border:1px solid rgba(255,255,255,.13)}
+.app:not(.admin-app-shell) .hamiya-dash-side,.app:not(.admin-app-shell) .hamiya-division,.app:not(.admin-app-shell) .product-card{box-shadow:0 5px 24px rgba(19,54,74,.045);border:1px solid var(--hig-line)}
+.app:not(.admin-app-shell) .hamiya-division{border-radius:20px;min-height:210px}
+.app:not(.admin-app-shell) .hamiya-division-icon{border-radius:15px;background:#eaf2f6}
+.app:not(.admin-app-shell) .product-grid{gap:16px}
+.app:not(.admin-app-shell) .product-card{border-radius:19px;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.app:not(.admin-app-shell) .product-card:hover{transform:translateY(-2px);border-color:#b6ccd7;box-shadow:0 15px 35px rgba(19,54,74,.10)}
+.app:not(.admin-app-shell) .product-art{overflow:hidden}
+.app:not(.admin-app-shell) .product-art img{object-fit:cover;transition:transform .24s ease}
+.app:not(.admin-app-shell) .product-card:hover .product-art img{transform:scale(1.025)}
+.app:not(.admin-app-shell) .category-tabs{gap:8px}
+.app:not(.admin-app-shell) .category-tabs button{border-radius:999px;min-height:43px;padding-inline:16px}
+.app:not(.admin-app-shell) .search-field{border-radius:14px;min-height:48px}
+.app:not(.admin-app-shell) .page-heading h1{letter-spacing:-.045em}
+.app:not(.admin-app-shell) .empty{border-radius:22px}
+.app:not(.admin-app-shell) .button{border-radius:13px;min-height:45px}
+.app:not(.admin-app-shell) .site-footer{color:var(--hig-muted)}
+@media(max-width:767px){
+  html{scroll-padding-top:74px}
+  .app:not(.admin-app-shell) .topbar{padding-top:env(safe-area-inset-top,0px);min-height:calc(64px + env(safe-area-inset-top,0px))}
+  .app:not(.admin-app-shell) .mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:35;background:rgba(255,255,255,.97);border-top:1px solid #e1eaf0;box-shadow:0 -7px 24px rgba(17,49,67,.055);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .app:not(.admin-app-shell) .mobile-nav button{min-width:0;min-height:61px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#6a8290;position:relative;border-radius:0}
+  .app:not(.admin-app-shell) .mobile-nav button.active{color:#193b4d;font-weight:750}
+  .app:not(.admin-app-shell) .mobile-nav button.active:before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;background:#315d73;border-radius:0 0 4px 4px}
+  .app:not(.admin-app-shell) .mobile-nav button span{font-size:11px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .app:not(.admin-app-shell) .app-body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
+  .app:not(.admin-app-shell) .home-intro{gap:8px}
+  .app:not(.admin-app-shell) .hamiya-dash-heading h1{font-size:clamp(26px,7.4vw,34px)}
+  .app:not(.admin-app-shell) .hamiya-dash-main{border-radius:20px}
+  .app:not(.admin-app-shell) .hamiya-division-grid{grid-template-columns:1fr;gap:12px}
+  .app:not(.admin-app-shell) .hamiya-division{min-height:155px}
+  .app:not(.admin-app-shell) .product-grid{gap:10px}
+  .app:not(.admin-app-shell) .product-card{border-radius:15px}
+  .app:not(.admin-app-shell) .catalog-toolbar{gap:14px}
+  .app:not(.admin-app-shell) .category-tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .app:not(.admin-app-shell) .category-tabs::-webkit-scrollbar{display:none}
+  .app:not(.admin-app-shell) .category-tabs button{flex-shrink:0}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.app:not(.admin-app-shell) .product-card,.app:not(.admin-app-shell) .product-art img,.app:not(.admin-app-shell) .nav-link{transition:none!important}.app:not(.admin-app-shell) .product-card:hover{transform:none}.app:not(.admin-app-shell) .product-card:hover .product-art img{transform:none}}
