@@ -4130,3 +4130,9 @@ html[lang='am'] textarea {
 .account-content .profile-editor .steps li button:focus-visible { outline: 3px solid #85b3cb; outline-offset: 2px; }
 .account-content .profile-editor .steps li button span { flex: 0 0 28px; display: inline-flex; justify-content: center; align-items: center; }
 @media (max-width: 600px) { .account-content .profile-editor .form-actions { gap: 12px; flex-wrap: wrap; } .account-content .profile-editor .form-actions .button { min-height: 46px; } }
+
+/* Customer cart: directly editable carton quantity between stepper buttons. */
+.quantity-stepper .cart-quantity-input { width: 62px; min-width: 0; height: 38px; border: 1px solid #d7e2e7; border-radius: 9px; background: #fff; color: #1c3e50; font: inherit; font-size: 16px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.quantity-stepper .cart-quantity-input:focus-visible { outline: 2px solid #658ea4; outline-offset: 2px; }
+.quantity-stepper .cart-quantity-input::-webkit-inner-spin-button, .quantity-stepper .cart-quantity-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.quantity-stepper .cart-quantity-input { -moz-appearance: textfield; appearance: textfield; }
