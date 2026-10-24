@@ -224,9 +224,10 @@ export function CatalogPage() {
 
 function ProductDetails({ product, onClose }: { product: Product; onClose: () => void }) {
   const { t, language, user, addCart, navigate, toast, notifyError, online } = useApp();
-  const [quantity, setQuantity] = useState('1');
+  const minimumOrder = product.category === 'food' ? 20 : 1;
+  const [quantity, setQuantity] = useState(String(minimumOrder));
   const quantityNumber = Number(quantity);
-  const validQuantity = /^\\d+$/.test(quantity) && Number.isSafeInteger(quantityNumber) && quantityNumber >= 1 && quantityNumber <= product.available_quantity;
+  const validQuantity = /^\\d+$/.test(quantity) && Number.isSafeInteger(quantityNumber) && quantityNumber >= minimumOrder && quantityNumber <= product.available_quantity;
   const [enquiring, setEnquiring] = useState(false);
   const [busy, setBusy] = useState(false);
   const key = useRef(crypto.randomUUID());
@@ -300,18 +301,19 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
           {product.category === 'food' ? (
             <>
               <Field
-                label={t('quantity')}
+                label={t('quantity') + ' (minimum 20 cartons)'}
                 type="number"
-                min={1}
+                min={minimumOrder}
                 max={product.available_quantity || 1}
                 step={1}
                 inputMode="numeric"
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 onBlur={() => {
-                  if (!validQuantity) setQuantity(String(Math.max(1, Math.min(product.available_quantity || 1, Number.isFinite(quantityNumber) ? Math.floor(quantityNumber) || 1 : 1))));
+                  if (!validQuantity) setQuantity(String(Math.max(minimumOrder, Math.min(product.available_quantity || minimumOrder, Number.isFinite(quantityNumber) ? Math.floor(quantityNumber) || minimumOrder : minimumOrder))));
                 }}
               />
+              {product.available_quantity < minimumOrder && <p className="muted small-text">Minimum order: 20 cartons. Not enough stock is currently available.</p>}
               <button
                 className="button primary full"
                 disabled={!orderable || !online || !validQuantity}
