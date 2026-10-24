@@ -4118,3 +4118,15 @@ html[lang='am'] select,
 html[lang='am'] textarea {
   font-family: 'Hamiya Benaiah', 'Noto Sans Ethiopic', sans-serif;
 }
+
+/* HAMIYA customer onboarding: readable single-column form and vertical progress list. */
+.account-content .profile-editor .form-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.account-content .profile-editor .form-grid > * { min-width: 0; }
+.account-content .profile-editor .steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 0; margin: 22px 0 26px; list-style: none; }
+.account-content .profile-editor .steps li { width: 100%; min-width: 0; }
+.account-content .profile-editor .steps li button { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: flex-start; gap: 14px; text-align: start; padding: 10px 14px; border: 1px solid #dfe6e9; border-radius: 13px; background: #fff; color: #536773; font-weight: 600; cursor: pointer; }
+.account-content .profile-editor .steps li.active button { background: #eef5f8; color: #193c4e; border-color: #87a7b8; }
+.account-content .profile-editor .steps li.done button { color: #193c4e; border-color: #c5d9e3; }
+.account-content .profile-editor .steps li button:focus-visible { outline: 3px solid #85b3cb; outline-offset: 2px; }
+.account-content .profile-editor .steps li button span { flex: 0 0 28px; display: inline-flex; justify-content: center; align-items: center; }
+@media (max-width: 600px) { .account-content .profile-editor .form-actions { gap: 12px; flex-wrap: wrap; } .account-content .profile-editor .form-actions .button { min-height: 46px; } }
