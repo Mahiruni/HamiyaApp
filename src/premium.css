@@ -1,55 +1,1379 @@
-/* HAMIYA 2026 customer experience — visual layer only.
-   Retains all existing routes, data, verification and commerce behavior. */
-:root{--hig-ink:#153447;--hig-navy:#193b4d;--hig-blue:#315d73;--hig-muted:#647e8d;--hig-line:#dfe8ed;--hig-surface:#fff;--hig-page:#f5f8fa;--hig-radius:18px}
-html{scroll-behavior:smooth;scroll-padding-top:88px}
-body{background:var(--hig-page);-webkit-tap-highlight-color:transparent}
-button,a,input,select,textarea{touch-action:manipulation}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #7db4d0;outline-offset:3px}
-.app:not(.admin-app-shell){background:var(--hig-page);color:var(--hig-ink)}
-.app:not(.admin-app-shell) .topbar{background:rgba(255,255,255,.93);border-bottom:1px solid var(--hig-line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-.app:not(.admin-app-shell) .sidebar{background:#fff;border-right:1px solid var(--hig-line)}
-.app:not(.admin-app-shell) .nav-link{border-radius:13px;min-height:46px;transition:background .16s ease,color .16s ease}
-.app:not(.admin-app-shell) .nav-link.active{background:#eaf2f6;color:#193b4d;font-weight:750}
-.app:not(.admin-app-shell) .sidebar-businesses button{border-radius:12px;min-height:44px}
-.app:not(.admin-app-shell) .icon-button{border-radius:12px;min-width:42px;min-height:42px}
-.app:not(.admin-app-shell) .topbar-user{border-radius:13px}
-.app:not(.admin-app-shell) .home-page,.app:not(.admin-app-shell) .catalog-page,.app:not(.admin-app-shell) .orders-page,.app:not(.admin-app-shell) .account-page{max-width:1260px;margin-inline:auto}
-.app:not(.admin-app-shell) .hamiya-dash-main{background:linear-gradient(135deg,#102d40 0%,#20495e 70%,#3b687a 100%);box-shadow:0 18px 44px rgba(16,45,64,.13);border:1px solid rgba(255,255,255,.13)}
-.app:not(.admin-app-shell) .hamiya-dash-side,.app:not(.admin-app-shell) .hamiya-division,.app:not(.admin-app-shell) .product-card{box-shadow:0 5px 24px rgba(19,54,74,.045);border:1px solid var(--hig-line)}
-.app:not(.admin-app-shell) .hamiya-division{border-radius:20px;min-height:210px}
-.app:not(.admin-app-shell) .hamiya-division-icon{border-radius:15px;background:#eaf2f6}
-.app:not(.admin-app-shell) .product-grid{gap:16px}
-.app:not(.admin-app-shell) .product-card{border-radius:19px;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-.app:not(.admin-app-shell) .product-card:hover{transform:translateY(-2px);border-color:#b6ccd7;box-shadow:0 15px 35px rgba(19,54,74,.10)}
-.app:not(.admin-app-shell) .product-art{overflow:hidden}
-.app:not(.admin-app-shell) .product-art img{object-fit:cover;transition:transform .24s ease}
-.app:not(.admin-app-shell) .product-card:hover .product-art img{transform:scale(1.025)}
-.app:not(.admin-app-shell) .category-tabs{gap:8px}
-.app:not(.admin-app-shell) .category-tabs button{border-radius:999px;min-height:43px;padding-inline:16px}
-.app:not(.admin-app-shell) .search-field{border-radius:14px;min-height:48px}
-.app:not(.admin-app-shell) .page-heading h1{letter-spacing:-.045em}
-.app:not(.admin-app-shell) .empty{border-radius:22px}
-.app:not(.admin-app-shell) .button{border-radius:13px;min-height:45px}
-.app:not(.admin-app-shell) .site-footer{color:var(--hig-muted)}
-@media(max-width:767px){
-  html{scroll-padding-top:74px}
-  .app:not(.admin-app-shell) .topbar{padding-top:env(safe-area-inset-top,0px);min-height:calc(64px + env(safe-area-inset-top,0px))}
-  .app:not(.admin-app-shell) .mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:35;background:rgba(255,255,255,.97);border-top:1px solid #e1eaf0;box-shadow:0 -7px 24px rgba(17,49,67,.055);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding-bottom:env(safe-area-inset-bottom,0px);display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
-  .app:not(.admin-app-shell) .mobile-nav button{min-width:0;min-height:61px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#6a8290;position:relative;border-radius:0}
-  .app:not(.admin-app-shell) .mobile-nav button.active{color:#193b4d;font-weight:750}
-  .app:not(.admin-app-shell) .mobile-nav button.active:before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;background:#315d73;border-radius:0 0 4px 4px}
-  .app:not(.admin-app-shell) .mobile-nav button span{font-size:11px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .app:not(.admin-app-shell) .app-body{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
-  .app:not(.admin-app-shell) .home-intro{gap:8px}
-  .app:not(.admin-app-shell) .hamiya-dash-heading h1{font-size:clamp(26px,7.4vw,34px)}
-  .app:not(.admin-app-shell) .hamiya-dash-main{border-radius:20px}
-  .app:not(.admin-app-shell) .hamiya-division-grid{grid-template-columns:1fr;gap:12px}
-  .app:not(.admin-app-shell) .hamiya-division{min-height:155px}
-  .app:not(.admin-app-shell) .product-grid{gap:10px}
-  .app:not(.admin-app-shell) .product-card{border-radius:15px}
-  .app:not(.admin-app-shell) .catalog-toolbar{gap:14px}
-  .app:not(.admin-app-shell) .category-tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .app:not(.admin-app-shell) .category-tabs::-webkit-scrollbar{display:none}
-  .app:not(.admin-app-shell) .category-tabs button{flex-shrink:0}
+/* HAMIYA customer visual system. Existing business rules and staff layouts are preserved. */
+:root {
+  --hig-ink: #153447;
+  --hig-muted: #58717f;
+  --hig-line: #dce6eb;
+  --hig-page: #f4f7f9;
+  --hig-shadow: 0 8px 30px #173a4c06;
 }
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.app:not(.admin-app-shell) .product-card,.app:not(.admin-app-shell) .product-art img,.app:not(.admin-app-shell) .nav-link{transition:none!important}.app:not(.admin-app-shell) .product-card:hover{transform:none}.app:not(.admin-app-shell) .product-card:hover .product-art img{transform:none}}
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+body {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #6d9fb9;
+  outline-offset: 4px;
+}
+.hamiya-mark {
+  display: block;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+.language-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border: 1px solid #dce6eb;
+  border-radius: 12px;
+  background: #f7fafb;
+  color: #31576b;
+  cursor: pointer;
+}
+.language-icon:hover {
+  background: #eaf1f5;
+}
+.language-icon:focus-within {
+  outline: 3px solid #6d9fb9;
+  outline-offset: 4px;
+}
+.language-icon > select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  appearance: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+.menu-toggle,
+.menu-close {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border: 1px solid #dce6eb;
+  border-radius: 12px;
+  background: #f7fafb;
+  color: #193b4d;
+}
+.menu-account {
+  display: none;
+}
+.app:not(.admin-app-shell) {
+  background: var(--hig-page);
+  color: var(--hig-ink);
+}
+.app:not(.admin-app-shell) .sidebar {
+  width: 252px;
+  padding: 32px 18px 24px;
+  border-color: var(--hig-line);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.app:not(.admin-app-shell) .app-body {
+  margin-left: 252px;
+}
+.app:not(.admin-app-shell) .brand {
+  gap: 12px;
+}
+.app:not(.admin-app-shell) .brand-name {
+  font-size: 30px;
+}
+.app:not(.admin-app-shell) .sidebar-divider {
+  margin: 30px 12px 20px;
+}
+.app:not(.admin-app-shell) .nav-link {
+  border-radius: 12px;
+  min-height: 48px;
+  font-size: 13px;
+  gap: 13px;
+  transition:
+    background 0.16s,
+    color 0.16s;
+}
+.app:not(.admin-app-shell) .nav-link.active {
+  background: #e7eff4;
+  color: #193b4d;
+  font-weight: 700;
+}
+.app:not(.admin-app-shell) .nav-link.active > svg {
+  color: #315f77;
+}
+.app:not(.admin-app-shell) .sidebar-businesses button {
+  border-radius: 12px;
+  min-height: 48px;
+  line-height: 1.5;
+}
+.app:not(.admin-app-shell) .sidebar-businesses button[aria-current] {
+  background: #edf3f6;
+}
+.app:not(.admin-app-shell) .business-dot {
+  border-radius: 9px;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+.app:not(.admin-app-shell) .business-dot.food {
+  color: #55705b;
+  background: #ebf0e7;
+}
+.app:not(.admin-app-shell) .business-dot.coffee {
+  color: #886747;
+  background: #f4ece3;
+}
+.app:not(.admin-app-shell) .sidebar-note {
+  line-height: 1.8;
+  font-size: 11px;
+}
+.app:not(.admin-app-shell) .sidebar-note svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.app:not(.admin-app-shell) .topbar {
+  height: 78px;
+  background: #ffffffed;
+  border-color: var(--hig-line);
+  backdrop-filter: blur(18px);
+}
+.app:not(.admin-app-shell) .breadcrumb {
+  font-size: 12px;
+}
+.app:not(.admin-app-shell) .breadcrumb strong {
+  font-weight: 650;
+}
+.app:not(.admin-app-shell) .icon-button {
+  border-radius: 12px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.app:not(.admin-app-shell) .topbar-user {
+  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  background: #e6eef2;
+}
+.app:not(.admin-app-shell) .home-page,
+.app:not(.admin-app-shell) .catalog-page,
+.app:not(.admin-app-shell) .orders-page,
+.app:not(.admin-app-shell) .account-page {
+  max-width: 1260px;
+  margin-inline: auto;
+}
+.app:not(.admin-app-shell) .button {
+  min-height: 46px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+.app:not(.admin-app-shell) .page-heading {
+  margin-bottom: 30px;
+  gap: 18px;
+}
+.app:not(.admin-app-shell) .page-heading h1 {
+  font-size: clamp(28px, 3.3vw, 40px);
+  letter-spacing: -0.045em;
+  line-height: 1.25;
+}
+.app:not(.admin-app-shell) .page-heading p {
+  font-size: 13px;
+  line-height: 1.8;
+  max-width: 600px;
+}
+.app:not(.admin-app-shell) .eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+.app:not(.admin-app-shell) .panel {
+  border-radius: 18px;
+  border-color: var(--hig-line);
+  box-shadow: var(--hig-shadow);
+}
+
+/* Homepage */
+.app:not(.admin-app-shell) .hamiya-dashboard {
+  gap: 23px;
+  margin-bottom: 22px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-head {
+  align-items: center;
+  padding-block: 3px 6px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-heading h1 {
+  font-size: clamp(28px, 3.1vw, 39px);
+  line-height: 1.3;
+  letter-spacing: -0.045em;
+  margin: 10px 0 6px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-heading p {
+  color: var(--hig-muted);
+  font-size: 13px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-kicker {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+.app:not(.admin-app-shell) .hamiya-live-dot {
+  background: #527b72;
+  box-shadow: 0 0 0 4px #e5eeeb;
+}
+.app:not(.admin-app-shell) .hamiya-dash-date {
+  border: 0;
+  background: #e9eff3;
+  border-radius: 10px;
+  font-size: 11px;
+  padding: 12px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-grid {
+  grid-template-columns: minmax(0, 1.55fr) minmax(255px, 0.9fr);
+  gap: 18px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main {
+  padding: 28px 32px 22px;
+  min-height: 345px;
+  border-radius: 22px;
+  background: #193b4d;
+  box-shadow: 0 12px 28px #193b4d12;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main::after {
+  width: 430px;
+  height: 430px;
+  right: -220px;
+  top: -140px;
+  border-color: #ffffff18;
+  box-shadow:
+    0 0 0 62px #ffffff04,
+    0 0 0 124px #ffffff04;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main .hamiya-mark {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #ffffff29;
+  border-radius: 10px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-overline {
+  color: #55758a;
+  font-size: 10px;
+  line-height: 1.7;
+  letter-spacing: 0.12em;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main .hamiya-dash-overline {
+  color: #bed0d9;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main h2 {
+  font-size: clamp(34px, 3.7vw, 53px);
+  line-height: 1.1;
+  margin: 13px 0;
+  letter-spacing: -0.045em;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main h2 em {
+  color: #b6d1d7;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main > p {
+  color: #d3e0e7;
+  font-size: 13px;
+  max-width: 390px;
+  line-height: 1.8;
+}
+.app:not(.admin-app-shell) .hamiya-dash-actions {
+  margin-top: 23px;
+  gap: 10px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-actions button {
+  min-height: 46px;
+  font-size: 12px;
+  border-radius: 11px;
+  padding: 12px 16px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-action-primary:hover {
+  background: #eaf2f5;
+}
+.app:not(.admin-app-shell) .hamiya-dash-action-secondary:hover {
+  background: #ffffff0d;
+}
+.app:not(.admin-app-shell) .hamiya-dash-main-bottom {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  padding-top: 30px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-side {
+  border-radius: 22px;
+  padding: 23px;
+  border-color: var(--hig-line);
+  box-shadow: var(--hig-shadow);
+  gap: 18px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-side-label {
+  font-size: 10px;
+  color: var(--hig-muted);
+}
+.app:not(.admin-app-shell) .hamiya-dash-metrics {
+  gap: 10px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-metrics > div {
+  background: #f2f6f8;
+  padding: 17px 15px;
+  border-radius: 13px;
+  min-width: 0;
+}
+.app:not(.admin-app-shell) .hamiya-dash-metrics strong {
+  font-size: 30px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-metrics span {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--hig-muted);
+}
+.app:not(.admin-app-shell) .hamiya-dash-status {
+  min-height: 66px;
+  padding: 12px;
+  gap: 11px;
+  border-radius: 13px;
+  background: #eaf1f4;
+  text-align: start;
+}
+.app:not(.admin-app-shell) .hamiya-dash-status > svg {
+  flex-shrink: 0;
+}
+.app:not(.admin-app-shell) .hamiya-dash-status > span {
+  min-width: 0;
+  gap: 6px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-status strong {
+  font-size: 12px;
+}
+.app:not(.admin-app-shell) .hamiya-dash-status .badge {
+  align-self: flex-start;
+  font-size: 10px;
+}
+.dashboard-data-note {
+  font-size: 11px;
+  line-height: 1.7;
+}
+.app:not(.admin-app-shell) .hamiya-dash-section-heading {
+  margin-top: 10px;
+  align-items: center;
+}
+.app:not(.admin-app-shell) .hamiya-dash-section-heading h2 {
+  font-size: 25px;
+  line-height: 1.35;
+  letter-spacing: -0.035em;
+}
+.app:not(.admin-app-shell) .hamiya-dash-section-heading > button {
+  min-height: 44px;
+  white-space: nowrap;
+}
+.app:not(.admin-app-shell) .hamiya-division-grid {
+  gap: 16px;
+}
+.app:not(.admin-app-shell) .hamiya-division {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 245px;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid #dce5df;
+  background: #edf2eb;
+  gap: 8px;
+  text-align: start;
+  box-shadow: none;
+}
+.app:not(.admin-app-shell) .hamiya-division:hover {
+  transform: translateY(-3px);
+  border-color: #9db5bd;
+  box-shadow: var(--hig-shadow);
+}
+.app:not(.admin-app-shell) .division-coffee {
+  background: #f4eee6;
+  border-color: #e9dfd3;
+}
+.app:not(.admin-app-shell) .division-vehicles {
+  background: #eaf0f5;
+  border-color: #dce4ed;
+}
+.app:not(.admin-app-shell) .hamiya-division-top {
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.app:not(.admin-app-shell) .hamiya-division-icon {
+  background: #ffffffb3;
+  color: #4e6c55;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+}
+.app:not(.admin-app-shell) .division-coffee .hamiya-division-icon {
+  color: #836041;
+}
+.app:not(.admin-app-shell) .division-vehicles .hamiya-division-icon {
+  color: #49677f;
+}
+.app:not(.admin-app-shell) .hamiya-division-index {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #607581;
+}
+.app:not(.admin-app-shell) .division-art {
+  position: absolute;
+  right: -13px;
+  top: 38px;
+  z-index: -1;
+  transform: rotate(-12deg);
+  color: #264d3b0e;
+  pointer-events: none;
+}
+.app:not(.admin-app-shell) .division-art svg {
+  width: 150px;
+  height: 150px;
+}
+.app:not(.admin-app-shell) .division-coffee .division-art {
+  color: #6f4f310e;
+}
+.app:not(.admin-app-shell) .division-vehicles .division-art {
+  color: #214e720d;
+  transform: rotate(-8deg);
+}
+.app:not(.admin-app-shell) .hamiya-division > strong {
+  margin-top: 16px;
+  font-size: 17px;
+  line-height: 1.4;
+  max-width: 210px;
+}
+.app:not(.admin-app-shell) .hamiya-division > small {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #536b77;
+  max-width: 230px;
+}
+.app:not(.admin-app-shell) .hamiya-division-bottom {
+  padding-top: 19px;
+  font-size: 11px;
+}
+.customer-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0 0 38px;
+}
+.customer-shortcuts > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: start;
+  padding: 18px 16px;
+  background: #fff;
+  border: 1px solid var(--hig-line);
+  border-radius: 15px;
+}
+.customer-shortcuts > button:hover {
+  border-color: #9bb7c7;
+}
+.customer-shortcuts .shortcut-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #416478;
+}
+.customer-shortcuts > button > span:nth-child(2) {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.customer-shortcuts strong {
+  font-size: 12px;
+}
+.customer-shortcuts small {
+  color: var(--hig-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+.customer-shortcuts > button > svg {
+  color: #7b929f;
+  flex-shrink: 0;
+}
+.app:not(.admin-app-shell) .how-section {
+  padding: 26px 0 0;
+  border-top: 1px solid var(--hig-line);
+}
+.app:not(.admin-app-shell) .how-section .section-heading h2 {
+  font-size: 22px;
+  line-height: 1.4;
+}
+.app:not(.admin-app-shell) .how-section .section-heading p {
+  font-size: 12px;
+}
+.app:not(.admin-app-shell) .how-step h3 {
+  font-size: 14px;
+}
+.app:not(.admin-app-shell) .how-step p {
+  font-size: 12px;
+}
+.app:not(.admin-app-shell) .how-icon {
+  background: #e7eef2;
+  border-radius: 14px;
+}
+.app:not(.admin-app-shell) .local-banner {
+  background: #e9f0f3;
+  border-radius: 16px;
+}
+
+/* Catalogue and commerce */
+.app:not(.admin-app-shell) .small-seal {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border: 1px solid var(--hig-line);
+  border-radius: 19px;
+  background: #eaf1f5;
+}
+.app:not(.admin-app-shell) .small-seal > span {
+  display: none;
+}
+.app:not(.admin-app-shell) .catalog-food .small-seal {
+  color: #4e6c55;
+  background: #edf2eb;
+}
+.app:not(.admin-app-shell) .catalog-coffee .small-seal {
+  color: #836041;
+  background: #f4eee6;
+}
+.app:not(.admin-app-shell) .catalog-toolbar {
+  border: 0;
+  padding: 0;
+  margin-bottom: 27px;
+}
+.app:not(.admin-app-shell) .category-tabs {
+  gap: 8px;
+  padding: 3px 3px 8px;
+}
+.app:not(.admin-app-shell) .category-tabs button {
+  border: 1px solid var(--hig-line);
+  background: #fff;
+  min-height: 44px;
+  padding-inline: 16px;
+  border-radius: 11px;
+  color: #536b79;
+}
+.app:not(.admin-app-shell) .category-tabs button.active {
+  background: #193b4d;
+  color: #fff;
+  border-color: #193b4d;
+}
+.app:not(.admin-app-shell) .catalog-controls {
+  margin-top: 17px;
+  gap: 16px;
+}
+.app:not(.admin-app-shell) .search-field {
+  max-width: 480px;
+  min-height: 48px;
+  border-radius: 12px;
+  border-color: var(--hig-line);
+}
+.app:not(.admin-app-shell) .search-field input {
+  font-size: 14px;
+  padding-block: 13px;
+}
+.app:not(.admin-app-shell) .search-field button {
+  min-width: 36px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+}
+.app:not(.admin-app-shell) .available-filter {
+  min-height: 44px;
+  font-size: 12px;
+}
+.app:not(.admin-app-shell) .available-filter input {
+  width: 18px;
+  height: 18px;
+  accent-color: #315d73;
+}
+.app:not(.admin-app-shell) .catalog-count {
+  font-size: 14px;
+  font-weight: 650;
+}
+.app:not(.admin-app-shell) .catalog-count > span {
+  font-size: 12px;
+  font-weight: 400;
+}
+.app:not(.admin-app-shell) .product-grid {
+  gap: 17px;
+}
+.app:not(.admin-app-shell) .product-card {
+  border-radius: 17px;
+  border-color: var(--hig-line);
+  box-shadow: var(--hig-shadow);
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.app:not(.admin-app-shell) .product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px #173a4c12;
+}
+.app:not(.admin-app-shell) .product-art {
+  min-height: 210px;
+  background: #eaf0f3;
+}
+.app:not(.admin-app-shell) .product-art.coffee {
+  background: #f2ece5;
+  color: #896a4d;
+}
+.app:not(.admin-app-shell) .product-art.vehicles {
+  background: #e8eef4;
+  color: #5b7890;
+}
+.app:not(.admin-app-shell) .product-art > span {
+  font-size: 10px;
+  color: #536b79;
+  padding-inline: 7px;
+}
+.app:not(.admin-app-shell) .product-art img {
+  object-fit: contain;
+}
+.app:not(.admin-app-shell) .product-content {
+  padding: 19px;
+}
+.app:not(.admin-app-shell) .product-content h3 {
+  font-size: 17px;
+  line-height: 1.45;
+}
+.app:not(.admin-app-shell) .product-content p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.app:not(.admin-app-shell) .product-title-row {
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.app:not(.admin-app-shell) .product-price-row {
+  margin-top: 22px;
+}
+.app:not(.admin-app-shell) .product-price-row > div > small {
+  line-height: 1.6;
+}
+.app:not(.admin-app-shell) .product-arrow {
+  background: #ecf2f5;
+  border-radius: 11px;
+  width: 36px;
+  height: 36px;
+}
+.app:not(.admin-app-shell) .empty {
+  border: 1px dashed #cbdbe3;
+  border-radius: 20px;
+  padding: 50px 24px;
+  background: #ffffffa6;
+}
+.app:not(.admin-app-shell) .empty-icon {
+  background: #e9f0f4;
+  color: #3c6176;
+  border-radius: 19px;
+  width: 68px;
+  height: 68px;
+}
+.app:not(.admin-app-shell) .empty h3 {
+  line-height: 1.5;
+  font-size: 19px;
+}
+.app:not(.admin-app-shell) .empty p {
+  max-width: 400px;
+  line-height: 1.8;
+  font-size: 13px;
+}
+.app:not(.admin-app-shell) .activity-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 24px;
+  overflow-x: auto;
+  padding: 4px 4px 8px;
+}
+.activity-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 10px 15px;
+  border: 1px solid var(--hig-line);
+  background: #fff;
+  border-radius: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.activity-tabs button > span {
+  display: grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  border-radius: 7px;
+  background: #edf2f5;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.activity-tabs button[aria-pressed='true'] {
+  background: #193b4d;
+  border-color: #193b4d;
+  color: #fff;
+}
+.activity-tabs button[aria-pressed='true'] > span {
+  background: #ffffff1c;
+}
+.app:not(.admin-app-shell) .order-grid {
+  gap: 17px;
+}
+.app:not(.admin-app-shell) .order-card {
+  padding: 24px;
+  text-align: start;
+}
+.app:not(.admin-app-shell) button.order-card:hover {
+  border-color: #9fb9c7;
+}
+.app:not(.admin-app-shell) .order-card .round-icon {
+  border-radius: 14px;
+  background: #edf3f6;
+  width: 46px;
+  height: 46px;
+}
+.app:not(.admin-app-shell) .order-card h3 {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.app:not(.admin-app-shell) .order-card p {
+  font-size: 13px;
+  line-height: 1.75;
+}
+.app:not(.admin-app-shell) .order-card-bottom {
+  border-top: 1px solid #e8eef2;
+  padding-top: 18px;
+  margin-top: 20px;
+}
+.app:not(.admin-app-shell) .order-card > small {
+  font-size: 11px;
+}
+.refreshing {
+  animation: hig-spin 1.2s linear infinite;
+}
+@keyframes hig-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.app:not(.admin-app-shell) .dialog {
+  border: 1px solid var(--hig-line);
+  border-radius: 22px;
+  max-height: calc(
+    100dvh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+  );
+  overscroll-behavior: contain;
+}
+.app:not(.admin-app-shell) .dialog::backdrop {
+  background: #102c40a6;
+  backdrop-filter: blur(4px);
+}
+.app:not(.admin-app-shell) .dialog-head {
+  padding: 20px 24px;
+  background: #fff;
+}
+.app:not(.admin-app-shell) .dialog-head h2 {
+  font-size: 19px;
+  line-height: 1.4;
+}
+.app:not(.admin-app-shell) .dialog-body {
+  padding: 24px;
+}
+.app:not(.admin-app-shell) .cart-item {
+  border-radius: 14px;
+}
+
+/* Account */
+.app:not(.admin-app-shell) .account-grid {
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.app:not(.admin-app-shell) .account-summary {
+  padding: 26px 22px;
+  border: 1px solid var(--hig-line);
+  border-radius: 19px;
+  background: #fff;
+  box-shadow: var(--hig-shadow);
+}
+.account-identity-mark {
+  position: relative;
+  width: fit-content;
+  margin-inline: auto;
+}
+.app:not(.admin-app-shell) .account-summary .avatar {
+  width: 74px;
+  height: 74px;
+  font-size: 28px;
+  background: #e7eff3;
+  color: #315b71;
+  border-radius: 23px;
+  margin-bottom: 0;
+}
+.account-identity-mark > span {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 9px;
+  border: 3px solid #fff;
+  background: #193b4d;
+  color: #fff;
+}
+.app:not(.admin-app-shell) .account-summary h3 {
+  font-size: 18px;
+  line-height: 1.45;
+  margin-top: 19px;
+  overflow-wrap: anywhere;
+}
+.app:not(.admin-app-shell) .account-summary > p {
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.app:not(.admin-app-shell) .customer-code {
+  background: #f2f6f8;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 20px;
+}
+.app:not(.admin-app-shell) .customer-code b {
+  font-variant-numeric: tabular-nums;
+}
+.app:not(.admin-app-shell) .summary-link {
+  min-height: 49px;
+  font-size: 12px;
+  text-align: start;
+  padding: 12px 5px;
+}
+.app:not(.admin-app-shell) .summary-link:hover {
+  color: #254e65;
+  background: #f5f8fa;
+}
+.app:not(.admin-app-shell) .profile-editor {
+  padding: 28px;
+}
+.app:not(.admin-app-shell) .profile-editor .section-heading h2 {
+  font-size: 23px;
+  line-height: 1.45;
+}
+.app:not(.admin-app-shell) .profile-editor .section-heading p {
+  font-size: 13px;
+  line-height: 1.75;
+}
+.app:not(.admin-app-shell) .profile-editor .steps {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.app:not(.admin-app-shell) .profile-editor .steps li button {
+  font-size: 12px;
+  min-height: 51px;
+  gap: 9px;
+}
+.app:not(.admin-app-shell) .field > span {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.app:not(.admin-app-shell) .field input,
+.app:not(.admin-app-shell) .field select,
+.app:not(.admin-app-shell) .field textarea {
+  min-height: 47px;
+  border-radius: 10px;
+}
+.app:not(.admin-app-shell) .profile-status {
+  padding: 38px 28px;
+}
+.app:not(.admin-app-shell) .profile-status h2 {
+  font-size: 24px;
+  line-height: 1.4;
+}
+.app:not(.admin-app-shell) .profile-status p {
+  line-height: 1.8;
+  font-size: 13px;
+}
+.app:not(.admin-app-shell) .site-footer {
+  color: var(--hig-muted);
+  font-size: 11px;
+}
+.app:not(.admin-app-shell) .site-footer button {
+  min-height: 36px;
+}
+
+@media (max-width: 1200px) {
+  .app:not(.admin-app-shell) .hamiya-dash-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.85fr);
+  }
+  .customer-shortcuts {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .customer-shortcuts > button {
+    padding: 17px 20px;
+  }
+  .customer-shortcuts > button > span:nth-child(2) {
+    gap: 4px;
+  }
+}
+@media (max-width: 1023px) {
+  .app:not(.admin-app-shell) .app-body {
+    margin-left: 0;
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+  .app:not(.admin-app-shell) .sidebar {
+    width: min(320px, calc(100vw - 32px));
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 18px
+      calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .sidebar .sidebar-brand {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 2;
+    background: #fff;
+    flex-shrink: 0;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e4ecf0;
+  }
+  .sidebar .brand {
+    min-width: 0;
+    padding: 0;
+    gap: 10px;
+  }
+  .sidebar .brand-name {
+    font-size: 27px;
+  }
+  .sidebar .brand-name > small {
+    font-size: 6px;
+    letter-spacing: 1.4px;
+  }
+  .sidebar .hamiya-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  .sidebar .menu-close {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .app:not(.admin-app-shell) .sidebar-divider {
+    display: none;
+  }
+  .menu-account {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 11px;
+    width: 100%;
+    margin: 18px 0 22px;
+    padding: 14px 12px;
+    border: 1px solid #dfe9ef;
+    border-radius: 14px;
+    background: #f0f5f8;
+    text-align: start;
+  }
+  .menu-account:hover {
+    background: #e7eff4;
+  }
+  .menu-avatar {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #193b4d;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 650;
+  }
+  .menu-account-details {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+  }
+  .menu-account-details strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .menu-account-details small {
+    color: #58717f;
+    font-size: 11px;
+  }
+  .menu-account > svg {
+    flex-shrink: 0;
+    color: #58717f;
+  }
+  .app:not(.admin-app-shell) .sidebar nav {
+    gap: 7px;
+  }
+  .app:not(.admin-app-shell) .sidebar nav .nav-link {
+    min-height: 50px;
+  }
+  .app:not(.admin-app-shell) .sidebar-section-label {
+    margin: 27px 14px 12px;
+  }
+  .app:not(.admin-app-shell) .sidebar-bottom {
+    padding-top: 20px;
+  }
+  .app:not(.admin-app-shell) .drawer-backdrop {
+    background: #102b406e;
+    backdrop-filter: blur(3px);
+  }
+  .app:not(.admin-app-shell) .topbar {
+    height: auto;
+    min-height: calc(70px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 24px 0;
+  }
+  .app:not(.admin-app-shell) .mobile-wordmark {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 25px;
+    letter-spacing: -1px;
+  }
+  .app:not(.admin-app-shell) .mobile-wordmark .hamiya-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .app:not(.admin-app-shell) .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: #fffffff5;
+    border-top: 1px solid var(--hig-line);
+    box-shadow: 0 -4px 25px #173a4c05;
+  }
+  .app:not(.admin-app-shell) .mobile-nav button {
+    min-width: 0;
+    min-height: 56px;
+    gap: 5px;
+    color: #58717f;
+    border-radius: 13px;
+  }
+  .app:not(.admin-app-shell) .mobile-nav button > span {
+    font-size: 11px;
+    line-height: 1.5;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .app:not(.admin-app-shell) .mobile-nav button.active {
+    background: #e9f0f4;
+    color: #193b4d;
+    font-weight: 700;
+  }
+  .app:not(.admin-app-shell) .mobile-nav button.active::before {
+    display: none;
+  }
+  .app:not(.admin-app-shell) .site-footer {
+    margin-bottom: 0;
+  }
+}
+@media (max-width: 767px) {
+  html {
+    scroll-padding-top: 84px;
+  }
+  .app:not(.admin-app-shell) main {
+    padding: 25px 20px 28px;
+  }
+  .app:not(.admin-app-shell) .topbar {
+    padding-inline: 16px;
+    min-height: calc(66px + env(safe-area-inset-top, 0px));
+  }
+  .app:not(.admin-app-shell) .topbar-left {
+    gap: 3px;
+  }
+  .app:not(.admin-app-shell) .topbar-actions {
+    gap: 6px;
+  }
+  .app:not(.admin-app-shell) .topbar-separator {
+    display: none;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-date {
+    display: none;
+  }
+  .app:not(.admin-app-shell) .hamiya-dashboard {
+    gap: 20px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-heading h1 {
+    font-size: 29px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-main {
+    padding: 24px;
+    min-height: 345px;
+    border-radius: 19px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-main h2 {
+    font-size: 42px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-main-bottom {
+    flex-wrap: wrap;
+    gap: 9px;
+    font-size: 8px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-side {
+    padding: 19px;
+    border-radius: 19px;
+    min-height: 0;
+    gap: 16px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-metrics > div {
+    padding: 17px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-metrics strong {
+    font-size: 28px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-section-heading h2 {
+    font-size: 23px;
+  }
+  .app:not(.admin-app-shell) .hamiya-division-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .app:not(.admin-app-shell) .hamiya-division {
+    min-height: 208px;
+    padding: 21px;
+  }
+  .app:not(.admin-app-shell) .hamiya-division > strong {
+    font-size: 18px;
+    max-width: 85%;
+  }
+  .app:not(.admin-app-shell) .hamiya-division > small {
+    max-width: 80%;
+  }
+  .app:not(.admin-app-shell) .division-art {
+    top: 42px;
+    right: 8px;
+  }
+  .app:not(.admin-app-shell) .hamiya-division-bottom {
+    padding-top: 15px;
+  }
+  .app:not(.admin-app-shell) .customer-shortcuts {
+    margin-bottom: 28px;
+  }
+  .app:not(.admin-app-shell) .how-grid {
+    gap: 22px;
+  }
+  .app:not(.admin-app-shell) .how-step p {
+    max-width: none;
+  }
+  .app:not(.admin-app-shell) .local-banner {
+    margin-top: 29px;
+    padding: 20px 16px;
+    gap: 12px;
+  }
+  .app:not(.admin-app-shell) .local-banner h3 {
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .app:not(.admin-app-shell) .page-heading {
+    margin-bottom: 25px;
+    align-items: start;
+  }
+  .app:not(.admin-app-shell) .page-heading h1 {
+    font-size: 30px;
+  }
+  .app:not(.admin-app-shell) .small-seal {
+    display: none;
+  }
+  .app:not(.admin-app-shell) .category-tabs {
+    margin-inline: -3px;
+    scrollbar-width: none;
+  }
+  .app:not(.admin-app-shell) .category-tabs button {
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .app:not(.admin-app-shell) .catalog-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .app:not(.admin-app-shell) .search-field {
+    max-width: none;
+  }
+  .app:not(.admin-app-shell) .search-field input {
+    font-size: 16px;
+  }
+  .app:not(.admin-app-shell) .product-grid {
+    gap: 12px;
+  }
+  .app:not(.admin-app-shell) .product-card {
+    border-radius: 15px;
+  }
+  .app:not(.admin-app-shell) .product-art {
+    min-height: 155px;
+  }
+  .app:not(.admin-app-shell) .product-art > svg {
+    width: 48px;
+    height: 48px;
+  }
+  .app:not(.admin-app-shell) .product-content {
+    padding: 14px;
+  }
+  .app:not(.admin-app-shell) .product-content h3 {
+    font-size: 15px;
+  }
+  .app:not(.admin-app-shell) .product-price-row {
+    margin-top: 17px;
+    align-items: start;
+  }
+  .app:not(.admin-app-shell) .product-price-row .money {
+    font-size: 16px;
+  }
+  .app:not(.admin-app-shell) .product-price-row > div > small {
+    font-size: 10px;
+  }
+  .app:not(.admin-app-shell) .product-arrow {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .app:not(.admin-app-shell) .order-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app:not(.admin-app-shell) .order-card {
+    padding: 21px;
+  }
+  .app:not(.admin-app-shell) .account-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .app:not(.admin-app-shell) .account-summary {
+    display: flex;
+    flex-direction: column;
+    padding: 25px 22px 14px;
+    text-align: center;
+  }
+  .app:not(.admin-app-shell) .account-summary > * {
+    grid-column: auto;
+  }
+  .app:not(.admin-app-shell) .account-summary > .badge {
+    align-self: center;
+    margin-block: 14px;
+  }
+  .app:not(.admin-app-shell) .account-summary .summary-link {
+    width: 100%;
+  }
+  .app:not(.admin-app-shell) .profile-editor {
+    padding: 22px 18px;
+  }
+  .app:not(.admin-app-shell) .profile-editor .steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app:not(.admin-app-shell) .profile-editor .field input,
+  .app:not(.admin-app-shell) .profile-editor .field select,
+  .app:not(.admin-app-shell) .profile-editor .field textarea {
+    font-size: 16px;
+  }
+  .app:not(.admin-app-shell) .dialog {
+    width: calc(100% - 20px);
+    border-radius: 19px;
+  }
+  .app:not(.admin-app-shell) .dialog-head {
+    padding: 15px 18px;
+  }
+  .app:not(.admin-app-shell) .dialog-body {
+    padding: 20px 18px;
+  }
+  .app:not(.admin-app-shell) .site-footer {
+    padding: 22px 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    line-height: 1.8;
+  }
+}
+@media (max-width: 380px) {
+  .app:not(.admin-app-shell) main {
+    padding-inline: 16px;
+  }
+  .app:not(.admin-app-shell) .topbar {
+    padding-inline: 8px;
+  }
+  .app:not(.admin-app-shell) .mobile-wordmark {
+    font-size: 22px;
+    gap: 5px;
+  }
+  .app:not(.admin-app-shell) .mobile-wordmark .hamiya-mark {
+    display: none;
+  }
+  .app:not(.admin-app-shell) .topbar-user {
+    width: 36px;
+    height: 36px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-main {
+    padding-inline: 20px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-main h2 {
+    font-size: 37px;
+  }
+  .app:not(.admin-app-shell) .hamiya-dash-actions button {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+  .app:not(.admin-app-shell) .product-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app:not(.admin-app-shell) .product-art {
+    min-height: 190px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .app:not(.admin-app-shell) *,
+  .app:not(.admin-app-shell) *::before,
+  .app:not(.admin-app-shell) *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+  .app:not(.admin-app-shell) .product-card:hover,
+  .app:not(.admin-app-shell) .hamiya-division:hover {
+    transform: none;
+  }
+}

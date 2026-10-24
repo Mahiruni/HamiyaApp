@@ -7,6 +7,7 @@ import {
   Cookie,
   Flame,
   Flower2,
+  Globe2,
   Leaf,
   Package,
   Wheat,
@@ -14,8 +15,41 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import { useApp } from './state';
+import { languages } from './i18n';
 import type { Category, Product } from './types';
 export const categoryIcons = { food: Wheat, coffee: Coffee, vehicles: CarFront };
+export function LanguageSelector({ className = '' }: { className?: string }) {
+  const { t, language, setLanguage } = useApp();
+  const current = languages.find((item) => item.code === language)!;
+  return (
+    <label className={'language-icon ' + className} title={`${t('language')}: ${current.label}`}>
+      <Globe2 size={21} strokeWidth={1.8} aria-hidden="true" />
+      <select
+        aria-label={t('language')}
+        value={language}
+        onChange={(event) => setLanguage(event.target.value as typeof language)}
+      >
+        {languages.map(({ code, label }) => (
+          <option key={code} value={code}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+export function BrandMark({ className = '' }: { className?: string }) {
+  return (
+    <img
+      className={'hamiya-mark ' + className}
+      src="/icon.svg"
+      width="40"
+      height="40"
+      alt=""
+      aria-hidden="true"
+    />
+  );
+}
 export function Money({ value }: { value: number | null | undefined }) {
   return (
     <span className="money">

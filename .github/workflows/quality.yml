@@ -21,3 +21,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - run: pnpm build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HAMIYA-web-preview
+          path: dist/
+          retention-days: 7

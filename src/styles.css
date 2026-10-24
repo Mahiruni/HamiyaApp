@@ -4106,7 +4106,7 @@
 
 @font-face {
   font-family: 'Hamiya Benaiah';
-  src: url('/fonts/Benaiah.ttf') format('truetype');
+  src: local('Benaiah');
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;

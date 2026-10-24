@@ -12,6 +12,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc -b",
+    "android:brand": "node scripts/apply-android-branding.mjs",
     "format": "prettier --write src tests vite.config.ts"
   },
   "dependencies": {
