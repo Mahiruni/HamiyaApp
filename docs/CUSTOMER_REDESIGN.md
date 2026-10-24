@@ -11,6 +11,6 @@ The shared mark has PWA PNG exports, five densities of Android legacy launcher i
 - TypeScript check passed.
 - 23 automated tests passed, covering existing authentication, navigation and database rules plus the new Android resource-copy integration.
 - 28 browser checks passed using isolated customer, catalogue, order and enquiry fixtures: all four customer screens at 320, 390, 768, 1024 and 1440 pixels; menu dismissal and resize behavior; product search/details/cart; activity filters; English, Amharic and Afaan Oromo; profile editing; and sign-out. No page errors or horizontal document overflow were recorded.
-- Browser checks used a portable bundle of the actual app source because this Windows host blocks the native Vite/Rolldown binding. The added GitHub Actions workflow runs the repository's production build on Linux.
+- Browser checks used a portable bundle of the actual app source because this Windows host blocks the native Vite/Rolldown binding. The production build passed in GitHub Actions on Linux. The existing App checks workflow now also saves the built web assets for review.
 
 Browser fixtures are test data and are never shipped in the app. No live customer, product, order or database records were changed. Physical-device Android testing and a newly signed APK/AAB are separate from this frontend validation. New translated interface labels should receive native-speaker review before release.
