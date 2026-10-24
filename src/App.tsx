@@ -26,7 +26,7 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { configured } from './api';
-import { CategoryCard, Empty } from './components';
+import { Empty } from './components';
 import { Cart, CatalogPage, OrdersPage } from './Commerce';
 import { languages } from './i18n';
 import { useApp } from './state';
