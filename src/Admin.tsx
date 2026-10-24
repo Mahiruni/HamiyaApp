@@ -57,6 +57,17 @@ export default function Admin() {
   const [request, setRequest] = useState<Enquiry | null>(null);
   const [busy, setBusy] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [telegramTesting, setTelegramTesting] = useState(false);
+  async function testTelegram() {
+    if (!supabase || telegramTesting) return;
+    setTelegramTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('hamiya-telegram-test', { body: {} });
+      if (error || !data?.ok) throw new Error(data?.detail || data?.error || error?.message || 'Telegram test failed');
+      toast('Telegram test delivered. Check your HAMIYA bot chat.');
+    } catch (error) { notifyError(error); }
+    finally { setTelegramTesting(false); }
+  }
   const [notifications, setNotifications] = useState<{ id: string; order_id: string; created_at: string }[]>([]);
   const [readIds, setReadIds] = useState<string[]>([]);
   async function loadNotifications() {
@@ -192,6 +203,7 @@ export default function Admin() {
         {notificationOpen && (
           <div className="panel admin-notification-list">
             <h3>Order notifications</h3>
+            {user?.role === 'admin' && <button className="button secondary" disabled={telegramTesting} onClick={() => void testTelegram()}>{telegramTesting ? 'Sending Telegram test…' : 'Send Telegram test'}</button>}
             {notifications.length === 0 && <p className="muted">No new orders yet.</p>}
             {notifications.map((n) => (
               <button key={n.id} className="admin-notification-item" onClick={() => void openNotification(n.id)}>
