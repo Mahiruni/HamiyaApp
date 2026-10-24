@@ -1023,8 +1023,56 @@ const extras: Record<Language, Record<string, string>> = {
     setupDraft: 'Beeksisa dhuunfummaa fi waliigaltee yeroo — ilaalcha dhaabbataa eega.',
   },
 };
+const experience: Record<Language, Record<string, string>> = {
+  en: {
+    skipContent: 'Skip to content',
+    menu: 'Main menu',
+    openMenu: 'Open menu',
+    customerPortal: 'YOUR HAMIYA WORKSPACE',
+    atGlance: 'AT A GLANCE',
+    businessDivisions: 'Business divisions',
+    listedProducts: 'Listed products',
+    inStockNow: 'In stock now',
+    cartItems: 'Items in your cart',
+    ordersShortcut: 'Follow your orders and enquiries.',
+    profileShortcut: 'Keep your business details up to date.',
+    supportShortcut: 'Connect with the Hamiya team.',
+    allActivity: 'All activity',
+  },
+  am: {
+    skipContent: 'ወደ ይዘት ይዝለሉ',
+    menu: 'ዋና ምናሌ',
+    openMenu: 'ምናሌ ክፈት',
+    customerPortal: 'የእርስዎ የሃሚያ የሥራ ቦታ',
+    atGlance: 'በአጭሩ',
+    businessDivisions: 'የንግድ ዘርፎች',
+    listedProducts: 'የተዘረዘሩ ምርቶች',
+    inStockNow: 'አሁን በክምችት ያሉ',
+    cartItems: 'በጋሪዎ ያሉ ዕቃዎች',
+    ordersShortcut: 'ትዕዛዞችዎን እና ጥያቄዎችዎን ይከታተሉ።',
+    profileShortcut: 'የንግድ መረጃዎን ያዘምኑ።',
+    supportShortcut: 'ከሃሚያ ቡድን ጋር ይገናኙ።',
+    allActivity: 'ሁሉም እንቅስቃሴዎች',
+  },
+  om: {
+    skipContent: 'Gara qabiyyeetti darbi',
+    menu: 'Baafata ijoo',
+    openMenu: 'Baafata bani',
+    customerPortal: 'BAKKA HOJII HAMIYA KEE',
+    atGlance: 'ILAALCHA GABAABAA',
+    businessDivisions: 'Dameewwan daldalaa',
+    listedProducts: 'Oomisha tarreeffame',
+    inStockNow: 'Amma kuusaa keessa',
+    cartItems: 'Meeshaalee gaarii kee keessa',
+    ordersShortcut: 'Ajajaa fi gaaffii kee hordofi.',
+    profileShortcut: 'Odeeffannoo daldala kee haaromsi.',
+    supportShortcut: 'Garee Hamiya waliin walqunnami.',
+    allActivity: 'Sochii hunda',
+  },
+};
 export const translate = (language: Language, key: string) =>
   dictionaries[language][key as TranslationKey] ||
   extras[language][key] ||
+  experience[language][key] ||
   en[key as TranslationKey] ||
   key;

@@ -2,6 +2,8 @@
 
 The workflow `.github/workflows/android-release.yml` builds the current React/Vite customer app into a Capacitor Android application, signs **both** APK and AAB with the same persistent release keystore, and verifies their signatures. The APK is for direct distribution; the AAB is for Google Play.
 
+The workflow applies the HAMIYA launcher resources after generating and syncing the native project. For manual native builds, run `pnpm android:brand` after Capacitor sync. See `resources/README.md` for the legacy, adaptive and themed icon assets.
+
 ## One-time secure setup
 
 1. Generate a persistent Android release keystore **on a trusted computer** (do not put the keystore or passwords in GitHub source files):

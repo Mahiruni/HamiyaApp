@@ -26,7 +26,7 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { configured } from './api';
-import { Empty } from './components';
+import { Badge, BrandMark, Empty } from './components';
 import { Cart, CatalogPage, OrdersPage } from './Commerce';
 import { languages } from './i18n';
 import { useApp } from './state';
@@ -75,6 +75,14 @@ export default function App() {
   ];
   const [drawer, setDrawer] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const closeOnDesktop = () => {
+      if (desktop.matches) setDrawer(false);
+    };
+    desktop.addEventListener('change', closeOnDesktop);
+    return () => desktop.removeEventListener('change', closeOnDesktop);
+  }, []);
   useEffect(() => {
     if (isStaff && view === 'dashboard' && root !== 'admin' && root !== 'account') {
       navigate('admin');
@@ -167,7 +175,7 @@ export default function App() {
       </div>
     );
   return (
-    <div className={isStaff ? "app admin-app-shell" : "app"}>
+    <div className={isStaff ? 'app admin-app-shell' : 'app'}>
       <a
         className="skip-link"
         href="#main"
@@ -176,14 +184,23 @@ export default function App() {
           document.getElementById('main')?.focus();
         }}
       >
-        {t('continue')}
+        {t('skipContent')}
       </a>
-      <aside ref={drawerRef} className={'sidebar ' + (drawer ? 'open' : '')}>
+      <aside
+        id="app-menu"
+        ref={drawerRef}
+        className={'sidebar ' + (drawer ? 'open' : '')}
+        aria-label={t('menu')}
+        role={drawer ? 'dialog' : undefined}
+        aria-modal={drawer ? true : undefined}
+      >
         <div className="sidebar-brand">
-          <button className="brand" aria-label="Hamiya" onClick={() => go(isStaff ? 'admin' : 'home')}>
-            <span className="brand-mark">
-              h<span />
-            </span>
+          <button
+            className="brand"
+            aria-label="Hamiya"
+            onClick={() => go(isStaff ? 'admin' : 'home')}
+          >
+            <BrandMark />
             <span className="brand-name">
               hamiya<small>INVESTMENT GROUP</small>
             </span>
@@ -198,36 +215,52 @@ export default function App() {
         </div>
         <div className="sidebar-divider" />
         <nav aria-label={t('home')}>
-          {(isStaff ? adminNavigation : navigation).map(({ route: destination, label, icon: Icon }) => (
-            <button
-              key={destination}
-              className={'nav-link ' + ((isStaff ? route === destination : root === destination) ? 'active' : '')}
-              onClick={() => go(destination)}
-            >
-              <Icon size={19} strokeWidth={1.7} />
-              {isStaff ? label : t(label)}
-              {root === destination && <span className="nav-active-dot" />}
-            </button>
-          ))}
+          {(isStaff ? adminNavigation : navigation).map(
+            ({ route: destination, label, icon: Icon }) => (
+              <button
+                key={destination}
+                aria-current={
+                  (isStaff ? route === destination : root === destination) ? 'page' : undefined
+                }
+                className={
+                  'nav-link ' +
+                  ((isStaff ? route === destination : root === destination) ? 'active' : '')
+                }
+                onClick={() => go(destination)}
+              >
+                <Icon size={19} strokeWidth={1.7} />
+                {isStaff ? label : t(label)}
+                {(isStaff ? route === destination : root === destination) && (
+                  <span className="nav-active-dot" />
+                )}
+              </button>
+            ),
+          )}
         </nav>
         {!isStaff && <div className="sidebar-section-label">{t('family')}</div>}
-        {!isStaff && <div className="sidebar-businesses">
-          {(
-            [
-              { key: 'food', icon: Wheat },
-              { key: 'coffee', icon: Coffee },
-              { key: 'vehicles', icon: CarFront },
-            ] as const
-          ).map(({ key, icon: Icon }) => (
-            <button key={key} onClick={() => go('catalog/' + key)}>
-              <span className={'business-dot ' + key}>
-                <Icon size={15} />
-              </span>
-              <span>{t(key + 'Brand')}</span>
-              <ChevronRight size={13} />
-            </button>
-          ))}
-        </div>}
+        {!isStaff && (
+          <div className="sidebar-businesses">
+            {(
+              [
+                { key: 'food', icon: Wheat },
+                { key: 'coffee', icon: Coffee },
+                { key: 'vehicles', icon: CarFront },
+              ] as const
+            ).map(({ key, icon: Icon }) => (
+              <button
+                key={key}
+                aria-current={route === 'catalog/' + key ? 'page' : undefined}
+                onClick={() => go('catalog/' + key)}
+              >
+                <span className={'business-dot ' + key}>
+                  <Icon size={15} />
+                </span>
+                <span>{t(key + 'Brand')}</span>
+                <ChevronRight size={13} />
+              </button>
+            ))}
+          </div>
+        )}
         <div className="sidebar-bottom">
           {user && user.role !== 'customer' && (
             <button
@@ -261,7 +294,9 @@ export default function App() {
           <div className="topbar-left">
             <button
               className="icon-button mobile-only"
-              aria-label={t('categories')}
+              aria-label={t('openMenu')}
+              aria-expanded={drawer}
+              aria-controls="app-menu"
               onClick={() => setDrawer(true)}
             >
               <Menu size={23} />
@@ -281,8 +316,11 @@ export default function App() {
                 )}
               </strong>
             </div>
-            <button className="mobile-wordmark" onClick={() => navigate(isStaff ? 'admin' : 'home')}>
-              hamiya<span>®</span>
+            <button
+              className="mobile-wordmark"
+              onClick={() => navigate(isStaff ? 'admin' : 'home')}
+            >
+              <BrandMark /> hamiya
             </button>
           </div>
           <div className="topbar-actions">
@@ -301,16 +339,18 @@ export default function App() {
               </select>
             </label>
             <span className="topbar-separator" />
-            {!isStaff && <button
-              className="icon-button cart-button"
-              aria-label={t('cart')}
-              onClick={() => setCartOpen(true)}
-            >
-              <ShoppingBag size={21} />
-              {cart.length > 0 && (
-                <span className="cart-count">{cart.reduce((a, b) => a + b.quantity, 0)}</span>
-              )}
-            </button>}
+            {!isStaff && (
+              <button
+                className="icon-button cart-button"
+                aria-label={t('cart')}
+                onClick={() => setCartOpen(true)}
+              >
+                <ShoppingBag size={21} />
+                {cart.length > 0 && (
+                  <span className="cart-count">{cart.reduce((a, b) => a + b.quantity, 0)}</span>
+                )}
+              </button>
+            )}
             <button
               className="topbar-user"
               onClick={() => navigate('account')}
@@ -363,18 +403,21 @@ export default function App() {
           </div>
         </footer>
       </div>
-      {!isStaff && <nav className="mobile-nav" aria-label={t('categories')} inert={drawer}>
-        {navigation.map(({ route: destination, label, icon: Icon }) => (
-          <button
-            key={destination}
-            className={root === destination ? 'active' : ''}
-            onClick={() => go(destination)}
-          >
-            <Icon size={21} strokeWidth={root === destination ? 2 : 1.7} />
-            <span>{t(label)}</span>
-          </button>
-        ))}
-      </nav>}
+      {!isStaff && (
+        <nav className="mobile-nav" aria-label={t('categories')} inert={drawer}>
+          {navigation.map(({ route: destination, label, icon: Icon }) => (
+            <button
+              key={destination}
+              aria-current={root === destination ? 'page' : undefined}
+              className={root === destination ? 'active' : ''}
+              onClick={() => go(destination)}
+            >
+              <Icon size={21} strokeWidth={root === destination ? 2 : 1.7} />
+              <span>{t(label)}</span>
+            </button>
+          ))}
+        </nav>
+      )}
       {!isStaff && cartOpen && <Cart />}
     </div>
   );
@@ -383,85 +426,167 @@ function EntryLoading() {
   const { t } = useApp();
   return (
     <div className="entry-loading" role="status">
+      <BrandMark />
       <strong>hamiya</strong>
       <span>{t('loading')}</span>
     </div>
   );
 }
 function Home() {
-  const { t, navigate, user, catalog, cart } = useApp();
+  const { t, navigate, user, catalog, cart, catalogLoading, catalogError } = useApp();
   const published = catalog.products.filter((product) => product.published);
-  const available = published.filter((product) => product.available_quantity > 0);
+  const available = published.filter(
+    (product) =>
+      product.available_quantity > 0 && ['available', 'low_stock'].includes(product.status),
+  );
   const divisions = [
-    { id: 'food', title: 'HAMIYA Food Processing', detail: 'Wholesale food and beverage products', icon: Wheat, count: published.filter((p) => p.category === 'food').length },
-    { id: 'coffee', title: 'Hawinet Coffee Export', detail: 'Ethiopian coffee and export enquiries', icon: Coffee, count: published.filter((p) => p.category === 'coffee').length },
-    { id: 'vehicles', title: 'Premium Car Import', detail: 'Vehicle sourcing and import enquiries', icon: CarFront, count: published.filter((p) => p.category === 'vehicles').length },
+    { id: 'food', icon: Wheat },
+    { id: 'coffee', icon: Coffee },
+    { id: 'vehicles', icon: CarFront },
   ] as const;
-  const verificationLabel = user?.verification === 'approved' ? 'Verified business' : user?.verification === 'submitted' || user?.verification === 'under_review' ? 'Verification in review' : 'Complete verification';
+  const metrics = [
+    { label: 'businessDivisions', value: '03' },
+    { label: 'listedProducts', value: published.length },
+    { label: 'inStockNow', value: available.length },
+    { label: 'cartItems', value: cart.reduce((sum, item) => sum + item.quantity, 0) },
+  ];
+  const shortcuts = [
+    { route: 'orders', title: 'orders', text: 'ordersShortcut', icon: ClipboardList },
+    { route: 'account', title: 'profile', text: 'profileShortcut', icon: UserRound },
+    { route: 'help', title: 'help', text: 'supportShortcut', icon: CircleHelp },
+  ];
   return (
     <div className="home-page">
-      <div className="home-intro">
-        <div>
-          <span className="intro-dot" />
-          {t(user ? 'welcomeBack' : 'welcome')}
-          {user && `, ${user.profile.full_name?.split(' ')[0]}`}
-        </div>
-        <span className="intro-location">
-          {t('country')} <span>·</span> ETB
-        </span>
-      </div>
-      <section className="hamiya-dashboard" aria-label="HAMIYA customer dashboard">
+      <section className="hamiya-dashboard" aria-label={t('home')}>
         <div className="hamiya-dash-head">
           <div className="hamiya-dash-heading">
-            <span className="hamiya-dash-kicker"><span className="hamiya-live-dot" /> HAMIYA CUSTOMER PORTAL</span>
-            <h1>{user ? `Welcome back, ${user.profile.full_name?.split(' ')[0] || 'partner'}.` : 'Welcome to HAMIYA.'}</h1>
-            <p>{user ? 'Everything your business needs, in one place. Explore products, place orders and manage your account.' : 'Your direct connection to HAMIYA Investment Group. Discover products across our three businesses.'}</p>
+            <span className="hamiya-dash-kicker">
+              <span className="hamiya-live-dot" />
+              {t('customerPortal')}
+            </span>
+            <h1>
+              {t(user ? 'welcomeBack' : 'welcome')}
+              {user?.profile.full_name ? `, ${user.profile.full_name.split(' ')[0]}.` : '.'}
+            </h1>
+            <p>{t('businessHomeText')}</p>
           </div>
-          <div className="hamiya-dash-date"><Building2 size={17} /><span>HAMIYA Investment Group</span></div>
+          <span className="hamiya-dash-date">
+            <Globe2 size={16} />
+            {t('country')}
+            <span>·</span>ETB
+          </span>
         </div>
         <div className="hamiya-dash-grid">
           <div className="hamiya-dash-main">
             <div className="hamiya-dash-main-top">
-              <span className="hamiya-dash-overline">YOUR BUSINESS, CONNECTED</span>
-              <span className="hamiya-dash-mark" aria-hidden="true">H.</span>
+              <span className="hamiya-dash-overline">{t('eyebrow')}</span>
+              <BrandMark />
             </div>
-            <h2>Discover. Order.<br /><em>Grow together.</em></h2>
-            <p>Food processing, Ethiopian coffee exports and premium vehicles — one trusted business partner.</p>
+            <h2>
+              {t('heroTitle')}
+              <br />
+              <em>{t('heroAccent')}</em>
+            </h2>
+            <p>{t('heroText')}</p>
             <div className="hamiya-dash-actions">
-              <button className="hamiya-dash-action-primary" onClick={() => navigate('catalog')}>Explore products <ArrowUpRight size={18}/></button>
-              <button className="hamiya-dash-action-secondary" onClick={() => navigate(user ? 'orders' : 'account')}>{user ? 'My orders' : 'Create account'} <ArrowRight size={17}/></button>
+              <button className="hamiya-dash-action-primary" onClick={() => navigate('catalog')}>
+                {t('explore')}
+                <ArrowUpRight size={18} />
+              </button>
+              <button
+                className="hamiya-dash-action-secondary"
+                onClick={() => navigate(user ? 'orders' : 'account')}
+              >
+                {t(user ? 'orders' : 'createAccount')}
+                <ArrowRight size={17} />
+              </button>
             </div>
-            <div className="hamiya-dash-main-bottom"><span>HAMIYA INVESTMENT GROUP</span><span>ETHIOPIA · ETB</span></div>
+            <div className="hamiya-dash-main-bottom">
+              <span>HAMIYA INVESTMENT GROUP</span>
+              <span>{t('country')} · ETB</span>
+            </div>
           </div>
           <div className="hamiya-dash-side">
-            <div className="hamiya-dash-side-label"><span>AT A GLANCE</span><LayoutGrid size={17}/></div>
-            <div className="hamiya-dash-metrics">
-              <div><strong>{divisions.length.toString().padStart(2,'0')}</strong><span>Business divisions</span></div>
-              <div><strong>{published.length}</strong><span>Listed products</span></div>
-              <div><strong>{available.length}</strong><span>In stock now</span></div>
-              <div><strong>{cart.reduce((sum,item) => sum + item.quantity,0)}</strong><span>Items in your cart</span></div>
+            <div className="hamiya-dash-side-label">
+              <span>{t('atGlance')}</span>
+              <LayoutGrid size={17} />
             </div>
+            <div className="hamiya-dash-metrics" aria-busy={catalogLoading}>
+              {metrics.map(({ label, value }) => (
+                <div key={label}>
+                  <strong>
+                    {catalogLoading && ['listedProducts', 'inStockNow'].includes(label)
+                      ? '—'
+                      : value}
+                  </strong>
+                  <span>{t(label)}</span>
+                </div>
+              ))}
+            </div>
+            {catalogError && (
+              <p className="dashboard-data-note" role="status">
+                {t('cached')}
+              </p>
+            )}
             <button className="hamiya-dash-status" onClick={() => navigate('account')}>
-              <ShieldCheck size={19}/>
-              <span><strong>{user ? verificationLabel : 'Secure customer registration'}</strong><small>{user ? 'Manage your business profile' : 'Get started with a verified account'}</small></span>
-              <ChevronRight size={17}/>
+              <ShieldCheck size={21} />
+              <span>
+                <strong>{t('profile')}</strong>
+                {user ? <Badge status={user.verification} /> : <small>{t('createAccount')}</small>}
+              </span>
+              <ChevronRight size={17} />
             </button>
           </div>
         </div>
         <div className="hamiya-dash-section-heading">
-          <div><span className="hamiya-dash-overline">EXPLORE HAMIYA</span><h2>Our business divisions</h2></div>
-          <button onClick={() => navigate('catalog')}>Browse catalog <ArrowRight size={16}/></button>
+          <div>
+            <span className="hamiya-dash-overline">{t('family')}</span>
+            <h2>{t('ourBusinesses')}</h2>
+          </div>
+          <button onClick={() => navigate('catalog')}>
+            {t('viewAll')}
+            <ArrowRight size={16} />
+          </button>
         </div>
         <div className="hamiya-division-grid">
-          {divisions.map(({ id, title, detail, icon: Icon, count }, index) => (
-            <button className="hamiya-division" key={id} onClick={() => navigate('catalog/' + id)}>
-              <div className="hamiya-division-top"><span className="hamiya-division-icon"><Icon size={23} strokeWidth={1.6}/></span><ArrowUpRight size={19}/></div>
-              <span className="hamiya-division-index">0{index + 1} / HAMIYA GROUP</span>
-              <strong>{title}</strong><small>{detail}</small>
-              <span className="hamiya-division-bottom">{count ? `${count} listed products` : 'Explore division'} <ArrowRight size={15}/></span>
+          {divisions.map(({ id, icon: Icon }, index) => (
+            <button
+              className={'hamiya-division division-' + id}
+              key={id}
+              onClick={() => navigate('catalog/' + id)}
+            >
+              <div className="hamiya-division-top">
+                <span className="hamiya-division-icon">
+                  <Icon size={25} strokeWidth={1.6} />
+                </span>
+                <span className="hamiya-division-index">0{index + 1}</span>
+              </div>
+              <span className="division-art" aria-hidden="true">
+                <Icon strokeWidth={0.65} />
+              </span>
+              <strong>{t(id + 'Brand')}</strong>
+              <small>{t(id + 'Desc')}</small>
+              <span className="hamiya-division-bottom">
+                {t(id)}
+                <ArrowUpRight size={18} />
+              </span>
             </button>
           ))}
         </div>
+      </section>
+      <section className="customer-shortcuts" aria-label={t('workspace')}>
+        {shortcuts.map(({ route, title, text, icon: Icon }) => (
+          <button key={route} onClick={() => navigate(route)}>
+            <span className="shortcut-icon">
+              <Icon size={21} strokeWidth={1.7} />
+            </span>
+            <span>
+              <strong>{t(title)}</strong>
+              <small>{t(text)}</small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+        ))}
       </section>
       <section className="how-section">
         <div className="section-heading">
@@ -469,7 +594,7 @@ function Home() {
             <h2>{t('howWorks')}</h2>
             <p>{t('howIntro')}</p>
           </div>
-          <span className="how-flower">✳</span>
+          <ShieldCheck size={26} strokeWidth={1.2} />
         </div>
         <div className="how-grid">
           {[
@@ -479,7 +604,7 @@ function Home() {
           ].map(({ key, icon: Icon }, i) => (
             <div className="how-step" key={key}>
               <span className="how-icon">
-                <Icon size={23} strokeWidth={1.4} />
+                <Icon size={23} strokeWidth={1.6} />
               </span>
               <div>
                 <small>0{i + 1}</small>
@@ -492,7 +617,7 @@ function Home() {
       </section>
       <section className="local-banner">
         <span className="local-banner-icon">
-          <Globe2 size={36} strokeWidth={1} />
+          <Globe2 size={32} strokeWidth={1.2} />
         </span>
         <div>
           <span className="eyebrow">{t('localFirst')}</span>
@@ -501,9 +626,9 @@ function Home() {
         <button
           className="icon-button"
           onClick={() => navigate('account')}
-          aria-label={t('createAccount')}
+          aria-label={t('account')}
         >
-          <ArrowUpRight size={25} />
+          <ArrowUpRight size={23} />
         </button>
       </section>
     </div>

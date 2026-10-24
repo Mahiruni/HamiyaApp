@@ -58,6 +58,7 @@ jobs:
         run: |
           pnpm exec cap add android
           pnpm exec cap sync android
+          pnpm android:brand
 
       - name: Configure release signing
         env:
