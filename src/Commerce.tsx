@@ -397,6 +397,7 @@ export function Cart() {
       !p ||
       p.price_cents !== item.price_cents ||
       p.sales_unit !== item.sales_unit ||
+      item.quantity < 20 ||
       item.quantity > p.available_quantity ||
       !['available', 'low_stock'].includes(p.status)
     );
@@ -405,7 +406,7 @@ export function Cart() {
   const fee = fulfilment === 'delivery' ? catalog.settings.delivery_fee_cents || 0 : 0;
   function setCartQuantity(id: string, quantity: number) {
     const p = catalog.products.find((product) => product.id === id);
-    if (!p || !Number.isSafeInteger(quantity) || quantity < 1) return;
+    if (!p || !Number.isSafeInteger(quantity) || quantity < 20) return;
     setCart(cart.map((item) => item.id === id ? { ...item, quantity: Math.min(quantity, Math.max(1, p.available_quantity)) } : item));
     key.current = crypto.randomUUID();
   }
@@ -416,7 +417,7 @@ export function Cart() {
         item.id === id
           ? {
               ...item,
-              quantity: Math.max(1, Math.min(p?.available_quantity || 1, item.quantity + amount)),
+              quantity: Math.max(20, Math.min(p?.available_quantity || 20, item.quantity + amount)),
             }
           : item,
       ),
@@ -489,7 +490,7 @@ export function Cart() {
                     <button
                       aria-label={t('remove')}
                       onClick={() => adjust(item.id, -1)}
-                      disabled={busy || item.quantity <= 1}
+                      disabled={busy || item.quantity <= 20}
                     >
                       <Minus size={13} />
                     </button>
@@ -497,8 +498,8 @@ export function Cart() {
                       className="cart-quantity-input"
                       type="number"
                       inputMode="numeric"
-                      min={1}
-                      max={catalog.products.find((p) => p.id === item.id)?.available_quantity || 1}
+                      min={20}
+                      max={catalog.products.find((p) => p.id === item.id)?.available_quantity || 20}
                       step={1}
                       aria-label={t('quantity') + ' · ' + item.name}
                       value={item.quantity}
