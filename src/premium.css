@@ -35,6 +35,57 @@ textarea:focus-visible {
   flex-shrink: 0;
   border-radius: 12px;
 }
+.language-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border: 1px solid #dce6eb;
+  border-radius: 12px;
+  background: #f7fafb;
+  color: #31576b;
+  cursor: pointer;
+}
+.language-icon:hover {
+  background: #eaf1f5;
+}
+.language-icon:focus-within {
+  outline: 3px solid #6d9fb9;
+  outline-offset: 4px;
+}
+.language-icon > select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  appearance: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+.menu-toggle,
+.menu-close {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border: 1px solid #dce6eb;
+  border-radius: 12px;
+  background: #f7fafb;
+  color: #193b4d;
+}
+.menu-account {
+  display: none;
+}
 .app:not(.admin-app-shell) {
   background: var(--hig-page);
   color: var(--hig-ink);
@@ -127,10 +178,6 @@ textarea:focus-visible {
   width: 42px;
   height: 42px;
   background: #e6eef2;
-}
-.app:not(.admin-app-shell) .language-select select {
-  min-height: 44px;
-  font-size: 12px;
 }
 .app:not(.admin-app-shell) .home-page,
 .app:not(.admin-app-shell) .catalog-page,
@@ -908,9 +955,107 @@ textarea:focus-visible {
     padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   }
   .app:not(.admin-app-shell) .sidebar {
-    width: min(300px, calc(100vw - 32px));
-    padding-top: calc(27px + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    width: min(320px, calc(100vw - 32px));
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 18px
+      calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .sidebar .sidebar-brand {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 2;
+    background: #fff;
+    flex-shrink: 0;
+    gap: 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e4ecf0;
+  }
+  .sidebar .brand {
+    min-width: 0;
+    padding: 0;
+    gap: 10px;
+  }
+  .sidebar .brand-name {
+    font-size: 27px;
+  }
+  .sidebar .brand-name > small {
+    font-size: 6px;
+    letter-spacing: 1.4px;
+  }
+  .sidebar .hamiya-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  .sidebar .menu-close {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .app:not(.admin-app-shell) .sidebar-divider {
+    display: none;
+  }
+  .menu-account {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 11px;
+    width: 100%;
+    margin: 18px 0 22px;
+    padding: 14px 12px;
+    border: 1px solid #dfe9ef;
+    border-radius: 14px;
+    background: #f0f5f8;
+    text-align: start;
+  }
+  .menu-account:hover {
+    background: #e7eff4;
+  }
+  .menu-avatar {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #193b4d;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 650;
+  }
+  .menu-account-details {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+  }
+  .menu-account-details strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .menu-account-details small {
+    color: #58717f;
+    font-size: 11px;
+  }
+  .menu-account > svg {
+    flex-shrink: 0;
+    color: #58717f;
+  }
+  .app:not(.admin-app-shell) .sidebar nav {
+    gap: 7px;
+  }
+  .app:not(.admin-app-shell) .sidebar nav .nav-link {
+    min-height: 50px;
+  }
+  .app:not(.admin-app-shell) .sidebar-section-label {
+    margin: 27px 14px 12px;
+  }
+  .app:not(.admin-app-shell) .sidebar-bottom {
+    padding-top: 20px;
+  }
+  .app:not(.admin-app-shell) .drawer-backdrop {
+    background: #102b406e;
+    backdrop-filter: blur(3px);
   }
   .app:not(.admin-app-shell) .topbar {
     height: auto;
@@ -979,14 +1124,8 @@ textarea:focus-visible {
   .app:not(.admin-app-shell) .topbar-actions {
     gap: 6px;
   }
-  .app:not(.admin-app-shell) .topbar-separator,
-  .app:not(.admin-app-shell) .topbar .language-select > svg {
+  .app:not(.admin-app-shell) .topbar-separator {
     display: none;
-  }
-  .app:not(.admin-app-shell) .language-select select {
-    max-width: 84px;
-    font-size: 11px;
-    padding-right: 14px;
   }
   .app:not(.admin-app-shell) .hamiya-dash-grid {
     grid-template-columns: minmax(0, 1fr);

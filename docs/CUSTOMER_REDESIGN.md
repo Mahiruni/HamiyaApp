@@ -14,3 +14,9 @@ The shared mark has PWA PNG exports, five densities of Android legacy launcher i
 - Browser checks used a portable bundle of the actual app source because this Windows host blocks the native Vite/Rolldown binding. The production build passed in GitHub Actions on Linux. The existing App checks workflow now also saves the built web assets for review.
 
 Browser fixtures are test data and are never shipped in the app. No live customer, product, order or database records were changed. Physical-device Android testing and a newly signed APK/AAB are separate from this frontend validation. New translated interface labels should receive native-speaker review before release.
+
+## Menu and language control follow-up
+
+The hamburger control now has a 44 px touch target and a matching close icon. The mobile drawer includes the customer's profile shortcut, keeps its close control visible when scrolling, and closes on route changes. Keyboard focus stays in the open drawer and returns to the hamburger button when dismissed.
+
+One shared globe-icon language selector is used in the app header, sign-in screens and standalone information pages. It opens the native language picker without displaying a language name or dropdown arrow in the header. English, Amharic and Afaan Oromo remain available. Follow-up verification passed 32 browser checks, including the actual picker interaction and keyboard focus behavior, with no page errors or document overflow.

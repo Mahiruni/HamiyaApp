@@ -26,9 +26,8 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { configured } from './api';
-import { Badge, BrandMark, Empty } from './components';
+import { Badge, BrandMark, Empty, LanguageSelector } from './components';
 import { Cart, CatalogPage, OrdersPage } from './Commerce';
-import { languages } from './i18n';
 import { useApp } from './state';
 import { appView } from './navigation';
 const Account = lazy(() => import('./Account'));
@@ -47,7 +46,6 @@ export default function App() {
     user,
     authLoading,
     language,
-    setLanguage,
     cart,
     setCartOpen,
     cartOpen,
@@ -75,6 +73,7 @@ export default function App() {
   ];
   const [drawer, setDrawer] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
+  useEffect(() => setDrawer(false), [route]);
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 1024px)');
     const closeOnDesktop = () => {
@@ -99,7 +98,7 @@ export default function App() {
     const previousFocus = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    drawerRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
+    drawerRef.current?.querySelector<HTMLButtonElement>('.menu-close')?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setDrawer(false);
       if (event.key !== 'Tab') return;
@@ -120,7 +119,7 @@ export default function App() {
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previousOverflow;
-      previousFocus?.focus();
+      previousFocus?.focus({ preventScroll: true });
     };
   }, [drawer, standalone]);
   function go(value: string) {
@@ -139,20 +138,7 @@ export default function App() {
               <ArrowLeft size={18} />
               {t(user ? 'account' : 'backToSignIn')}
             </button>
-            <label className="language-select">
-              <Globe2 size={16} />
-              <select
-                aria-label={t('language')}
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as typeof language)}
-              >
-                {languages.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <LanguageSelector />
           </header>
         )}
         {!online && (
@@ -206,14 +192,26 @@ export default function App() {
             </span>
           </button>
           <button
-            className="icon-button mobile-only"
+            className="icon-button menu-close mobile-only"
             aria-label={t('close')}
             onClick={() => setDrawer(false)}
           >
-            <X size={20} />
+            <X size={21} strokeWidth={1.8} aria-hidden="true" />
           </button>
         </div>
         <div className="sidebar-divider" />
+        {user && (
+          <button className="menu-account" onClick={() => go('account')} aria-label={t('account')}>
+            <span className="menu-avatar">{user.profile.full_name?.slice(0, 1) || 'H'}</span>
+            <span className="menu-account-details">
+              <strong>
+                {user.profile.full_name || user.profile.business_name || t('account')}
+              </strong>
+              <small>{t('profile')}</small>
+            </span>
+            <ChevronRight size={17} aria-hidden="true" />
+          </button>
+        )}
         <nav aria-label={t('home')}>
           {(isStaff ? adminNavigation : navigation).map(
             ({ route: destination, label, icon: Icon }) => (
@@ -293,13 +291,14 @@ export default function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button
-              className="icon-button mobile-only"
+              className="icon-button menu-toggle mobile-only"
               aria-label={t('openMenu')}
               aria-expanded={drawer}
               aria-controls="app-menu"
+              aria-haspopup="dialog"
               onClick={() => setDrawer(true)}
             >
-              <Menu size={23} />
+              <Menu size={22} strokeWidth={1.8} aria-hidden="true" />
             </button>
             <div className="breadcrumb">
               <span>Hamiya</span>
@@ -324,20 +323,7 @@ export default function App() {
             </button>
           </div>
           <div className="topbar-actions">
-            <label className="language-select">
-              <Globe2 size={16} />
-              <select
-                aria-label={t('language')}
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as typeof language)}
-              >
-                {languages.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <LanguageSelector />
             <span className="topbar-separator" />
             {!isStaff && (
               <button
