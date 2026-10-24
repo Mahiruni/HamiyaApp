@@ -302,6 +302,8 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
                 type="number"
                 min={1}
                 max={product.available_quantity || 1}
+                step={1}
+                inputMode="numeric"
                 value={quantity}
                 onChange={(e) =>
                   setQuantity(
@@ -397,6 +399,12 @@ export function Cart() {
   });
   const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.price_cents, 0);
   const fee = fulfilment === 'delivery' ? catalog.settings.delivery_fee_cents || 0 : 0;
+  function setCartQuantity(id: string, quantity: number) {
+    const p = catalog.products.find((product) => product.id === id);
+    if (!p || !Number.isSafeInteger(quantity) || quantity < 1) return;
+    setCart(cart.map((item) => item.id === id ? { ...item, quantity: Math.min(quantity, Math.max(1, p.available_quantity)) } : item));
+    key.current = crypto.randomUUID();
+  }
   function adjust(id: string, amount: number) {
     const p = catalog.products.find((p) => p.id === id);
     setCart(
@@ -481,7 +489,20 @@ export function Cart() {
                     >
                       <Minus size={13} />
                     </button>
-                    <span>{item.quantity}</span>
+                    <input
+                      className="cart-quantity-input"
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={catalog.products.find((p) => p.id === item.id)?.available_quantity || 1}
+                      step={1}
+                      aria-label={t('quantity') + ' · ' + item.name}
+                      value={item.quantity}
+                      disabled={busy}
+                      onChange={(event) => {
+                        if (event.target.value !== '') setCartQuantity(item.id, Number(event.target.value));
+                      }}
+                    />
                     <button
                       aria-label={t('quantity')}
                       onClick={() => adjust(item.id, 1)}
