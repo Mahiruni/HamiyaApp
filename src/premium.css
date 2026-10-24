@@ -253,30 +253,30 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .food-auth-logo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:24px}
 
 /* Standard application header: clear brand context, balanced controls and Android-safe spacing. */
-.app .topbar{min-height:74px;height:auto;padding:0 clamp(20px,3vw,42px);gap:24px}
-.app .topbar-left{min-width:0;flex:1;gap:14px}
-.topbar-context{display:flex;align-items:center;gap:11px;min-width:0}
-.topbar-context .hamiya-mark{width:36px;height:36px}
+.app .topbar{min-height:90px;height:auto;padding:0 clamp(24px,3.4vw,48px);gap:28px}
+.app .topbar-left{min-width:0;flex:1;gap:16px}
+.topbar-context{display:flex;align-items:center;gap:14px;min-width:0}
+.topbar-context .hamiya-mark{width:48px;height:48px}
 .topbar-context .hamiya-mark img{border-radius:10px;background:#fff;border:1px solid #e2e4df}
-.topbar-context-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
-.topbar-context-copy>span{color:#057437;font-size:8px;font-weight:800;letter-spacing:.16em;line-height:1;white-space:nowrap}
-.topbar-context-copy>strong{color:#111;font-size:16px;font-weight:800;letter-spacing:-.02em;line-height:1.1;white-space:nowrap}
+.topbar-context-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
+.topbar-context-copy>span{color:#057437;font-size:9px;font-weight:800;letter-spacing:.18em;line-height:1;white-space:nowrap}
+.topbar-context-copy>strong{color:#111;font-size:19px;font-weight:800;letter-spacing:-.025em;line-height:1.1;white-space:nowrap}
 .app .mobile-wordmark{display:none!important;align-items:center;gap:8px!important;min-width:0;padding:0;text-align:left}
-.mobile-wordmark .hamiya-mark{width:30px;height:30px}
+.mobile-wordmark .hamiya-mark{width:38px;height:38px}
 .mobile-wordmark-copy{display:flex!important;flex-direction:column;align-items:flex-start;gap:3px!important;min-width:0;line-height:1}
-.mobile-wordmark-copy strong{color:#111;font-size:14px;letter-spacing:.08em;line-height:1}
-.mobile-wordmark-copy small{color:#057437;font-size:7px!important;font-weight:800;letter-spacing:.1em;line-height:1}
-.app .topbar-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.app .connection-pill{height:40px;padding:0 12px;font-size:10px;font-weight:700}
-.app .topbar-language{height:40px;min-width:40px;padding:0 10px;border:1px solid #e2e4df;border-radius:12px;background:#fff;color:#37423a}
-.app .topbar-language select{min-height:38px;max-width:108px;color:#111;font-size:10px;font-weight:700}
-.app .topbar-separator{height:28px;background:#dfe3dd}
-.app .topbar .icon-button.cart-button{width:40px;height:40px;min-width:40px;border:1px solid #e2e4df;border-radius:12px;background:#fff;color:#111}
+.mobile-wordmark-copy strong{color:#111;font-size:16px;letter-spacing:.09em;line-height:1}
+.mobile-wordmark-copy small{color:#057437;font-size:8px!important;font-weight:800;letter-spacing:.12em;line-height:1}
+.app .topbar-actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.app .connection-pill{height:44px;padding:0 14px;font-size:11px;font-weight:700}
+.app .topbar-language{height:44px;min-width:44px;padding:0 12px;border:1px solid #e2e4df;border-radius:13px;background:#fff;color:#37423a}
+.app .topbar-language select{min-height:42px;max-width:116px;color:#111;font-size:11px;font-weight:700}
+.app .topbar-separator{height:32px;background:#dfe3dd}
+.app .topbar .icon-button.cart-button{width:44px;height:44px;min-width:44px;border:1px solid #e2e4df;border-radius:13px;background:#fff;color:#111}
 .app .topbar .icon-button.cart-button:hover{background:#f0f3ef}
 .app .cart-count{top:-4px;right:-4px;background:#e71d1b;border-color:#fff;font-size:8px;font-weight:800}
-.app .topbar-user{display:inline-flex;align-items:center;gap:8px;width:auto;min-width:0;height:44px;padding:4px 10px 4px 5px;border:1px solid #e2e4df;border-radius:13px;background:#fff;color:#111;box-shadow:0 3px 10px rgb(17 17 17 / 5%)}
+.app .topbar-user{display:inline-flex;align-items:center;gap:9px;width:auto;min-width:0;height:50px;padding:5px 12px 5px 6px;border:1px solid #e2e4df;border-radius:15px;background:#fff;color:#111;box-shadow:0 3px 10px rgb(17 17 17 / 5%)}
 .app .topbar-user:hover{background:#f0f3ef}
-.topbar-user-avatar{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:#111;color:#fff;font-size:12px;font-weight:850}
+.topbar-user-avatar{display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border-radius:11px;background:#111;color:#fff;font-size:13px;font-weight:850}
 .topbar-user-copy{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;line-height:1}
 .topbar-user-copy small{color:#7a847d;font-size:7px;font-weight:800;letter-spacing:.1em;line-height:1;text-transform:uppercase}
 .topbar-user-copy strong{max-width:92px;overflow:hidden;color:#111;font-size:11px;font-weight:800;line-height:1.1;text-overflow:ellipsis;white-space:nowrap}
@@ -286,20 +286,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .app .mobile-wordmark{display:flex!important}
 }
 @media(max-width:767px){
-  .app .topbar{min-height:calc(68px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 12px 0;gap:8px}
+  .app .topbar{min-height:calc(78px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 14px 0;gap:10px}
   .app .topbar-left{gap:7px}
   .app .topbar-actions{gap:5px}
-  .app .topbar .icon-button.mobile-only{width:40px;min-width:40px;height:40px;border:1px solid #e2e4df;border-radius:12px;background:#fff;color:#111}
+  .app .topbar .icon-button.mobile-only{width:44px;min-width:44px;height:44px;border:1px solid #e2e4df;border-radius:13px;background:#fff;color:#111}
   .app .topbar .icon-button.mobile-only:hover{background:#f0f3ef}
-  .app .topbar-language{width:40px;min-width:40px;justify-content:center;padding:0;border-radius:12px}
-  .app .topbar-language select{width:40px;max-width:40px;padding:0;opacity:0}
-  .app .topbar .icon-button.cart-button{width:40px;min-width:40px}
-  .app .topbar-user{width:40px;height:40px;padding:3px;border-radius:12px}
+  .app .topbar-language{width:44px;min-width:44px;justify-content:center;padding:0;border-radius:13px}
+  .app .topbar-language select{width:44px;max-width:44px;padding:0;opacity:0}
+  .app .topbar .icon-button.cart-button{width:44px;min-width:44px;height:44px}
+  .app .topbar-user{width:44px;height:44px;padding:2px;border-radius:13px}
   .topbar-user-copy,.topbar-user-chevron{display:none}
-  .topbar-user-avatar{width:34px;height:34px;flex-basis:34px;border-radius:9px}
+  .topbar-user-avatar{width:38px;height:38px;flex-basis:38px;border-radius:10px}
 }
 @media(max-width:370px){
-  .app .topbar{padding-left:8px;padding-right:8px}
-  .mobile-wordmark-copy strong{font-size:13px}
-  .mobile-wordmark-copy small{font-size:6px!important}
+  .app .topbar{padding-left:9px;padding-right:9px}
+  .mobile-wordmark-copy strong{font-size:14px}
+  .mobile-wordmark-copy small{font-size:7px!important}
 }
