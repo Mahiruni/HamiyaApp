@@ -751,6 +751,30 @@ function StockEditor({
   const { t, notifyError, toast, online } = useApp();
   const [busy, setBusy] = useState(false);
   const key = useRef(crypto.randomUUID());
+  const [targetStock, setTargetStock] = useState(String(product.stock));
+  const [reason, setReason] = useState('Inventory count correction');
+  const delta = Number(targetStock) - product.stock;
+  const validTarget = /^\\d+$/.test(targetStock) && Number.isSafeInteger(Number(targetStock)) && Number(targetStock) <= 10000000 && Number(targetStock) >= product.reserved;
+  async function saveQuantity(e: FormEvent) {
+    e.preventDefault();
+    if (!validTarget || delta === 0) return;
+    setBusy(true);
+    try {
+      await rpc('admin_stock', {
+        id: product.id,
+        client_key: key.current,
+        operation: delta > 0 ? 'add' : 'remove',
+        quantity: Math.abs(delta),
+        reason: reason.trim() || 'Inventory count correction',
+      });
+      await onSaved();
+      toast(t('saved'));
+    } catch (error) {
+      notifyError(error);
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
     <Dialog title={t('manageStock') + ' · ' + product.name} onClose={onClose}>
       <div className="stock-summary">
@@ -763,6 +787,13 @@ function StockEditor({
           <strong>{product.reserved}</strong>
         </div>
       </div>
+      <form onSubmit={saveQuantity} className="stock-direct-edit">
+        <Field label="Set total stock (cartons)" type="number" min={product.reserved} max={10000000} step={1} required value={targetStock} onChange={(e) => setTargetStock(e.target.value)} />
+        <Field label={t('reason')} value={reason} maxLength={500} required onChange={(e) => setReason(e.target.value)} />
+        <p className="muted small-text">{validTarget ? (delta === 0 ? 'No stock change' : `${delta > 0 ? '+' : ''}${delta} cartons will be recorded in inventory history.`) : `Enter a whole number of at least ${product.reserved} reserved cartons.`}</p>
+        <button className="button primary full" disabled={busy || !online || !validTarget || delta === 0}>Save stock quantity</button>
+      </form>
+      <div className="notice">Or record a separate stock movement below.</div>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
