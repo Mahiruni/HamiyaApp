@@ -4167,3 +4167,57 @@ html[lang='am'] textarea {
 .telegram-preference-row small{color:#617582}
 .telegram-preference-row input{width:20px;height:20px;accent-color:#204c64;flex-shrink:0}
 @media(max-width:480px){.telegram-control-panel{padding:16px}.telegram-control-heading h2{font-size:1.12rem}}
+
+
+/* HAMIYA customer dashboard — premium 2026 experience */
+@layer components {
+.hamiya-dashboard{display:grid;gap:23px;margin-bottom:36px}
+.hamiya-dash-head{display:flex;align-items:end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.hamiya-dash-heading{max-width:660px}
+.hamiya-dash-kicker,.hamiya-dash-overline{font-size:10px;letter-spacing:.15em;font-weight:800;color:#55758a}
+.hamiya-dash-kicker{display:flex;align-items:center;gap:9px}
+.hamiya-live-dot{height:8px;width:8px;border-radius:50%;background:#55a4a2;box-shadow:0 0 0 4px #e3f1ef}
+.hamiya-dash-heading h1{font-size:clamp(28px,3.3vw,43px);font-weight:730;letter-spacing:-.055em;margin:10px 0 7px;color:#142f42}
+.hamiya-dash-heading p{font-size:13px;max-width:580px;line-height:1.7}
+.hamiya-dash-date{display:flex;align-items:center;gap:9px;color:#59717f;font-size:12px;background:#fff;border:1px solid #e3eaee;padding:11px 14px;border-radius:100px}
+.hamiya-dash-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,.9fr);gap:15px}
+.hamiya-dash-main{background:linear-gradient(130deg,#102d40 0%,#1b4359 65%,#365d6c 100%);border-radius:22px;min-height:320px;padding:30px 32px 21px;position:relative;overflow:hidden;display:flex;flex-direction:column;color:#fff;isolation:isolate}
+.hamiya-dash-main:after{content:"";position:absolute;right:-115px;top:-170px;width:440px;height:440px;border:1px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 65px #ffffff06,0 0 0 130px #ffffff06;z-index:-1}
+.hamiya-dash-main-top,.hamiya-dash-main-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hamiya-dash-overline,.hamiya-dash-main-top{color:#b9d2de}
+.hamiya-dash-mark{font-size:32px;line-height:1;font-weight:850;letter-spacing:-.12em;color:#d9e8ed}
+.hamiya-dash-main h2{font-size:clamp(31px,3.3vw,47px);font-weight:730;letter-spacing:-.06em;line-height:1.08;margin:17px 0 12px;color:#fff}
+.hamiya-dash-main h2 em{color:#b9d5de;font-style:normal}
+.hamiya-dash-main>p{max-width:380px;color:#d4e2e8;font-size:13px;line-height:1.75}
+.hamiya-dash-actions{display:flex;flex-wrap:wrap;gap:11px;margin-top:22px}
+.hamiya-dash-actions button{display:flex;align-items:center;gap:13px;justify-content:center;border-radius:11px;padding:12px 16px;font-size:12px;font-weight:750;min-height:44px}
+.hamiya-dash-action-primary{background:#fff;color:#18394c}
+.hamiya-dash-action-secondary{color:#fff;border:1px solid #ffffff55}
+.hamiya-dash-main-bottom{font-size:9px;letter-spacing:.13em;color:#a9c1cd;margin-top:auto;padding-top:26px}
+.hamiya-dash-side{background:#fff;border:1px solid #e1e9ee;border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:17px}
+.hamiya-dash-side-label{display:flex;justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.14em;font-weight:800;color:#607989}
+.hamiya-dash-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1}
+.hamiya-dash-metrics>div{display:flex;flex-direction:column;justify-content:center;background:#f4f7f9;border-radius:13px;padding:15px}
+.hamiya-dash-metrics strong{font-size:clamp(23px,2.4vw,33px);font-weight:750;line-height:1.15;letter-spacing:-.055em;color:#193b4d;font-variant-numeric:tabular-nums}
+.hamiya-dash-metrics span{font-size:11px;color:#637c8b;margin-top:7px}
+.hamiya-dash-status{display:flex;align-items:center;text-align:left;gap:10px;background:#eaf2f5;border-radius:12px;padding:12px;color:#254e60}
+.hamiya-dash-status span{display:flex;flex-direction:column;flex:1;gap:2px}
+.hamiya-dash-status strong{font-size:11px}.hamiya-dash-status small{font-size:10px;color:#64808d}
+.hamiya-dash-section-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-top:7px}
+.hamiya-dash-section-heading h2{font-size:clamp(22px,2.5vw,29px);font-weight:720;margin-top:6px;letter-spacing:-.045em}
+.hamiya-dash-section-heading>button{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:#24536a;padding:9px 0}
+.hamiya-division-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.hamiya-division{background:#fff;border:1px solid #e2eaee;border-radius:17px;min-height:225px;padding:20px;text-align:left;display:flex;flex-direction:column;gap:9px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.hamiya-division:hover{transform:translateY(-3px);border-color:#9bb9c9;box-shadow:0 14px 30px #1a40500c}
+.hamiya-division-top{display:flex;justify-content:space-between;align-items:start;color:#4b7083}
+.hamiya-division-icon{width:47px;height:47px;display:grid;place-items:center;background:#edf3f6;border-radius:13px;color:#244d61}
+.hamiya-division-index{font-size:9px;letter-spacing:.14em;font-weight:800;color:#8095a1;margin-top:12px}
+.hamiya-division strong{font-size:16px;line-height:1.35;letter-spacing:-.025em;color:#1c3b4c}
+.hamiya-division small{color:#687e8a;font-size:11px;line-height:1.55}
+.hamiya-division-bottom{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;color:#32647a;padding-top:12px}
+}
+@layer responsive {
+@media(max-width:900px){.hamiya-dash-grid{grid-template-columns:1fr}.hamiya-dash-side{min-height:210px}.hamiya-dash-metrics{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:650px){.hamiya-dashboard{gap:17px}.hamiya-dash-date{display:none}.hamiya-dash-main{padding:23px 21px 18px;min-height:315px;border-radius:18px}.hamiya-dash-side{padding:15px;border-radius:18px}.hamiya-dash-metrics{grid-template-columns:repeat(2,1fr)}.hamiya-division-grid{grid-template-columns:1fr}.hamiya-division{min-height:160px}.hamiya-dash-section-heading h2{font-size:23px}.hamiya-dash-heading h1{font-size:30px}}
+@media(prefers-reduced-motion:reduce){.hamiya-division{transition:none}.hamiya-division:hover{transform:none}}
+}
