@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   ArrowRight,
+  Bell,
   ClipboardList,
   FileCheck2,
   Package,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import {
   AppError,
+  supabase,
   cents,
   configured,
   hydrateProduct,
@@ -54,6 +56,29 @@ export default function Admin() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [request, setRequest] = useState<Enquiry | null>(null);
   const [busy, setBusy] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<{ id: string; order_id: string; created_at: string }[]>([]);
+  const [readIds, setReadIds] = useState<string[]>([]);
+  async function loadNotifications() {
+    if (!supabase || !user || user.role === 'customer') return;
+    const [events, receipts] = await Promise.all([
+      supabase.from('hamiya_admin_notifications').select('id,order_id,created_at').order('created_at', { ascending: false }).limit(40),
+      supabase.from('hamiya_notification_reads').select('notification_id').eq('user_id', user.id),
+    ]);
+    if (!events.error && !receipts.error) {
+      setNotifications(events.data || []);
+      setReadIds((receipts.data || []).map((x) => x.notification_id));
+    }
+  }
+  async function openNotification(id: string) {
+    if (!supabase || !user) return;
+    const { error } = await supabase.from('hamiya_notification_reads').insert({ notification_id: id, user_id: user.id });
+    if (error && error.code !== '23505') notifyError(error);
+    setReadIds((old) => [...new Set([...old, id])]);
+    setTab('orders');
+    setNotificationOpen(false);
+    void load();
+  }
   const knownOrderIds = useRef<Set<string> | null>(null);
   const [unreadOrders, setUnreadOrders] = useState(0);
   async function load(silent = false) {
@@ -71,6 +96,7 @@ export default function Admin() {
       }
       knownOrderIds.current = ids;
       setFailed(false);
+      void loadNotifications();
     } catch (error) {
       if (!silent) notifyError(error);
       if (!silent) setFailed(true);
@@ -83,6 +109,10 @@ export default function Admin() {
     setUnreadOrders(0);
     if (!user || user.role === 'customer') return;
     void load();
+    void loadNotifications();
+    const channel = supabase?.channel('hamiya-admin-notifications-' + user.id)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'hamiya_admin_notifications' }, () => { void loadNotifications(); void load(true); })
+      .subscribe();
     const check = () => {
       if (document.visibilityState === 'visible' && navigator.onLine) void load(true);
     };
@@ -91,6 +121,7 @@ export default function Admin() {
     window.addEventListener('online', check);
     return () => {
       window.clearInterval(interval);
+      if (channel) void supabase?.removeChannel(channel);
       document.removeEventListener('visibilitychange', check);
       window.removeEventListener('online', check);
     };
@@ -154,6 +185,24 @@ export default function Admin() {
           </button>
         </div>
       )}
+      <div className="admin-notification-area">
+        <button className="button secondary" aria-label="Administrator notifications" aria-expanded={notificationOpen} onClick={() => { setNotificationOpen(!notificationOpen); void loadNotifications(); }}>
+          <Bell size={18} /> Notifications ({notifications.filter((n) => !readIds.includes(n.id)).length})
+        </button>
+        {notificationOpen && (
+          <div className="panel admin-notification-list">
+            <h3>Order notifications</h3>
+            {notifications.length === 0 && <p className="muted">No new orders yet.</p>}
+            {notifications.map((n) => (
+              <button key={n.id} className="admin-notification-item" onClick={() => void openNotification(n.id)}>
+                <span>{readIds.includes(n.id) ? '✓ ' : '● '}New order #{n.order_id.slice(0, 8).toUpperCase()}</span>
+                <small>{new Date(n.created_at).toLocaleString()}</small>
+                <ArrowRight size={16} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="admin-tabs">
         {tabs.map((value) => (
           <button
