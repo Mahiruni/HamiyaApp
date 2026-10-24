@@ -4152,3 +4152,18 @@ html[lang='am'] textarea {
 .admin-app-shell .sidebar nav .nav-link.active { font-weight: 700; }
 .admin-app-shell .topbar { border-bottom: 1px solid #e0e8ee; }
 @media(max-width:767px) { .admin-app-shell .app-body { padding-bottom: env(safe-area-inset-bottom, 0px); } .admin-app-shell .admin-page { padding-bottom: 32px; } }
+
+/* Telegram bot operational controls */
+.telegram-control-panel{margin:18px 0;padding:22px;display:grid;gap:14px}
+.telegram-control-heading{display:flex;justify-content:space-between;align-items:start;gap:14px;flex-wrap:wrap}
+.telegram-control-heading h2{font-size:1.3rem;margin:0 0 6px}
+.telegram-control-heading p{margin:0;color:#617582;max-width:540px}
+.telegram-delivery-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.telegram-delivery-stats>div{background:#f1f6f8;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:3px}
+.telegram-delivery-stats strong{font-size:1.45rem;font-variant-numeric:tabular-nums}
+.telegram-delivery-stats span{text-transform:capitalize;color:#617582;font-size:.8rem}
+.telegram-preference-row{display:flex;justify-content:space-between;align-items:center;gap:18px;border-bottom:1px solid #e3ebef;padding:13px 0;cursor:pointer}
+.telegram-preference-row span{display:flex;flex-direction:column;gap:4px}
+.telegram-preference-row small{color:#617582}
+.telegram-preference-row input{width:20px;height:20px;accent-color:#204c64;flex-shrink:0}
+@media(max-width:480px){.telegram-control-panel{padding:16px}.telegram-control-heading h2{font-size:1.12rem}}
