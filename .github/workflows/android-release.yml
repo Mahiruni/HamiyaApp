@@ -1,0 +1,95 @@
+name: HAMIYA Signed Android Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.25.0'
+      - name: Install web dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Capacitor tooling for Android build
+        run: pnpm add --save-exact @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8
+      - name: Build production web assets
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" || { echo "Missing VITE_SUPABASE_PUBLISHABLE_KEY"; exit 1; }
+          pnpm build
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Generate Android native project
+        run: |
+          pnpm exec cap add android
+          pnpm exec cap sync android
+      - name: Configure release signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.HAMIYA_ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.HAMIYA_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.HAMIYA_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.HAMIYA_ANDROID_KEY_PASSWORD }}
+        run: |
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            test -n "${!name}" || { echo "Missing signing secret: $name"; exit 1; }
+          done
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/hamiya-release.jks
+          cat >> android/app/build.gradle <<'GRADLE'
+
+          android {
+              signingConfigs {
+                  hamiyaRelease {
+                      storeFile file('hamiya-release.jks')
+                      storePassword System.getenv('HAMIYA_ANDROID_KEYSTORE_PASSWORD')
+                      keyAlias System.getenv('HAMIYA_ANDROID_KEY_ALIAS')
+                      keyPassword System.getenv('HAMIYA_ANDROID_KEY_PASSWORD')
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.hamiyaRelease
+                  }
+              }
+          }
+          GRADLE
+      - name: Build signed release APK and AAB
+        working-directory: android
+        env:
+          HAMIYA_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.HAMIYA_ANDROID_KEYSTORE_PASSWORD }}
+          HAMIYA_ANDROID_KEY_ALIAS: ${{ secrets.HAMIYA_ANDROID_KEY_ALIAS }}
+          HAMIYA_ANDROID_KEY_PASSWORD: ${{ secrets.HAMIYA_ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon assembleRelease bundleRelease
+      - name: Verify APK and AAB signatures
+        run: |
+          APK="$(find android/app/build/outputs/apk/release -name '*.apk' -print -quit)"
+          AAB="$(find android/app/build/outputs/bundle/release -name '*.aab' -print -quit)"
+          test -s "$APK" && test -s "$AAB"
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
+          "$APKSIGNER" verify --verbose "$APK"
+          jarsigner -verify -strict "$AAB"
+      - name: Upload signed Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: HAMIYA-signed-android-release
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30
+          if-no-files-found: error
