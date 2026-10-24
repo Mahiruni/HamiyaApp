@@ -12,6 +12,7 @@ import {
   MessageCircle,
   BarChart3,
   ChevronRight,
+  ChevronDown,
   CircleHelp,
   Coffee,
   Globe2,
@@ -56,6 +57,12 @@ export default function App() {
     recovery,
   } = useApp();
   const root = route.split('/')[0];
+  const headerPageKey =
+    root === 'catalog'
+      ? 'categories'
+      : ['home', 'orders', 'account', 'admin', 'help', 'privacy', 'terms'].includes(root)
+        ? root
+        : 'home';
   const view = appView({
     authLoading,
     signedIn: !!user,
@@ -278,28 +285,22 @@ export default function App() {
             >
               <Menu size={23} />
             </button>
-            <div className="breadcrumb">
-              <span>Hamiya</span>
-              <ChevronRight size={13} />
-              <strong>
-                {t(
-                  root === 'catalog'
-                    ? 'categories'
-                    : ['home', 'orders', 'account', 'admin', 'help', 'privacy', 'terms'].includes(
-                          root,
-                        )
-                      ? root
-                      : 'home',
-                )}
-              </strong>
+            <div className="topbar-context">
+              <HamiyaMark size="tiny" />
+              <div className="topbar-context-copy">
+                <span>HAMIYA FOOD PROCESSING</span>
+                <strong>{t(headerPageKey)}</strong>
+              </div>
             </div>
             <button
               className="mobile-wordmark"
               onClick={() => navigate(isStaff ? 'admin' : 'home')}
+              aria-label="Hamiya Food Processing"
             >
               <HamiyaMark size="tiny" />
-              <span>
-                hamiya<small>FOOD</small>
+              <span className="mobile-wordmark-copy">
+                <strong>HAMIYA</strong>
+                <small>FOOD PROCESSING</small>
               </span>
             </button>
           </div>
@@ -308,7 +309,7 @@ export default function App() {
               <span aria-hidden="true" />
               {online ? t('connected') : t('offlineShort')}
             </span>
-            <label className="language-select">
+            <label className="language-select topbar-language">
               <Globe2 size={16} />
               <select
                 aria-label={t('language')}
@@ -340,11 +341,18 @@ export default function App() {
               onClick={() => navigate('account')}
               aria-label={t('account')}
             >
-              {user ? (
-                <span>{user.profile.full_name?.slice(0, 1) || 'H'}</span>
-              ) : (
-                <UserRound size={20} />
-              )}
+              <span className="topbar-user-avatar">
+                {user ? (
+                  user.profile.full_name?.slice(0, 1).toUpperCase() || 'H'
+                ) : (
+                  <UserRound size={19} />
+                )}
+              </span>
+              <span className="topbar-user-copy">
+                <small>{t('account')}</small>
+                <strong>{user?.profile.full_name?.split(' ')[0] || 'Hamiya'}</strong>
+              </span>
+              <ChevronDown className="topbar-user-chevron" size={15} />
             </button>
           </div>
         </header>
