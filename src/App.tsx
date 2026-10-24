@@ -409,7 +409,14 @@ function EntryLoading() {
   const { t } = useApp();
   return (
     <div className="entry-loading" role="status">
-      <strong>hamiya</strong>
+      <img
+        className="entry-loading-logo"
+        src="/brand/hamiya-food-processing.jpg"
+        alt="Hamiya Food Processing"
+        width={240}
+        height={240}
+      />
+      <strong>HAMIYA FOOD PROCESSING</strong>
       <span>{t('loading')}</span>
     </div>
   );
