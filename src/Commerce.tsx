@@ -224,7 +224,9 @@ export function CatalogPage() {
 
 function ProductDetails({ product, onClose }: { product: Product; onClose: () => void }) {
   const { t, language, user, addCart, navigate, toast, notifyError, online } = useApp();
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
+  const quantityNumber = Number(quantity);
+  const validQuantity = /^\\d+$/.test(quantity) && Number.isSafeInteger(quantityNumber) && quantityNumber >= 1 && quantityNumber <= product.available_quantity;
   const [enquiring, setEnquiring] = useState(false);
   const [busy, setBusy] = useState(false);
   const key = useRef(crypto.randomUUID());
@@ -305,17 +307,17 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
                 step={1}
                 inputMode="numeric"
                 value={quantity}
-                onChange={(e) =>
-                  setQuantity(
-                    Math.max(1, Math.min(product.available_quantity, Number(e.target.value) || 1)),
-                  )
-                }
+                onChange={(e) => setQuantity(e.target.value)}
+                onBlur={() => {
+                  if (!validQuantity) setQuantity(String(Math.max(1, Math.min(product.available_quantity || 1, Number.isFinite(quantityNumber) ? Math.floor(quantityNumber) || 1 : 1))));
+                }}
               />
               <button
                 className="button primary full"
-                disabled={!orderable || !online}
+                disabled={!orderable || !online || !validQuantity}
                 onClick={() => {
-                  addCart(product, quantity);
+                  if (!validQuantity) return;
+                  addCart(product, quantityNumber);
                   onClose();
                 }}
               >
