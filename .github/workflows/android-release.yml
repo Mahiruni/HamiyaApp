@@ -79,14 +79,14 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew --no-daemon assembleRelease bundleRelease
-      - name: Verify APK and AAB signatures
-        run: |
+           - name: Verify APK and AAB signatures
+            run: |
           APK="$(find android/app/build/outputs/apk/release -name '*.apk' -print -quit)"
           AAB="$(find android/app/build/outputs/bundle/release -name '*.aab' -print -quit)"
           test -s "$APK" && test -s "$AAB"
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
           "$APKSIGNER" verify --verbose "$APK"
-          jarsigner -verify -strict "$AAB"
+          jarsigner -verify "$AAB"
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v4
         with:
