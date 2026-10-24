@@ -62,6 +62,37 @@ export default function Admin() {
   const [request, setRequest] = useState<Enquiry | null>(null);
   const [busy, setBusy] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const alertTypes = [
+    { id: 'order_submitted', label: 'New customer orders', description: 'Orders successfully submitted' },
+    { id: 'customer_verification', label: 'Customer verification', description: 'Applications awaiting review' },
+    { id: 'payment_evidence', label: 'Payment screenshots', description: 'Payment evidence awaiting verification' },
+    { id: 'low_inventory', label: 'Low inventory', description: 'Stock at or below threshold' },
+    { id: 'critical_system', label: 'Critical system alerts', description: 'Operational failures requiring attention' },
+  ];
+  const [telegramPrefs, setTelegramPrefs] = useState<Record<string,boolean>>({});
+  const [telegramCounts, setTelegramCounts] = useState<{channel:string;state:string;count:number}[]>([]);
+  const [telegramSaving, setTelegramSaving] = useState<string | null>(null);
+  async function loadTelegramPreferences() {
+    if (!supabase || user?.role !== 'admin') return;
+    const [prefs, counts] = await Promise.all([
+      supabase.from('hamiya_telegram_preferences').select('event_type,enabled'),
+      supabase.rpc('hamiya_admin_notification_status'),
+    ]);
+    if (prefs.error) notifyError(prefs.error);
+    else setTelegramPrefs(Object.fromEntries((prefs.data || []).map((p) => [p.event_type, p.enabled])));
+    if (!counts.error && Array.isArray(counts.data)) setTelegramCounts(counts.data);
+  }
+  async function changeTelegramPreference(eventType: string, enabled: boolean) {
+    if (!supabase || telegramSaving) return;
+    setTelegramSaving(eventType);
+    try {
+      const { error } = await supabase.from('hamiya_telegram_preferences').update({ enabled, updated_at: new Date().toISOString() }).eq('event_type', eventType);
+      if (error) throw error;
+      setTelegramPrefs((old) => ({ ...old, [eventType]: enabled }));
+      toast('Telegram alert preference saved');
+    } catch (error) { notifyError(error); }
+    finally { setTelegramSaving(null); }
+  }
   const [telegramTesting, setTelegramTesting] = useState(false);
   async function testTelegram() {
     if (!supabase || telegramTesting) return;
@@ -127,6 +158,7 @@ export default function Admin() {
     if (!user || user.role === 'customer') return;
     void load();
     void loadNotifications();
+    void loadTelegramPreferences();
     const channel = supabase?.channel('hamiya-admin-notifications-' + user.id)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'hamiya_admin_notifications' }, () => { void loadNotifications(); void load(true); })
       .subscribe();
@@ -221,6 +253,27 @@ export default function Admin() {
           </div>
         )}
       </div>
+      {user.role === 'admin' && tab === 'settings' && (
+        <section className="panel telegram-control-panel" aria-label="Telegram bot control">
+          <div className="telegram-control-heading">
+            <div><h2>Telegram Bot Control</h2><p>Manage which operational events send Telegram alerts to the authorized administrator.</p></div>
+            <button className="button secondary" onClick={() => void loadTelegramPreferences()}><RefreshCw size={16}/> Refresh</button>
+          </div>
+          <div className="telegram-delivery-stats">
+            {['pending','delivered','failed'].map((state) => (
+              <div key={state}><strong>{telegramCounts.filter((r) => r.channel === 'telegram' && r.state === state).reduce((total,r) => total + Number(r.count),0)}</strong><span>{state}</span></div>
+            ))}
+          </div>
+          {alertTypes.map((alert) => (
+            <label key={alert.id} className="telegram-preference-row">
+              <span><strong>{alert.label}</strong><small>{alert.description}</small></span>
+              <input type="checkbox" checked={!!telegramPrefs[alert.id]} disabled={telegramSaving !== null || !(alert.id in telegramPrefs)} onChange={(event) => void changeTelegramPreference(alert.id,event.target.checked)}/>
+            </label>
+          ))}
+          <button className="button secondary" disabled={telegramTesting} onClick={() => void testTelegram()}>{telegramTesting ? 'Sending test…' : 'Send Telegram test'}</button>
+          <p className="muted">Payment and critical-system alerts require their respective event producers. A successful test confirms bot connectivity, not automatic scheduling.</p>
+        </section>
+      )}
       <div className="admin-tabs">
         {tabs.map((value) => (
           <button
