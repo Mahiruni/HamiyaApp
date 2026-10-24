@@ -30,11 +30,59 @@ Deno.serve(async (req) => {
     const details = event.details || {};
     let message = "🔔 <b>HAMIYA — " + escapeHtml(event.subject || event.event_type.replaceAll("_"," ").toUpperCase()) + "</b>";
     if (event.event_type === "order_submitted" && event.order_id) {
-      const { data: order } = await db.from("hamiya_orders").select("id,status,items,total_cents,created_at").eq("id",event.order_id).maybeSingle();
-      if (!order) continue;
+      const { data: order, error: orderError } = await db.from("hamiya_orders")
+        .select("id,customer_id,status,items,total_cents,delivery_fee_cents,fulfilment,payment_status,created_at")
+        .eq("id",event.order_id).maybeSingle();
+      if (orderError || !order) continue;
+      const { data: customer } = await db.from("hamiya_profiles")
+        .select("profile,customer_id").eq("id",order.customer_id).maybeSingle();
+      const profile = customer?.profile || {};
+      const company = String(profile.business_name || "").trim();
+      const buyer = String(profile.full_name || "").trim();
+      const phone = String(profile.phone || "").trim();
       const items = Array.isArray(order.items) ? order.items : [];
-      const lines = items.slice(0,15).map((item: Record<string,unknown>) => "• " + escapeHtml(item.name || item.product_name || item.product_id || "Product") + " — " + escapeHtml(item.quantity || item.cartons || "?") + " cartons");
-      message = ["🔔 <b>HAMIYA — NEW CUSTOMER ORDER</b>","","🆔 Order: #"+escapeHtml(order.id.slice(0,8).toUpperCase()),"📦 "+(lines.join("\\n")||"Review order in dashboard"),"💰 Total: "+(Number(order.total_cents||0)/100).toLocaleString("en-US")+" ETB","📌 Status: "+escapeHtml(order.status),"Open the HAMIYA administration dashboard to review."].join("\\n");
+      const money = (cents: unknown) => (Number(cents || 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " ETB";
+      const lines = items.slice(0, 15).map((item: Record<string,unknown>, index: number) => {
+        const qty = Number(item.quantity || item.cartons || 0);
+        const unitPrice = Number(item.price_cents || 0);
+        return (index + 1) + ". <b>" + escapeHtml(item.name || item.product_name || item.product_id || "Product") + "</b>" +
+          (item.variant ? " · " + escapeHtml(item.variant) : "") +
+          "\n   " + escapeHtml(qty || "?") + " cartons" +
+          (unitPrice > 0 ? " × " + money(unitPrice) : "") +
+          (unitPrice > 0 && qty > 0 ? "\n   Line total: <b>" + money(unitPrice * qty) + "</b>" : "");
+      });
+      const orderedAt = new Date(order.created_at).toLocaleString("en-GB", { timeZone: "Africa/Addis_Ababa", day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" });
+      const companyName = company || "Not provided";
+      const header = [
+        "🏢 <b>HAMIYA INVESTMENT GROUP</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "🛒 <b>NEW CUSTOMER PURCHASE ORDER</b>",
+        "",
+        "📋 <b>ORDER DETAILS</b>",
+        "Order ID: <code>#" + escapeHtml(order.id.slice(0, 8).toUpperCase()) + "</code>",
+        "Received: " + escapeHtml(orderedAt) + " (EAT)",
+        "",
+        "🏬 <b>CUSTOMER / BUSINESS</b>",
+        "Company: <b>" + escapeHtml(companyName) + "</b>",
+        ...(buyer ? ["Contact: " + escapeHtml(buyer)] : []),
+        ...(phone ? ["Phone: " + escapeHtml(phone)] : []),
+        "",
+        "📦 <b>PRODUCTS ORDERED</b>",
+        ...(lines.length ? lines : ["View items in the dashboard"]),
+        ...(items.length > 15 ? ["… and " + (items.length - 15) + " more items"] : []),
+        "",
+        "━━━━━━━━━━━━━━━━━━",
+        "💰 <b>ORDER SUMMARY</b>",
+        "Order total: <b>" + money(order.total_cents) + "</b>",
+        "Fulfilment: " + escapeHtml(order.fulfilment || "Not specified"),
+        "Payment: <b>" + escapeHtml(order.payment_status || "Awaiting verification") + "</b>",
+        "Order status: <b>" + escapeHtml(order.status).toUpperCase() + "</b>",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        "🔎 <b>Next action:</b> Review the customer and confirm this order in the HAMIYA administrator dashboard.",
+        "⚠️ Order submitted does not mean payment has been verified."
+      ];
+      message = header.join("\n");
     } else if (event.event_type === "customer_verification") {
       message += "\\n👤 New customer application awaiting review.\\nStatus: "+escapeHtml(details.status || "submitted");
     } else if (event.event_type === "low_inventory") {
@@ -45,7 +93,7 @@ Deno.serve(async (req) => {
       message += "\\n⚠️ Critical operational event. Check administrator audit logs.";
     }
     try {
-      const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML", disable_web_page_preview: true }) });
+      const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "HTML", disable_web_page_preview: true, reply_markup: event.event_type === "order_submitted" ? { inline_keyboard: [[{ text: "📋 Review order in HAMIYA Admin", url: "https://hamiyainvestmentgroup.vercel.app/#admin/orders" }]] } : undefined }) });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error("Telegram HTTP " + response.status + ": " + String(result.description || "delivery failed").slice(0, 160));
       await db.from("hamiya_notification_deliveries").update({ state: "delivered", attempts: job.attempts + 1, delivered_at: new Date().toISOString(), last_error: null }).eq("notification_id", job.notification_id).eq("channel", "telegram").neq("state", "delivered");
