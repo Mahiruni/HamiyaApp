@@ -54,21 +54,46 @@ export default function Admin() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [request, setRequest] = useState<Enquiry | null>(null);
   const [busy, setBusy] = useState(false);
-  async function load() {
-    setLoading(true);
+  const knownOrderIds = useRef<Set<string> | null>(null);
+  const [unreadOrders, setUnreadOrders] = useState(0);
+  async function load(silent = false) {
+    if (!silent) setLoading(true);
     try {
       const data = await rpc<Dashboard>('admin_dashboard');
       setData({ ...data, products: data.products.map(hydrateProduct) });
+      const ids = new Set(data.orders.map((order) => order.id));
+      if (knownOrderIds.current) {
+        const newOrders = data.orders.filter((order) => order.status === 'submitted' && !knownOrderIds.current!.has(order.id));
+        if (newOrders.length) {
+          setUnreadOrders((count) => count + newOrders.length);
+          toast(newOrders.length === 1 ? 'New customer order received' : `${newOrders.length} new customer orders received`);
+        }
+      }
+      knownOrderIds.current = ids;
       setFailed(false);
     } catch (error) {
-      notifyError(error);
-      setFailed(true);
+      if (!silent) notifyError(error);
+      if (!silent) setFailed(true);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
   useEffect(() => {
-    if (user && user.role !== 'customer') void load();
+    knownOrderIds.current = null;
+    setUnreadOrders(0);
+    if (!user || user.role === 'customer') return;
+    void load();
+    const check = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) void load(true);
+    };
+    const interval = window.setInterval(check, 20000);
+    document.addEventListener('visibilitychange', check);
+    window.addEventListener('online', check);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', check);
+      window.removeEventListener('online', check);
+    };
   }, [user?.id, user?.role]);
   async function changeOrder(order: Order, status: string) {
     setBusy(true);
@@ -121,6 +146,14 @@ export default function Admin() {
           {t('refresh')}
         </button>
       </div>
+      {unreadOrders > 0 && (
+        <div className="notice" role="status" aria-live="polite">
+          <strong>{unreadOrders} new customer order{unreadOrders === 1 ? '' : 's'} received.</strong>{' '}
+          <button className="button secondary" onClick={() => { setTab('orders'); setUnreadOrders(0); }}>
+            View orders <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
       <div className="admin-tabs">
         {tabs.map((value) => (
           <button
