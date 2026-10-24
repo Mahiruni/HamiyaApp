@@ -72,6 +72,26 @@ export function CatalogPage() {
           </span>
         </div>
       </div>
+      <div className="catalog-snapshot" aria-label={t('catalogSnapshot')}>
+        <div>
+          <span>{t('products')}</span>
+          <strong>{catalog.products.length}</strong>
+        </div>
+        <div>
+          <span>{t('available')}</span>
+          <strong>
+            {
+              catalog.products.filter((product) =>
+                ['available', 'low_stock'].includes(product.status),
+              ).length
+            }
+          </strong>
+        </div>
+        <div>
+          <span>{t('categories')}</span>
+          <strong>03</strong>
+        </div>
+      </div>
       <div className="catalog-toolbar">
         <div className="category-tabs">
           {(['all', 'food', 'coffee', 'vehicles'] as const).map((value) => (
@@ -227,7 +247,11 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
   const minimumOrder = product.category === 'food' ? 20 : 1;
   const [quantity, setQuantity] = useState(String(minimumOrder));
   const quantityNumber = Number(quantity);
-  const validQuantity = /^\d+$/.test(quantity) && Number.isSafeInteger(quantityNumber) && quantityNumber >= minimumOrder && quantityNumber <= product.available_quantity;
+  const validQuantity =
+    /^\d+$/.test(quantity) &&
+    Number.isSafeInteger(quantityNumber) &&
+    quantityNumber >= minimumOrder &&
+    quantityNumber <= product.available_quantity;
   const [enquiring, setEnquiring] = useState(false);
   const [busy, setBusy] = useState(false);
   const key = useRef(crypto.randomUUID());
@@ -310,10 +334,27 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 onBlur={() => {
-                  if (!validQuantity) setQuantity(String(Math.max(minimumOrder, Math.min(product.available_quantity || minimumOrder, Number.isFinite(quantityNumber) ? Math.floor(quantityNumber) || minimumOrder : minimumOrder))));
+                  if (!validQuantity)
+                    setQuantity(
+                      String(
+                        Math.max(
+                          minimumOrder,
+                          Math.min(
+                            product.available_quantity || minimumOrder,
+                            Number.isFinite(quantityNumber)
+                              ? Math.floor(quantityNumber) || minimumOrder
+                              : minimumOrder,
+                          ),
+                        ),
+                      ),
+                    );
                 }}
               />
-              {product.available_quantity < minimumOrder && <p className="muted small-text">Minimum order: 20 cartons. Not enough stock is currently available.</p>}
+              {product.available_quantity < minimumOrder && (
+                <p className="muted small-text">
+                  Minimum order: 20 cartons. Not enough stock is currently available.
+                </p>
+              )}
               <button
                 className="button primary full"
                 disabled={!orderable || !online || !validQuantity}
@@ -407,7 +448,13 @@ export function Cart() {
   function setCartQuantity(id: string, quantity: number) {
     const p = catalog.products.find((product) => product.id === id);
     if (!p || !Number.isSafeInteger(quantity) || quantity < 20) return;
-    setCart(cart.map((item) => item.id === id ? { ...item, quantity: Math.min(quantity, Math.max(1, p.available_quantity)) } : item));
+    setCart(
+      cart.map((item) =>
+        item.id === id
+          ? { ...item, quantity: Math.min(quantity, Math.max(1, p.available_quantity)) }
+          : item,
+      ),
+    );
     key.current = crypto.randomUUID();
   }
   function adjust(id: string, amount: number) {
@@ -505,7 +552,8 @@ export function Cart() {
                       value={item.quantity}
                       disabled={busy}
                       onChange={(event) => {
-                        if (event.target.value !== '') setCartQuantity(item.id, Number(event.target.value));
+                        if (event.target.value !== '')
+                          setCartQuantity(item.id, Number(event.target.value));
                       }}
                     />
                     <button
@@ -637,6 +685,7 @@ export function OrdersPage() {
   const [error, setError] = useState(false);
   const [selected, setSelected] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'orders' | 'requests'>('all');
   async function load() {
     if (!supabase || !user) return;
     setLoading(true);
@@ -700,8 +749,13 @@ export function OrdersPage() {
       </Empty>
     );
   const current = selected ? orders.find((o) => o.id === selected.id) || selected : null;
+  const visibleOrders = filter === 'requests' ? [] : orders;
+  const visibleRequests = filter === 'orders' ? [] : requests;
+  const pendingCount =
+    orders.filter((order) => !['completed', 'cancelled'].includes(order.status)).length +
+    requests.filter((request) => !['closed', 'rejected'].includes(request.status)).length;
   return (
-    <section>
+    <section className="orders-page">
       <div className="page-heading">
         <div>
           <span className="eyebrow">{t('business')}</span>
@@ -716,6 +770,42 @@ export function OrdersPage() {
           {t('refresh')}
         </button>
       </div>
+      <div className="orders-overview" aria-label={t('orderHistory')}>
+        <div className="orders-overview-card">
+          <span>{t('orderNumber')}</span>
+          <strong>{orders.length}</strong>
+          <small>{t('orders')}</small>
+        </div>
+        <div className="orders-overview-card">
+          <span>{t('enquiry')}</span>
+          <strong>{requests.length}</strong>
+          <small>{t('requests')}</small>
+        </div>
+        <div className="orders-overview-card accent">
+          <span>{t('status')}</span>
+          <strong>{pendingCount}</strong>
+          <small>{t('under_review')}</small>
+        </div>
+      </div>
+      <div className="orders-filter" role="tablist" aria-label={t('orderHistory')}>
+        {(
+          [
+            ['all', t('all')],
+            ['orders', t('orders')],
+            ['requests', t('enquiry')],
+          ] as const
+        ).map(([value, label]) => (
+          <button
+            key={value}
+            role="tab"
+            aria-selected={filter === value}
+            className={filter === value ? 'active' : ''}
+            onClick={() => setFilter(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       {loading ? (
         <div className="loading-row">{t('loading')}</div>
       ) : error ? (
@@ -724,7 +814,7 @@ export function OrdersPage() {
             {t('retry')}
           </button>
         </Empty>
-      ) : !orders.length && !requests.length ? (
+      ) : !visibleOrders.length && !visibleRequests.length ? (
         <Empty icon={ShoppingBag} title={t('noOrders')} text={t('noOrdersText')}>
           <button className="button primary" onClick={() => navigate('catalog')}>
             {t('explore')}
@@ -733,12 +823,18 @@ export function OrdersPage() {
         </Empty>
       ) : (
         <div className="order-grid">
-          {orders.map((order) => (
-            <button className="order-card panel" key={order.id} onClick={() => setSelected(order)}>
+          {visibleOrders.map((order) => (
+            <button
+              className="order-card panel"
+              key={order.id}
+              onClick={() => setSelected(order)}
+              aria-label={t('orderNumber') + ' #' + order.id.slice(0, 8).toUpperCase()}
+            >
               <div className="order-card-top">
                 <span className="round-icon">
                   <ShoppingBag size={20} />
                 </span>
+                <span className="order-card-kind">{t('orderNumber')}</span>
                 <Badge status={order.status} />
               </div>
               <h3>
@@ -754,12 +850,13 @@ export function OrdersPage() {
               </small>
             </button>
           ))}
-          {requests.map((request) => (
+          {visibleRequests.map((request) => (
             <div className="order-card panel" key={request.id}>
               <div className="order-card-top">
                 <span className="round-icon">
                   <FileText size={20} />
                 </span>
+                <span className="order-card-kind">{t('enquiry')}</span>
                 <Badge status={request.status} />
               </div>
               <h3>{request.name || t(request.category + 'Brand')}</h3>

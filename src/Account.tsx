@@ -27,7 +27,7 @@ import {
   supabase,
   uploadDocument,
 } from './api';
-import { Badge, Empty, Field } from './components';
+import { Badge, Empty, Field, HamiyaMark } from './components';
 import { AuthField, AuthIllustration } from './Auth';
 import { authStorage } from './auth-storage';
 import { afterSignIn, authMode, authRoutes, type AuthMode } from './navigation';
@@ -119,8 +119,7 @@ export default function Account() {
       if (result.confirmation) {
         setPendingEmail(String(data.get('email')).trim());
         setConfirmation(true);
-      }
-      else {
+      } else {
         setEditing(mode === 'register');
         toast(t('welcomeBack'));
         if (result.user) navigate(afterSignIn(result.user.verification));
@@ -264,7 +263,10 @@ export default function Account() {
         <span className="auth-orbit two" aria-hidden="true" />
         <div className="auth-card">
           <div className="auth-brand">
-            HAMIYA <span>INVESTMENT GROUP</span>
+            <HamiyaMark size="tiny" />
+            <span>
+              HAMIYA <small>INVESTMENT GROUP</small>
+            </span>
           </div>
           <AuthIllustration register={registering} />
           <div className="auth-heading">
@@ -408,8 +410,16 @@ export default function Account() {
         <label className="auth-language-icon" aria-label={t('language')}>
           <Globe2 size={20} aria-hidden="true" />
           <ChevronDown size={13} aria-hidden="true" />
-          <select value={language} aria-label={t('language')} onChange={(event) => setLanguage(event.target.value as typeof language)}>
-            {languages.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+          <select
+            value={language}
+            aria-label={t('language')}
+            onChange={(event) => setLanguage(event.target.value as typeof language)}
+          >
+            {languages.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
           </select>
         </label>
       </section>
@@ -446,6 +456,9 @@ export default function Account() {
       <div className="account-grid">
         <aside className="account-summary">
           <div className="avatar">{user.profile.full_name?.slice(0, 1) || 'H'}</div>
+          <div className="account-summary-kicker">
+            <ShieldCheck size={14} /> {t('security')}
+          </div>
           <h3>{user.profile.business_name || user.profile.full_name}</h3>
           <p>{user.email}</p>
           <div className="customer-code">

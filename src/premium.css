@@ -53,3 +53,141 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .app:not(.admin-app-shell) .category-tabs button{flex-shrink:0}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.app:not(.admin-app-shell) .product-card,.app:not(.admin-app-shell) .product-art img,.app:not(.admin-app-shell) .nav-link{transition:none!important}.app:not(.admin-app-shell) .product-card:hover{transform:none}.app:not(.admin-app-shell) .product-card:hover .product-art img{transform:none}}
+
+/* Premium continuation: shared identity, commerce surfaces, profile and Android-safe shell. */
+.hamiya-mark{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:0}
+.hamiya-mark img{display:block;width:100%;height:100%;border-radius:13px;object-fit:cover}
+.hamiya-mark-tiny{width:28px;height:28px}
+.hamiya-mark-sm{width:39px;height:39px}
+.hamiya-mark-md{width:48px;height:48px}
+.brand .hamiya-mark{filter:drop-shadow(0 5px 8px rgb(21 52 71 / 8%))}
+.brand-name{color:#153447}
+.brand-name small{color:#6a818e}
+.mobile-wordmark{display:flex!important;align-items:center;gap:8px!important}
+.mobile-wordmark .hamiya-mark-tiny{width:28px;height:28px}
+.mobile-wordmark>span:last-child{display:inline-flex;align-items:flex-start;gap:2px}
+.mobile-wordmark>span:last-child small{font-size:8px;margin-top:2px}
+.connection-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #e1e9ed;border-radius:999px;color:#617986;font-size:10px;white-space:nowrap;background:#fbfcfd}
+.connection-pill>span{width:7px;height:7px;border-radius:50%;background:#9caeb7}
+.connection-pill.online>span{background:#4eaa91;box-shadow:0 0 0 3px #e4f4ef}
+.connection-pill.offline{color:#987839;background:#fffaf0;border-color:#eadfca}
+.connection-pill.offline>span{background:#c7923b;box-shadow:0 0 0 3px #fbf0d9}
+.app:not(.admin-app-shell) .topbar{min-height:76px;height:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:0}
+.app:not(.admin-app-shell) .topbar-actions{gap:12px}
+.app:not(.admin-app-shell) .topbar-user{border:1px solid #dfe8ed;background:#eef4f7;color:#193b4d;box-shadow:0 3px 10px rgb(21 52 71 / 5%)}
+.app:not(.admin-app-shell) .topbar-user:hover{background:#e4eef3}
+.app:not(.admin-app-shell) .sidebar{padding-top:max(26px,env(safe-area-inset-top,0px));padding-bottom:max(24px,env(safe-area-inset-bottom,0px))}
+.app:not(.admin-app-shell) .sidebar-divider{margin-top:25px;margin-bottom:22px}
+.app:not(.admin-app-shell) .sidebar-bottom{padding-bottom:2px}
+.app:not(.admin-app-shell) main{min-height:calc(100svh - 150px)}
+.app:not(.admin-app-shell) .site-footer{background:transparent}
+
+/* Home dashboard refinements */
+.app:not(.admin-app-shell) .hamiya-dash-heading h1{max-width:780px}
+.app:not(.admin-app-shell) .hamiya-dash-main{box-shadow:0 22px 55px rgb(16 45 64 / 15%)}
+.app:not(.admin-app-shell) .hamiya-dash-action-primary,.app:not(.admin-app-shell) .hamiya-dash-action-secondary,.app:not(.admin-app-shell) .hamiya-dash-status,.app:not(.admin-app-shell) .hamiya-division,.app:not(.admin-app-shell) .hamiya-dash-section-heading>button{transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.app:not(.admin-app-shell) .hamiya-dash-action-primary:hover{transform:translateY(-2px);box-shadow:0 9px 20px rgb(0 0 0 / 15%)}
+.app:not(.admin-app-shell) .hamiya-dash-action-secondary:hover{background:rgb(255 255 255 / 9%);border-color:#fff9}
+.app:not(.admin-app-shell) .hamiya-dash-status:hover{transform:translateY(-2px);background:#e2eff3}
+.app:not(.admin-app-shell) .hamiya-dash-status:focus-visible,.app:not(.admin-app-shell) .hamiya-division:focus-visible{outline:3px solid #7db4d0;outline-offset:3px}
+
+/* Catalog */
+.catalog-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 21px}
+.catalog-snapshot>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border:1px solid #e2eaee;border-radius:14px;background:#fff}
+.catalog-snapshot span{color:#708692;font-size:10px;letter-spacing:.03em}
+.catalog-snapshot strong{color:#193b4d;font-size:21px;line-height:1;font-variant-numeric:tabular-nums}
+.app:not(.admin-app-shell) .catalog-toolbar{border:1px solid #e2eaee;border-radius:18px;background:#fff;padding:14px 15px 15px;margin-bottom:22px}
+.app:not(.admin-app-shell) .catalog-toolbar .category-tabs{padding-bottom:0}
+.app:not(.admin-app-shell) .catalog-toolbar .catalog-controls{margin-top:14px}
+.app:not(.admin-app-shell) .catalog-toolbar .search-field{background:#f7fafb;border-color:#e6edf0}
+.app:not(.admin-app-shell) .catalog-count{margin:15px 2px 12px}
+.app:not(.admin-app-shell) .product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.app:not(.admin-app-shell) .product-card{display:flex;flex-direction:column;min-width:0;background:#fff}
+.app:not(.admin-app-shell) .product-art{min-height:205px;background-image:radial-gradient(circle at 50% 34%,rgb(255 255 255 / 55%),transparent 56%)}
+.app:not(.admin-app-shell) .product-art>svg{filter:drop-shadow(0 7px 12px rgb(35 73 92 / 9%))}
+.app:not(.admin-app-shell) .product-art>span{background:linear-gradient(180deg,transparent,#ffffff66);padding-top:24px}
+.app:not(.admin-app-shell) .product-content{display:flex;flex:1;flex-direction:column;padding:17px}
+.app:not(.admin-app-shell) .product-card h3{font-size:18px;line-height:1.25}
+.app:not(.admin-app-shell) .product-card p{min-height:18px}
+.app:not(.admin-app-shell) .product-price-row{margin-top:auto;padding-top:18px}
+.app:not(.admin-app-shell) .product-arrow{transition:transform .18s ease,background .18s ease}
+.app:not(.admin-app-shell) .product-card:hover .product-arrow{transform:translateX(3px);background:#dcebf1}
+.app:not(.admin-app-shell) .product-title-row .badge{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+
+/* Orders */
+.orders-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:-6px 0 18px}
+.orders-overview-card{display:grid;grid-template-columns:1fr auto;gap:3px 12px;padding:16px 17px;border:1px solid #e1e9ee;border-radius:16px;background:#fff}
+.orders-overview-card span{grid-column:1/-1;color:#6b8290;font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+.orders-overview-card strong{font-size:29px;line-height:1.1;letter-spacing:-.06em;color:#193b4d;font-variant-numeric:tabular-nums}
+.orders-overview-card small{align-self:end;color:#8195a0;font-size:10px;text-align:right}
+.orders-overview-card.accent{background:#eaf3f6;border-color:#d2e4eb}
+.orders-filter{display:flex;gap:7px;align-items:center;margin:0 0 17px;padding:4px;border:1px solid #e3eaee;border-radius:13px;background:#f7fafb;width:max-content;max-width:100%;overflow:auto}
+.orders-filter button{min-height:35px;padding:8px 14px;border-radius:9px;color:#708692;font-size:11px;white-space:nowrap}
+.orders-filter button.active{background:#193b4d;color:#fff;box-shadow:0 4px 12px rgb(25 59 77 / 15%)}
+.app:not(.admin-app-shell) .order-grid{gap:14px}
+.app:not(.admin-app-shell) .order-card{border-radius:18px;padding:20px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.app:not(.admin-app-shell) button.order-card:hover{transform:translateY(-2px);border-color:#b7ced9;box-shadow:0 14px 29px rgb(19 54 74 / 9%)}
+.order-card-kind{margin-left:auto;color:#7c919d;font-size:9px;text-transform:uppercase;letter-spacing:.09em}
+.app:not(.admin-app-shell) .order-card .round-icon{width:43px;height:43px;border-radius:13px;background:#edf4f7;color:#2f6177}
+.app:not(.admin-app-shell) .order-card h3{font-size:17px}
+.app:not(.admin-app-shell) .order-card-bottom .money{font-size:21px}
+
+/* Account and verification */
+.account-summary-kicker{display:flex;align-items:center;justify-content:center;gap:5px;margin:-5px 0 11px;color:#4d8f82;font-size:9px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.app:not(.admin-app-shell) .account-summary{border-radius:20px;box-shadow:0 7px 22px rgb(19 54 74 / 4%)}
+.app:not(.admin-app-shell) .account-content>.panel{border-radius:20px;box-shadow:0 7px 22px rgb(19 54 74 / 4%)}
+.app:not(.admin-app-shell) .profile-editor .section-heading{align-items:flex-start}
+.app:not(.admin-app-shell) .profile-editor .steps li button{transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.app:not(.admin-app-shell) .profile-editor .steps li button:hover{transform:translateX(2px);border-color:#aac5d2}
+.app:not(.admin-app-shell) .profile-status{background:linear-gradient(145deg,#f4f9fb,#fff)}
+.app:not(.admin-app-shell) .profile-status>svg{filter:drop-shadow(0 5px 10px rgb(41 105 117 / 12%))}
+.app:not(.admin-app-shell) .upload-card{background:#fbfcfd;transition:background .16s ease,border-color .16s ease,transform .16s ease}
+.app:not(.admin-app-shell) .upload-card:hover{background:#f3f8fa;border-color:#94b4c3;transform:translateY(-1px)}
+
+/* Standalone authentication */
+.auth-brand .hamiya-mark{width:28px;height:28px}
+.auth-brand>span{display:flex;align-items:baseline;gap:5px;font-size:11px;letter-spacing:1.7px}
+.auth-brand>span small{font-size:7px;letter-spacing:1px;color:#627782;font-weight:500}
+.entry-main .auth-card{box-shadow:0 26px 75px rgb(25 59 77 / 12%),0 4px 14px rgb(25 59 77 / 4%)}
+.entry-main .auth-submit{box-shadow:0 11px 20px rgb(25 59 77 / 16%)}
+
+@media (max-width:1180px){
+  .app:not(.admin-app-shell) .product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:880px){
+  .connection-pill{display:none}
+  .app:not(.admin-app-shell) .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .orders-overview{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  .hamiya-mark-sm{width:36px;height:36px}
+  .app:not(.admin-app-shell) .topbar{min-height:68px}
+  .app:not(.admin-app-shell) .topbar .language-select select{max-width:74px}
+  .catalog-snapshot{gap:8px}
+  .catalog-snapshot>div{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:11px 12px}
+  .catalog-snapshot strong{font-size:22px}
+  .app:not(.admin-app-shell) .catalog-toolbar{padding:10px 10px 12px;border-radius:15px}
+  .app:not(.admin-app-shell) .catalog-toolbar .catalog-controls{align-items:stretch;flex-direction:column;gap:9px}
+  .app:not(.admin-app-shell) .catalog-toolbar .search-field{max-width:none}
+  .orders-overview{gap:8px}
+  .orders-overview-card{padding:12px 11px;border-radius:13px}
+  .orders-overview-card strong{font-size:24px}
+  .orders-overview-card small{font-size:8px}
+  .orders-filter{width:100%;justify-content:space-between}
+  .orders-filter button{flex:1;padding-inline:8px}
+  .app:not(.admin-app-shell) .order-card{padding:16px;border-radius:16px}
+  .app:not(.admin-app-shell) .order-card .round-icon{width:39px;height:39px}
+  .order-card-kind{font-size:8px}
+}
+@media (max-width:420px){
+  .app:not(.admin-app-shell) .product-grid{gap:9px}
+  .app:not(.admin-app-shell) .product-content{padding:13px}
+  .app:not(.admin-app-shell) .product-art{min-height:155px}
+  .app:not(.admin-app-shell) .product-card h3{font-size:15px}
+  .app:not(.admin-app-shell) .product-price-row .money{font-size:15px}
+  .app:not(.admin-app-shell) .product-price-row small{font-size:8px}
+  .app:not(.admin-app-shell) .badge{padding:4px 6px;font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .app:not(.admin-app-shell) .hamiya-dash-action-primary,.app:not(.admin-app-shell) .hamiya-dash-action-secondary,.app:not(.admin-app-shell) .hamiya-dash-status,.app:not(.admin-app-shell) .hamiya-division,.app:not(.admin-app-shell) .product-arrow,.app:not(.admin-app-shell) button.order-card,.app:not(.admin-app-shell) .upload-card{transition:none!important}
+}

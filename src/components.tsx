@@ -16,6 +16,21 @@ import {
 import { useApp } from './state';
 import type { Category, Product } from './types';
 export const categoryIcons = { food: Wheat, coffee: Coffee, vehicles: CarFront };
+
+export function HamiyaMark({
+  size = 'md',
+  label,
+}: {
+  size?: 'tiny' | 'sm' | 'md';
+  label?: string;
+}) {
+  return (
+    <span className={'hamiya-mark hamiya-mark-' + size} aria-hidden={label ? undefined : true}>
+      <img src="/icon.svg" alt={label || ''} width={48} height={48} />
+    </span>
+  );
+}
+
 export function Money({ value }: { value: number | null | undefined }) {
   return (
     <span className="money">
