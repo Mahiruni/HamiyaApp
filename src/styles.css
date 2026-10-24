@@ -4144,3 +4144,11 @@ html[lang='am'] textarea {
 .admin-notification-item small { color: #617582; }
 .admin-notification-item:hover { background: #eef5f8; }
 .admin-notification-item:focus-visible { outline: 2px solid #628ba2; outline-offset: -2px; }
+
+/* Distinct administrator operating shell: no customer mobile shopping dock */
+.admin-app-shell .app-body { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.admin-app-shell .sidebar { border-right: 1px solid #dce5eb; }
+.admin-app-shell .sidebar nav .nav-link { min-height: 46px; }
+.admin-app-shell .sidebar nav .nav-link.active { font-weight: 700; }
+.admin-app-shell .topbar { border-bottom: 1px solid #e0e8ee; }
+@media(max-width:767px) { .admin-app-shell .app-body { padding-bottom: env(safe-area-inset-bottom, 0px); } .admin-app-shell .admin-page { padding-bottom: 32px; } }
