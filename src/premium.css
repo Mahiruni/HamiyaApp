@@ -18,6 +18,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .app:not(.admin-app-shell) .hamiya-dash-side,.app:not(.admin-app-shell) .hamiya-division,.app:not(.admin-app-shell) .product-card{box-shadow:0 5px 24px rgba(19,54,74,.045);border:1px solid var(--hig-line)}
 .app:not(.admin-app-shell) .hamiya-division{border-radius:20px;min-height:210px}
 .app:not(.admin-app-shell) .hamiya-division-icon{border-radius:15px;background:#eaf2f6}
+.app:not(.admin-app-shell) .hamiya-division.food{border-color:#c8dfcf;background:linear-gradient(145deg,#fff,#f4faf5 74%,#fff8ec)}
+.app:not(.admin-app-shell) .hamiya-division.food .hamiya-division-icon{background:#fff;border:1px solid #e5eadf;color:#057437;overflow:hidden}
+.app:not(.admin-app-shell) .hamiya-division.food .hamiya-division-top{color:#057437}
 .app:not(.admin-app-shell) .product-grid{gap:16px}
 .app:not(.admin-app-shell) .product-card{border-radius:19px;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 .app:not(.admin-app-shell) .product-card:hover{transform:translateY(-2px);border-color:#b6ccd7;box-shadow:0 15px 35px rgba(19,54,74,.10)}
@@ -61,6 +64,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .hamiya-mark-sm{width:39px;height:39px}
 .hamiya-mark-md{width:48px;height:48px}
 .brand .hamiya-mark{filter:drop-shadow(0 5px 8px rgb(21 52 71 / 8%))}
+.food-brand-mark{display:grid;place-items:center;width:100%;height:100%;overflow:hidden;border-radius:inherit;background:#fafafa;line-height:0}
+.food-brand-mark img{display:block;width:100%;height:100%;object-fit:cover}
+.food-brand-icon{padding:0}
+.food-brand-icon .food-brand-mark{border-radius:inherit}
 .brand-name{color:#153447}
 .brand-name small{color:#6a818e}
 .mobile-wordmark{display:flex!important;align-items:center;gap:8px!important}
@@ -92,6 +99,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .app:not(.admin-app-shell) .hamiya-dash-status:focus-visible,.app:not(.admin-app-shell) .hamiya-division:focus-visible{outline:3px solid #7db4d0;outline-offset:3px}
 
 /* Catalog */
+.food-brand-banner{display:grid;grid-template-columns:108px minmax(0,1fr) auto;align-items:center;gap:18px;margin:-3px 0 20px;padding:12px 17px 12px 12px;border:1px solid #c8dfcf;border-radius:20px;background:linear-gradient(110deg,#fff 0%,#f4faf5 68%,#fff8eb 100%);box-shadow:0 8px 22px rgb(5 116 55 / 6%)}
+.food-brand-banner .food-brand-mark{width:108px;height:108px;border:1px solid #e5eadf;border-radius:16px;box-shadow:0 5px 16px rgb(5 116 55 / 8%)}
+.food-brand-banner .eyebrow{color:#057437}
+.food-brand-banner strong{display:block;margin-top:5px;color:#153447;font-size:17px;line-height:1.35}
+.food-brand-banner p{margin-top:4px;font-size:11px}
+.food-brand-palette{display:flex;gap:5px;align-self:start;padding-top:5px}
+.food-brand-palette i{display:block;width:9px;height:31px;border-radius:99px}
+.food-brand-palette .green{background:#057437}.food-brand-palette .orange{background:#fa9d08}.food-brand-palette .red{background:#e71d1b}
 .catalog-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 21px}
 .catalog-snapshot>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border:1px solid #e2eaee;border-radius:14px;background:#fff}
 .catalog-snapshot span{color:#708692;font-size:10px;letter-spacing:.03em}
@@ -163,6 +178,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .hamiya-mark-sm{width:36px;height:36px}
   .app:not(.admin-app-shell) .topbar{min-height:68px}
   .app:not(.admin-app-shell) .topbar .language-select select{max-width:74px}
+  .food-brand-banner{grid-template-columns:76px minmax(0,1fr) auto;gap:11px;padding:9px 11px 9px 9px;border-radius:16px}
+  .food-brand-banner .food-brand-mark{width:76px;height:76px;border-radius:12px}
+  .food-brand-banner strong{font-size:14px}
+  .food-brand-banner p{font-size:10px}
+  .food-brand-palette{gap:3px;padding-top:3px}
+  .food-brand-palette i{width:7px;height:25px}
   .catalog-snapshot{gap:8px}
   .catalog-snapshot>div{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:11px 12px}
   .catalog-snapshot strong{font-size:22px}

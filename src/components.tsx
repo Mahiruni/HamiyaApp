@@ -31,6 +31,26 @@ export function HamiyaMark({
   );
 }
 
+export function FoodBrandMark({
+  alt = 'Hamiya Food Processing',
+  className = '',
+}: {
+  alt?: string;
+  className?: string;
+}) {
+  return (
+    <span className={'food-brand-mark ' + className}>
+      <img
+        src="/brand/hamiya-food-processing.jpg"
+        alt={alt}
+        width={240}
+        height={240}
+        loading="lazy"
+      />
+    </span>
+  );
+}
+
 export function Money({ value }: { value: number | null | undefined }) {
   return (
     <span className="money">
@@ -171,7 +191,7 @@ export function CategoryCard({ category, index = 0 }: { category: Category; inde
         <ArrowUpRight size={23} />
       </div>
       <div className="category-illustration">
-        <Icon strokeWidth={0.9} />
+        {category === 'food' ? <FoodBrandMark alt="" /> : <Icon strokeWidth={0.9} />}
         <span className="orb one" />
         <span className="orb two" />
       </div>

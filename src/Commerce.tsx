@@ -22,7 +22,16 @@ import {
   submissionKey,
   supabase,
 } from './api';
-import { Badge, categoryIcons, Dialog, Empty, Field, Money, ProductArt } from './components';
+import {
+  Badge,
+  categoryIcons,
+  Dialog,
+  Empty,
+  Field,
+  FoodBrandMark,
+  Money,
+  ProductArt,
+} from './components';
 import { useApp } from './state';
 import type { Category, Enquiry, Order, Product } from './types';
 
@@ -72,6 +81,21 @@ export function CatalogPage() {
           </span>
         </div>
       </div>
+      {category === 'food' && (
+        <div className="food-brand-banner">
+          <FoodBrandMark alt={t('foodBrand')} />
+          <div>
+            <span className="eyebrow">{t('food')}</span>
+            <strong>{t('foodBrand')}</strong>
+            <p>{t('foodDesc')}</p>
+          </div>
+          <span className="food-brand-palette" aria-hidden="true">
+            <i className="green" />
+            <i className="orange" />
+            <i className="red" />
+          </span>
+        </div>
+      )}
       <div className="catalog-snapshot" aria-label={t('catalogSnapshot')}>
         <div>
           <span>{t('products')}</span>

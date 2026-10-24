@@ -26,7 +26,7 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { configured } from './api';
-import { Empty, HamiyaMark } from './components';
+import { Empty, FoodBrandMark, HamiyaMark } from './components';
 import { Cart, CatalogPage, OrdersPage } from './Commerce';
 import { languages } from './i18n';
 import { useApp } from './state';
@@ -551,10 +551,16 @@ function Home() {
         </div>
         <div className="hamiya-division-grid">
           {divisions.map(({ id, title, detail, icon: Icon, count }, index) => (
-            <button className="hamiya-division" key={id} onClick={() => navigate('catalog/' + id)}>
+            <button
+              className={'hamiya-division ' + id}
+              key={id}
+              onClick={() => navigate('catalog/' + id)}
+            >
               <div className="hamiya-division-top">
-                <span className="hamiya-division-icon">
-                  <Icon size={23} strokeWidth={1.6} />
+                <span
+                  className={'hamiya-division-icon ' + (id === 'food' ? 'food-brand-icon' : '')}
+                >
+                  {id === 'food' ? <FoodBrandMark alt="" /> : <Icon size={23} strokeWidth={1.6} />}
                 </span>
                 <ArrowUpRight size={19} />
               </div>
