@@ -234,9 +234,9 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
   }
   return (
     <Dialog title={name} onClose={onClose} wide>
-      <div className="product-detail-layout">
-        <ProductArt product={product} />
-        <div>
+      <div className="product-detail-layout hamiya-product-detail">
+        <div className="hamiya-product-hero"><ProductArt product={product} /></div>
+        <div className="hamiya-product-content">
           <span className="eyebrow">{t(product.category + 'Brand')}</span>
           <h2>
             {name} <small>{variantLabel(product.variant, t)}</small>
@@ -251,7 +251,7 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
             <p>{product.sales_unit ? '/ ' + unitLabel(product.sales_unit, t) : t('unitPending')}</p>
           </div>
           {description && <p>{description}</p>}
-          <dl className="details-list">
+          <dl className="details-list hamiya-product-facts">
             {product.pack_count && (
               <div>
                 <dt>{t('pack')}</dt>
@@ -277,6 +277,10 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
           </dl>
           {product.category === 'food' ? (
             <>
+              <div className="hamiya-product-quantity">
+                <span className="hamiya-quantity-label">{t('foodQuantity')}</span>
+                <div className="hamiya-quantity-stepper">
+                  <button type="button" aria-label={t('remove')} disabled={quantityNumber <= minimumOrder} onClick={() => setQuantity(String(Math.max(minimumOrder, (Number.isFinite(quantityNumber) ? quantityNumber : minimumOrder) - 1)))}><Minus size={18} /></button>
               <Field
                 label={t('foodQuantity')}
                 hint={t('minimumCartons')}
@@ -304,6 +308,9 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
                     );
                 }}
               />
+                  <button type="button" aria-label={t('add')} disabled={!available || quantityNumber >= product.available_quantity} onClick={() => setQuantity(String(Math.min(product.available_quantity, (Number.isFinite(quantityNumber) ? quantityNumber : minimumOrder) + 1)))}><Plus size={18} /></button>
+                </div>
+              </div>
               {product.available_quantity < minimumOrder && (
                 <p className="muted small-text">{t('stockBelowMinimum')}</p>
               )}
