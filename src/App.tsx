@@ -27,8 +27,15 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { configured } from './api';
-import { Empty, FoodBrandMark, HamiyaMark } from './components';
-import { Cart, CatalogPage, OrdersPage } from './Commerce';
+import { Empty, FoodBrandMark, HamiyaMark, LoadingState, StartupSplash } from './components';
+import { useCompactLayout, useKeyboardViewport, useOverlay } from './experience';
+const CatalogPage = lazy(() =>
+  import('./Commerce').then((module) => ({ default: module.CatalogPage })),
+);
+const OrdersPage = lazy(() =>
+  import('./Commerce').then((module) => ({ default: module.OrdersPage })),
+);
+const Cart = lazy(() => import('./Commerce').then((module) => ({ default: module.Cart })));
 import { languages } from './i18n';
 import { useApp } from './state';
 import { appView } from './navigation';
@@ -73,15 +80,35 @@ export default function App() {
   const standalone = view !== 'dashboard';
   const isStaff = !!user && user.role !== 'customer';
   const adminNavigation = [
-    { route: 'admin', label: 'Command center', icon: BarChart3 },
-    { route: 'admin/customers', label: 'Customer verification', icon: Users },
-    { route: 'admin/orders', label: 'Orders', icon: ClipboardList },
-    { route: 'admin/products', label: 'Inventory', icon: Package },
-    { route: 'admin/requests', label: 'Enquiries', icon: MessageCircle },
-    { route: 'admin/settings', label: 'Settings', icon: Settings2 },
+    { route: 'admin', label: 'overview', icon: BarChart3 },
+    { route: 'admin/customers', label: 'customers', icon: Users },
+    { route: 'admin/orders', label: 'adminOrders', icon: ClipboardList },
+    { route: 'admin/products', label: 'products', icon: Package },
+    { route: 'admin/requests', label: 'requests', icon: MessageCircle },
+    { route: 'admin/settings', label: 'settings', icon: Settings2 },
   ];
   const [drawer, setDrawer] = useState(false);
+  const compact = useCompactLayout();
+  const mobileDrawer = drawer && compact && !standalone;
+  useOverlay(mobileDrawer, () => setDrawer(false));
+  useKeyboardViewport();
   const drawerRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!compact) setDrawer(false);
+  }, [compact]);
+  useEffect(() => {
+    const title =
+      view === 'auth'
+        ? root === 'register'
+          ? 'register'
+          : root === 'forgot'
+            ? 'resetPassword'
+            : 'signIn'
+        : view === 'onboarding'
+          ? 'profile'
+          : headerPageKey;
+    document.title = `${t(title)} · HAMIYA`;
+  }, [headerPageKey, root, t, view]);
   useEffect(() => {
     if (isStaff && view === 'dashboard' && root !== 'admin' && root !== 'account') {
       navigate('admin');
@@ -94,10 +121,8 @@ export default function App() {
     }
   }, [standalone, setCartOpen]);
   useEffect(() => {
-    if (!drawer || standalone) return;
+    if (!mobileDrawer) return;
     const previousFocus = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     drawerRef.current?.querySelector<HTMLButtonElement>('button')?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setDrawer(false);
@@ -118,14 +143,14 @@ export default function App() {
     document.addEventListener('keydown', onKey);
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = previousOverflow;
       previousFocus?.focus();
     };
-  }, [drawer, standalone]);
+  }, [mobileDrawer]);
   function go(value: string) {
     navigate(value);
     setDrawer(false);
   }
+  if (view === 'loading') return <StartupSplash />;
   if (standalone)
     return (
       <div className={'entry-screen entry-' + view}>
@@ -161,12 +186,10 @@ export default function App() {
           </div>
         )}
         <main id="main" className="entry-main" tabIndex={-1}>
-          {view === 'loading' ? (
-            <EntryLoading />
-          ) : view === 'information' ? (
+          {view === 'information' ? (
             <Information page={root} />
           ) : (
-            <Suspense fallback={<EntryLoading />}>
+            <Suspense fallback={<LoadingState />}>
               <Account key={user?.id || 'guest'} />
             </Suspense>
           )}
@@ -185,7 +208,15 @@ export default function App() {
       >
         {t('continue')}
       </a>
-      <aside ref={drawerRef} className={'sidebar ' + (drawer ? 'open' : '')}>
+      <aside
+        ref={drawerRef}
+        id="app-drawer"
+        className={'sidebar ' + (mobileDrawer ? 'open' : '')}
+        role={mobileDrawer ? 'dialog' : undefined}
+        aria-modal={mobileDrawer || undefined}
+        aria-label={t('navigation')}
+        inert={compact && !mobileDrawer}
+      >
         <div className="sidebar-brand">
           <button
             className="brand"
@@ -194,7 +225,7 @@ export default function App() {
           >
             <HamiyaMark size="sm" />
             <span className="brand-name">
-              hamiya<small>FOOD PROCESSING</small>
+              HAMIYA<small>{t('groupName')}</small>
             </span>
           </button>
           <button
@@ -207,25 +238,32 @@ export default function App() {
         </div>
         <div className="sidebar-divider" />
         <nav aria-label={t('home')}>
-          {(isStaff ? adminNavigation : navigation).map(
-            ({ route: destination, label, icon: Icon }) => (
-              <button
-                key={destination}
-                className={
-                  'nav-link ' +
-                  ((isStaff ? route === destination : root === destination) ? 'active' : '')
-                }
-                aria-current={
-                  (isStaff ? route === destination : root === destination) ? 'page' : undefined
-                }
-                onClick={() => go(destination)}
-              >
-                <Icon size={19} strokeWidth={1.7} />
-                {isStaff ? label : t(label)}
-                {root === destination && <span className="nav-active-dot" />}
-              </button>
-            ),
-          )}
+          {(isStaff
+            ? adminNavigation.filter(
+                (item) =>
+                  user?.role === 'admin' ||
+                  (user?.role === 'reviewer'
+                    ? ['admin', 'admin/customers'].includes(item.route)
+                    : !['admin/customers', 'admin/settings'].includes(item.route)),
+              )
+            : navigation
+          ).map(({ route: destination, label, icon: Icon }) => (
+            <button
+              key={destination}
+              className={
+                'nav-link ' +
+                ((isStaff ? route === destination : root === destination) ? 'active' : '')
+              }
+              aria-current={
+                (isStaff ? route === destination : root === destination) ? 'page' : undefined
+              }
+              onClick={() => go(destination)}
+            >
+              <Icon size={19} strokeWidth={1.7} />
+              {t(label)}
+              {root === destination && <span className="nav-active-dot" />}
+            </button>
+          ))}
         </nav>
         {!isStaff && <div className="sidebar-section-label">{t('family')}</div>}
         {!isStaff && (
@@ -248,13 +286,13 @@ export default function App() {
           </div>
         )}
         <div className="sidebar-bottom">
-          {user && user.role !== 'customer' && (
+          {isStaff && (
             <button
-              className={'nav-link ' + (root === 'admin' ? 'active' : '')}
-              onClick={() => go('admin')}
+              className={'nav-link ' + (root === 'account' ? 'active' : '')}
+              onClick={() => go('account')}
             >
-              <Building2 size={19} />
-              {t('admin')}
+              <UserRound size={19} />
+              {t('account')}
             </button>
           )}
           <button className="nav-link" onClick={() => go('help')}>
@@ -268,39 +306,40 @@ export default function App() {
           <div className="sidebar-copyright">© {new Date().getFullYear()} Hamiya</div>
         </div>
       </aside>
-      {drawer && (
+      {mobileDrawer && (
         <button
           className="drawer-backdrop"
           aria-label={t('close')}
           onClick={() => setDrawer(false)}
         />
       )}
-      <div className="app-body" inert={drawer}>
+      <div className="app-body" inert={mobileDrawer}>
         <header className="topbar">
           <div className="topbar-left">
             <button
               className="icon-button mobile-only"
-              aria-label={t('categories')}
+              aria-label={t('openMenu')}
+              aria-expanded={mobileDrawer}
+              aria-controls="app-drawer"
               onClick={() => setDrawer(true)}
             >
               <Menu size={23} />
             </button>
             <div className="topbar-context">
-              <HamiyaMark size="tiny" />
               <div className="topbar-context-copy">
-                <span>HAMIYA FOOD PROCESSING</span>
+                <span>{t(isStaff ? 'workspace' : 'customerPortal')}</span>
                 <strong>{t(headerPageKey)}</strong>
               </div>
             </div>
             <button
               className="mobile-wordmark"
               onClick={() => navigate(isStaff ? 'admin' : 'home')}
-              aria-label="Hamiya Food Processing"
+              aria-label="HAMIYA"
             >
               <HamiyaMark size="tiny" />
               <span className="mobile-wordmark-copy">
                 <strong>HAMIYA</strong>
-                <small>FOOD PROCESSING</small>
+                <small>{t('customerPortal')}</small>
               </span>
             </button>
           </div>
@@ -366,7 +405,7 @@ export default function App() {
           <div className="announcement-bar">{catalog.settings.announcement[language]}</div>
         )}
         <main id="main" tabIndex={-1}>
-          <Suspense fallback={<div className="loading-row">{t('loading')}</div>}>
+          <Suspense fallback={<LoadingState />}>
             {isStaff && root === 'admin' ? (
               <Admin />
             ) : root === 'home' ? (
@@ -387,7 +426,7 @@ export default function App() {
           </Suspense>
         </main>
         <footer className="site-footer">
-          <span>Hamiya Food Processing</span>
+          <span>{t('groupName')}</span>
           <div>
             <button onClick={() => navigate('privacy')}>{t('privacy')}</button>
             <button onClick={() => navigate('terms')}>{t('terms')}</button>
@@ -396,11 +435,12 @@ export default function App() {
         </footer>
       </div>
       {!isStaff && (
-        <nav className="mobile-nav" aria-label={t('categories')} inert={drawer}>
+        <nav className="mobile-nav" aria-label={t('navigation')} inert={mobileDrawer}>
           {navigation.map(({ route: destination, label, icon: Icon }) => (
             <button
               key={destination}
               className={root === destination ? 'active' : ''}
+              aria-current={root === destination ? 'page' : undefined}
               onClick={() => go(destination)}
             >
               <Icon size={21} strokeWidth={root === destination ? 2 : 1.7} />
@@ -409,23 +449,11 @@ export default function App() {
           ))}
         </nav>
       )}
-      {!isStaff && cartOpen && <Cart />}
-    </div>
-  );
-}
-function EntryLoading() {
-  const { t } = useApp();
-  return (
-    <div className="entry-loading" role="status">
-      <img
-        className="entry-loading-logo"
-        src="/brand/hamiya-food-processing.jpg"
-        alt="Hamiya Food Processing"
-        width={240}
-        height={240}
-      />
-      <strong>HAMIYA FOOD PROCESSING</strong>
-      <span>{t('loading')}</span>
+      {!isStaff && cartOpen && (
+        <Suspense fallback={null}>
+          <Cart />
+        </Suspense>
+      )}
     </div>
   );
 }
@@ -464,16 +492,6 @@ function Home() {
         : t('completeVerification');
   return (
     <div className="home-page">
-      <div className="home-intro">
-        <div>
-          <span className="intro-dot" />
-          {t(user ? 'welcomeBack' : 'welcome')}
-          {user && `, ${user.profile.full_name?.split(' ')[0]}`}
-        </div>
-        <span className="intro-location">
-          {t('country')} <span>·</span> ETB
-        </span>
-      </div>
       <section className="hamiya-dashboard" aria-label={t('customerPortal')}>
         <div className="hamiya-dash-head">
           <div className="hamiya-dash-heading">
@@ -496,9 +514,7 @@ function Home() {
           <div className="hamiya-dash-main">
             <div className="hamiya-dash-main-top">
               <span className="hamiya-dash-overline">{t('businessConnected')}</span>
-              <span className="hamiya-dash-mark" aria-hidden="true">
-                H.
-              </span>
+              <HamiyaMark size="sm" />
             </div>
             <h2>
               {t('discover')} {t('order')}
@@ -580,7 +596,7 @@ function Home() {
                 <ArrowUpRight size={19} />
               </div>
               <span className="hamiya-division-index">
-                0{index + 1} / {t('groupShort')}
+                0{index + 1} / {t(id)}
               </span>
               <strong>{title}</strong>
               <small>{detail}</small>
@@ -591,49 +607,6 @@ function Home() {
             </button>
           ))}
         </div>
-      </section>
-      <section className="how-section">
-        <div className="section-heading">
-          <div>
-            <h2>{t('howWorks')}</h2>
-            <p>{t('howIntro')}</p>
-          </div>
-          <span className="how-flower">✳</span>
-        </div>
-        <div className="how-grid">
-          {[
-            { key: 'stepOne', icon: UserRound },
-            { key: 'stepTwo', icon: ShieldCheck },
-            { key: 'stepThree', icon: ShoppingBag },
-          ].map(({ key, icon: Icon }, i) => (
-            <div className="how-step" key={key}>
-              <span className="how-icon">
-                <Icon size={23} strokeWidth={1.4} />
-              </span>
-              <div>
-                <small>0{i + 1}</small>
-                <h3>{t(key)}</h3>
-                <p>{t(key + 'Text')}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-      <section className="local-banner">
-        <span className="local-banner-icon">
-          <Globe2 size={36} strokeWidth={1} />
-        </span>
-        <div>
-          <span className="eyebrow">{t('localFirst')}</span>
-          <h3>{t('localText')}</h3>
-        </div>
-        <button
-          className="icon-button"
-          onClick={() => navigate('account')}
-          aria-label={t('createAccount')}
-        >
-          <ArrowUpRight size={25} />
-        </button>
       </section>
     </div>
   );

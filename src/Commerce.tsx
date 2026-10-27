@@ -24,6 +24,7 @@ import {
 } from './api';
 import {
   Badge,
+  Button,
   categoryIcons,
   Dialog,
   Empty,
@@ -425,10 +426,10 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
                 <span>{t('notes')} *</span>
                 <textarea name="notes" required rows={3} maxLength={2000} />
               </label>
-              <button className="button primary full" disabled={busy || !online}>
+              <Button busy={busy} className="button primary full" disabled={busy || !online}>
                 {t(busy ? 'loading' : 'submit')}
                 <ArrowRight size={16} />
-              </button>
+              </Button>
             </form>
           )}
         </div>
@@ -685,7 +686,8 @@ export function Cart() {
           </div>
           <p className="muted small-text">{t('orderNotice')}</p>
           {!allowed && <div className="notice">{t('approvalNotice')}</div>}
-          <button
+          <Button
+            busy={busy}
             className="button primary full"
             disabled={
               busy || !online || changed || (!catalog.settings.pickup && !catalog.settings.delivery)
@@ -694,7 +696,7 @@ export function Cart() {
           >
             {t(busy ? 'loading' : allowed ? 'submitOrder' : 'finishProfile')}
             <ArrowRight size={17} />
-          </button>
+          </Button>
         </>
       )}
     </Dialog>
@@ -943,7 +945,8 @@ export function OrdersPage() {
           </p>
           <p>{current.note}</p>
           {['submitted', 'accepted'].includes(current.status) && (
-            <button
+            <Button
+              busy={busy}
               className="button secondary full danger"
               disabled={busy || !online}
               onClick={async () => {
@@ -960,7 +963,7 @@ export function OrdersPage() {
               }}
             >
               {t('cancel')}
-            </button>
+            </Button>
           )}
         </Dialog>
       )}

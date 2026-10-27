@@ -16,7 +16,7 @@ export function AuthField({
   const id = useId();
   return (
     <div className="auth-field">
-      <label className="sr-only" htmlFor={id}>
+      <label className="auth-field-label" htmlFor={id}>
         {label}
       </label>
       <div className="auth-field-control">
@@ -135,19 +135,5 @@ export function AuthIllustration({ register = false }: { register?: boolean }) {
       <circle cx="258" cy="152" r="3" fill="#a3bdcc" />
       <path d="M247 33V41M243 37H251" stroke="#a3bdcc" strokeWidth="2" strokeLinecap="round" />
     </svg>
-  );
-}
-
-export function FoodBrandAuthIllustration() {
-  return (
-    <div className="auth-illustration food-auth-illustration" aria-hidden="true">
-      <span className="food-auth-orbit" />
-      <span className="food-auth-accent orange" />
-      <span className="food-auth-accent green" />
-      <span className="food-auth-accent black" />
-      <span className="food-auth-logo">
-        <img src="/brand/hamiya-food-icon-512.png" alt="" width={512} height={512} />
-      </span>
-    </div>
   );
 }

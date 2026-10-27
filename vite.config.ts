@@ -1,5 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
@@ -29,8 +32,29 @@ export default defineConfig(({ mode, command }) => {
                   attrs: { 'http-equiv': 'Content-Security-Policy', content: csp },
                   injectTo: 'head-prepend' as const,
                 },
+                {
+                  tag: 'meta',
+                  attrs: {
+                    name: 'hamiya-build',
+                    content: process.env.VERCEL_GIT_COMMIT_SHA || 'local',
+                  },
+                  injectTo: 'head' as const,
+                },
               ]
             : [];
+        },
+        writeBundle(options, bundle) {
+          const assets = Object.keys(bundle)
+            .filter((name) => /\.(js|css)$/.test(name))
+            .map((name) => '/' + name);
+          const version = createHash('sha256')
+            .update(JSON.stringify(assets))
+            .digest('hex')
+            .slice(0, 12);
+          const worker = readFileSync('public/sw.js', 'utf8')
+            .replace('/* HAMIYA_BUILD_ASSETS */ []', JSON.stringify(assets))
+            .replace('hamiya-shell-v7', 'hamiya-shell-' + version);
+          writeFileSync(resolve(options.dir || 'dist', 'sw.js'), worker);
         },
       },
     ],

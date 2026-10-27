@@ -5,11 +5,13 @@ import {
   useEffect,
   useRef,
   useState,
+  useMemo,
   type ReactNode,
 } from 'react';
 import { AppError, configured, currentProfile, loadCatalog, rpc, supabase } from './api';
 import { languages, translate, type Language } from './i18n';
 import type { CartItem, Catalog, Customer, Product } from './types';
+import { navigateHistory } from './overlay-history';
 const initialCatalog: Catalog = {
   products: [],
   settings: {
@@ -100,6 +102,7 @@ export function Provider({ children }: { children: ReactNode }) {
   const [cartOpen, setCartOpen] = useState(false);
   const [recovery, setRecovery] = useState(window.location.hash.includes('type=recovery'));
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const catalogRequest = useRef<Promise<void> | null>(null);
   const languageRef = useRef(language);
   languageRef.current = language;
   useEffect(() => {
@@ -119,7 +122,7 @@ export function Provider({ children }: { children: ReactNode }) {
     [toast],
   );
   const navigate = useCallback((next: string) => {
-    history.pushState(null, '', '#' + next);
+    navigateHistory(next);
     setRoute(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -131,51 +134,62 @@ export function Provider({ children }: { children: ReactNode }) {
       setAuthLoading(false);
     }
   }, []);
-  const refreshCatalog = useCallback(async () => {
-    try {
-      const data = await loadCatalog();
-      setCatalog(data);
-      persist('hamiya-catalog-v1', data);
-      setCached(false);
-      setCatalogError('');
-    } catch (error) {
-      setCatalogError(error instanceof AppError ? error.code : 'connectionError');
-      setCached(true);
-    } finally {
-      setCatalogLoading(false);
-    }
+  const refreshCatalog = useCallback(() => {
+    if (catalogRequest.current) return catalogRequest.current;
+    const request = (async () => {
+      try {
+        const data = await loadCatalog();
+        setCatalog(data);
+        persist('hamiya-catalog-v1', data);
+        setCached(false);
+        setCatalogError('');
+      } catch (error) {
+        setCatalogError(error instanceof AppError ? error.code : 'connectionError');
+        setCached(true);
+      } finally {
+        setCatalogLoading(false);
+      }
+    })();
+    catalogRequest.current = request;
+    void request.finally(() => {
+      catalogRequest.current = null;
+    });
+    return request;
   }, []);
-  function setLanguage(next: Language) {
-    setLang(next);
-    persist('hamiya-language', next);
-    if (user && online) {
-      void rpc('preferences', { language: next }).catch(notifyError);
-      void supabase?.auth.updateUser({ data: { language: next } });
-    }
-  }
-  function setCart(items: CartItem[]) {
+  const setLanguage = useCallback(
+    (next: Language) => {
+      setLang(next);
+      persist('hamiya-language', next);
+      if (user && online) {
+        void rpc('preferences', { language: next }).catch(notifyError);
+        void supabase?.auth.updateUser({ data: { language: next } });
+      }
+    },
+    [user?.id, online, notifyError],
+  );
+  const setCart = useCallback((items: CartItem[]) => {
     updateCart(items);
     persist('hamiya-cart-v1', items);
-  }
-  function addCart(p: Product, quantity: number) {
-    if (!p.confirmed || !p.price_cents || !['available', 'low_stock'].includes(p.status)) return;
-    const existing = cart.find((x) => x.id === p.id);
-    const amount = Math.min((existing?.quantity || 0) + quantity, p.available_quantity);
-    setCart([
-      ...cart.filter((x) => x.id !== p.id),
-      {
-        id: p.id,
-        name: p.name,
-        quantity: amount,
-        price_cents: p.price_cents,
-        sales_unit: p.sales_unit,
-      },
-    ]);
-    toast(t('addedCart'));
-  }
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+  }, []);
+  const addCart = useCallback(
+    (p: Product, quantity: number) => {
+      if (!p.confirmed || !p.price_cents || !['available', 'low_stock'].includes(p.status)) return;
+      const existing = cart.find((x) => x.id === p.id);
+      const amount = Math.min((existing?.quantity || 0) + quantity, p.available_quantity);
+      setCart([
+        ...cart.filter((x) => x.id !== p.id),
+        {
+          id: p.id,
+          name: p.name,
+          quantity: amount,
+          price_cents: p.price_cents,
+          sales_unit: p.sales_unit,
+        },
+      ]);
+      toast(t('addedCart'));
+    },
+    [cart, setCart, t, toast],
+  );
   useEffect(() => {
     const client = supabase;
     if (!user?.id || !client) return;
@@ -246,35 +260,59 @@ export function Provider({ children }: { children: ReactNode }) {
       clearTimeout(timer.current);
     };
   }, [refreshCatalog, refreshUser, notifyError]);
+  const value = useMemo(
+    () => ({
+      language,
+      t,
+      setLanguage,
+      user,
+      authLoading,
+      setUser,
+      refreshUser,
+      catalog,
+      refreshCatalog,
+      catalogLoading,
+      catalogError,
+      cached,
+      route,
+      navigate,
+      online,
+      cart,
+      setCart,
+      addCart,
+      toast,
+      notifyError,
+      cartOpen,
+      setCartOpen,
+      recovery,
+      setRecovery,
+    }),
+    [
+      language,
+      t,
+      setLanguage,
+      user,
+      authLoading,
+      refreshUser,
+      catalog,
+      refreshCatalog,
+      catalogLoading,
+      catalogError,
+      cached,
+      route,
+      navigate,
+      online,
+      cart,
+      setCart,
+      addCart,
+      toast,
+      notifyError,
+      cartOpen,
+      recovery,
+    ],
+  );
   return (
-    <Context.Provider
-      value={{
-        language,
-        t,
-        setLanguage,
-        user,
-        authLoading,
-        setUser,
-        refreshUser,
-        catalog,
-        refreshCatalog,
-        catalogLoading,
-        catalogError,
-        cached,
-        route,
-        navigate,
-        online,
-        cart,
-        setCart,
-        addCart,
-        toast,
-        notifyError,
-        cartOpen,
-        setCartOpen,
-        recovery,
-        setRecovery,
-      }}
-    >
+    <Context.Provider value={value}>
       {children}
       {message && (
         <div className="toast" role="status">

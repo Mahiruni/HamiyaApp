@@ -1,26 +1,38 @@
-const CACHE = 'hamiya-shell-v6';
+const CACHE = 'hamiya-shell-v7';
+const BUILD_ASSETS = /* HAMIYA_BUILD_ASSETS */ [];
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) =>
-      cache.addAll([
-        '/',
-        '/icon-192.png',
-        '/icon-512.png',
-        '/brand/hamiya-food-icon-512.png',
-        '/brand/hamiya-food-processing.jpg',
-        '/manifest.webmanifest',
-      ]),
-    ),
+    caches
+      .open(CACHE)
+      .then((cache) =>
+        cache.addAll([
+          '/',
+          '/icon-192.png',
+          '/icon-512.png',
+          '/startup.css',
+          '/brand/hamiya-food-icon-192.png',
+          '/fonts/Benaiah.ttf',
+          '/brand/hamiya-food-icon-512.png',
+          '/brand/hamiya-food-processing.jpg',
+          '/manifest.webmanifest',
+          ...BUILD_ASSETS,
+        ]),
+      ),
   );
   self.skipWaiting();
 });
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))),
-      ),
+    caches.keys().then((keys) => {
+      // Keep the previous build's chunks available to tabs already open during a release.
+      const shells = keys.filter((key) => key.startsWith('hamiya-shell-'));
+      return Promise.all(
+        shells
+          .slice(0, -2)
+          .filter((key) => key !== CACHE)
+          .map((key) => caches.delete(key)),
+      );
+    }),
   );
   self.clients.claim();
 });
@@ -54,9 +66,12 @@ self.addEventListener('fetch', (event) => {
   }
   if (
     url.pathname.startsWith('/assets/') ||
+    url.pathname.startsWith('/fonts/') ||
     [
       '/icon-192.png',
       '/icon-512.png',
+      '/startup.css',
+      '/brand/hamiya-food-icon-192.png',
       '/brand/hamiya-food-icon-512.png',
       '/brand/hamiya-food-processing.jpg',
       '/manifest.webmanifest',
@@ -64,7 +79,9 @@ self.addEventListener('fetch', (event) => {
   ) {
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {
-        const hit = await cache.match(event.request);
+        const hit =
+          (await cache.match(event.request)) ||
+          (url.pathname.startsWith('/assets/') ? await caches.match(event.request) : undefined);
         if (hit) return hit;
         const response = await fetch(event.request);
         if (response.ok) await cache.put(event.request, response.clone());

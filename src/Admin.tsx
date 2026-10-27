@@ -1,3 +1,4 @@
+import { validStockTarget } from './inventory';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
   ArrowRight,
@@ -22,7 +23,7 @@ import {
   rpc,
   uploadProductImage,
 } from './api';
-import { Badge, Dialog, Empty, Field, Money } from './components';
+import { Badge, Button, Dialog, Empty, Field, Money } from './components';
 import { languages } from './i18n';
 import { useApp } from './state';
 import type { BusinessSettings, Customer, Dashboard, Enquiry, Order, Product } from './types';
@@ -47,10 +48,21 @@ type Tab = 'overview' | 'products' | 'customers' | 'orders' | 'requests' | 'sett
 export default function Admin() {
   const { t, user, navigate, route, notifyError, toast, online, refreshCatalog } = useApp();
   const initialTab = (route.split('/')[1] || 'overview') as Tab;
-  const [tab, setTab] = useState<Tab>(['overview','products','customers','orders','requests','settings','activity'].includes(initialTab) ? initialTab : 'overview');
+  const [tab, setTab] = useState<Tab>(
+    ['overview', 'products', 'customers', 'orders', 'requests', 'settings', 'activity'].includes(
+      initialTab,
+    )
+      ? initialTab
+      : 'overview',
+  );
   useEffect(() => {
     const next = route.split('/')[1] || 'overview';
-    if (['overview','products','customers','orders','requests','settings','activity'].includes(next)) setTab(next as Tab);
+    if (
+      ['overview', 'products', 'customers', 'orders', 'requests', 'settings', 'activity'].includes(
+        next,
+      )
+    )
+      setTab(next as Tab);
   }, [route]);
   const [search, setSearch] = useState('');
   const [data, setData] = useState<Dashboard>(empty);
@@ -63,14 +75,20 @@ export default function Admin() {
   const [busy, setBusy] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const alertTypes = [
-    { id: 'order_submitted', label: 'New customer orders', description: 'Orders successfully submitted' },
-    { id: 'customer_verification', label: 'Customer verification', description: 'Applications awaiting review' },
-    { id: 'payment_evidence', label: 'Payment screenshots', description: 'Payment evidence awaiting verification' },
-    { id: 'low_inventory', label: 'Low inventory', description: 'Stock at or below threshold' },
-    { id: 'critical_system', label: 'Critical system alerts', description: 'Operational failures requiring attention' },
+    { id: 'order_submitted', label: t('alertOrders'), description: t('alertOrdersHint') },
+    {
+      id: 'customer_verification',
+      label: t('alertVerification'),
+      description: t('alertVerificationHint'),
+    },
+    { id: 'payment_evidence', label: t('alertPayments'), description: t('alertPaymentsHint') },
+    { id: 'low_inventory', label: t('alertInventory'), description: t('alertInventoryHint') },
+    { id: 'critical_system', label: t('alertCritical'), description: t('alertCriticalHint') },
   ];
-  const [telegramPrefs, setTelegramPrefs] = useState<Record<string,boolean>>({});
-  const [telegramCounts, setTelegramCounts] = useState<{channel:string;state:string;count:number}[]>([]);
+  const [telegramPrefs, setTelegramPrefs] = useState<Record<string, boolean>>({});
+  const [telegramCounts, setTelegramCounts] = useState<
+    { channel: string; state: string; count: number }[]
+  >([]);
   const [telegramSaving, setTelegramSaving] = useState<string | null>(null);
   async function loadTelegramPreferences() {
     if (!supabase || user?.role !== 'admin') return;
@@ -79,19 +97,28 @@ export default function Admin() {
       supabase.rpc('hamiya_admin_notification_status'),
     ]);
     if (prefs.error) notifyError(prefs.error);
-    else setTelegramPrefs(Object.fromEntries((prefs.data || []).map((p) => [p.event_type, p.enabled])));
+    else
+      setTelegramPrefs(
+        Object.fromEntries((prefs.data || []).map((p) => [p.event_type, p.enabled])),
+      );
     if (!counts.error && Array.isArray(counts.data)) setTelegramCounts(counts.data);
   }
   async function changeTelegramPreference(eventType: string, enabled: boolean) {
     if (!supabase || telegramSaving) return;
     setTelegramSaving(eventType);
     try {
-      const { error } = await supabase.from('hamiya_telegram_preferences').update({ enabled, updated_at: new Date().toISOString() }).eq('event_type', eventType);
+      const { error } = await supabase
+        .from('hamiya_telegram_preferences')
+        .update({ enabled, updated_at: new Date().toISOString() })
+        .eq('event_type', eventType);
       if (error) throw error;
       setTelegramPrefs((old) => ({ ...old, [eventType]: enabled }));
-      toast('Telegram alert preference saved');
-    } catch (error) { notifyError(error); }
-    finally { setTelegramSaving(null); }
+      toast(t('telegramPrefsSaved'));
+    } catch (error) {
+      notifyError(error);
+    } finally {
+      setTelegramSaving(null);
+    }
   }
   const [telegramTesting, setTelegramTesting] = useState(false);
   async function testTelegram() {
@@ -99,17 +126,27 @@ export default function Admin() {
     setTelegramTesting(true);
     try {
       const { data, error } = await supabase.functions.invoke('hamiya-telegram-test', { body: {} });
-      if (error || !data?.ok) throw new Error(data?.detail || data?.error || error?.message || 'Telegram test failed');
-      toast('Telegram test delivered. Check your HAMIYA bot chat.');
-    } catch (error) { notifyError(error); }
-    finally { setTelegramTesting(false); }
+      if (error || !data?.ok)
+        throw new Error(data?.detail || data?.error || error?.message || 'Telegram test failed');
+      toast(t('telegramTestDelivered'));
+    } catch (error) {
+      notifyError(error);
+    } finally {
+      setTelegramTesting(false);
+    }
   }
-  const [notifications, setNotifications] = useState<{ id: string; order_id: string; created_at: string }[]>([]);
+  const [notifications, setNotifications] = useState<
+    { id: string; order_id: string; created_at: string }[]
+  >([]);
   const [readIds, setReadIds] = useState<string[]>([]);
   async function loadNotifications() {
     if (!supabase || !user || user.role === 'customer') return;
     const [events, receipts] = await Promise.all([
-      supabase.from('hamiya_admin_notifications').select('id,order_id,created_at').order('created_at', { ascending: false }).limit(40),
+      supabase
+        .from('hamiya_admin_notifications')
+        .select('id,order_id,created_at')
+        .order('created_at', { ascending: false })
+        .limit(40),
       supabase.from('hamiya_notification_reads').select('notification_id').eq('user_id', user.id),
     ]);
     if (!events.error && !receipts.error) {
@@ -119,7 +156,9 @@ export default function Admin() {
   }
   async function openNotification(id: string) {
     if (!supabase || !user) return;
-    const { error } = await supabase.from('hamiya_notification_reads').insert({ notification_id: id, user_id: user.id });
+    const { error } = await supabase
+      .from('hamiya_notification_reads')
+      .insert({ notification_id: id, user_id: user.id });
     if (error && error.code !== '23505') notifyError(error);
     setReadIds((old) => [...new Set([...old, id])]);
     setTab('orders');
@@ -136,10 +175,12 @@ export default function Admin() {
       setData({ ...data, products: data.products.map(hydrateProduct) });
       const ids = new Set(data.orders.map((order) => order.id));
       if (knownOrderIds.current) {
-        const newOrders = data.orders.filter((order) => order.status === 'submitted' && !knownOrderIds.current!.has(order.id));
+        const newOrders = data.orders.filter(
+          (order) => order.status === 'submitted' && !knownOrderIds.current!.has(order.id),
+        );
         if (newOrders.length) {
           setUnreadOrders((count) => count + newOrders.length);
-          toast(newOrders.length === 1 ? 'New customer order received' : `${newOrders.length} new customer orders received`);
+          toast(t('newOrdersReceived').replace('{count}', String(newOrders.length)));
         }
       }
       knownOrderIds.current = ids;
@@ -159,8 +200,16 @@ export default function Admin() {
     void load();
     void loadNotifications();
     void loadTelegramPreferences();
-    const channel = supabase?.channel('hamiya-admin-notifications-' + user.id)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'hamiya_admin_notifications' }, () => { void loadNotifications(); void load(true); })
+    const channel = supabase
+      ?.channel('hamiya-admin-notifications-' + user.id)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'hamiya_admin_notifications' },
+        () => {
+          void loadNotifications();
+          void load(true);
+        },
+      )
       .subscribe();
     const check = () => {
       if (document.visibilityState === 'visible' && navigator.onLine) void load(true);
@@ -228,50 +277,106 @@ export default function Admin() {
       </div>
       {unreadOrders > 0 && (
         <div className="notice" role="status" aria-live="polite">
-          <strong>{unreadOrders} new customer order{unreadOrders === 1 ? '' : 's'} received.</strong>{' '}
-          <button className="button secondary" onClick={() => { setTab('orders'); navigate('admin/orders'); setUnreadOrders(0); }}>
-            View orders <ArrowRight size={16} />
+          <strong>{t('newOrdersReceived').replace('{count}', String(unreadOrders))}</strong>{' '}
+          <button
+            className="button secondary"
+            onClick={() => {
+              setTab('orders');
+              navigate('admin/orders');
+              setUnreadOrders(0);
+            }}
+          >
+            {t('orders')} <ArrowRight size={16} />
           </button>
         </div>
       )}
       <div className="admin-notification-area">
-        <button className="button secondary" aria-label="Administrator notifications" aria-expanded={notificationOpen} onClick={() => { setNotificationOpen(!notificationOpen); void loadNotifications(); }}>
-          <Bell size={18} /> Notifications ({notifications.filter((n) => !readIds.includes(n.id)).length})
+        <button
+          className="button secondary"
+          aria-label={t('notifications')}
+          aria-expanded={notificationOpen}
+          onClick={() => {
+            setNotificationOpen(!notificationOpen);
+            void loadNotifications();
+          }}
+        >
+          <Bell size={18} /> {t('notifications')} (
+          {notifications.filter((n) => !readIds.includes(n.id)).length})
         </button>
         {notificationOpen && (
-          <div className="panel admin-notification-list">
-            <h3>Order notifications</h3>
-            {user?.role === 'admin' && <button className="button secondary" disabled={telegramTesting} onClick={() => void testTelegram()}>{telegramTesting ? 'Sending Telegram test…' : 'Send Telegram test'}</button>}
-            {notifications.length === 0 && <p className="muted">No new orders yet.</p>}
+          <Dialog title={t('orderNotifications')} onClose={() => setNotificationOpen(false)}>
+            {user?.role === 'admin' && (
+              <button
+                className="button secondary"
+                disabled={telegramTesting}
+                onClick={() => void testTelegram()}
+              >
+                {telegramTesting ? t('sendingTest') : t('sendTelegramTest')}
+              </button>
+            )}
+            {notifications.length === 0 && <p className="muted">{t('noNewOrders')}</p>}
             {notifications.map((n) => (
-              <button key={n.id} className="admin-notification-item" onClick={() => void openNotification(n.id)}>
-                <span>{readIds.includes(n.id) ? '✓ ' : '● '}New order #{n.order_id.slice(0, 8).toUpperCase()}</span>
+              <button
+                key={n.id}
+                className="admin-notification-item"
+                onClick={() => void openNotification(n.id)}
+              >
+                <span>
+                  {readIds.includes(n.id) ? '✓ ' : '● '}
+                  {t('newOrder')} #{n.order_id.slice(0, 8).toUpperCase()}
+                </span>
                 <small>{new Date(n.created_at).toLocaleString()}</small>
                 <ArrowRight size={16} />
               </button>
             ))}
-          </div>
+          </Dialog>
         )}
       </div>
       {user.role === 'admin' && tab === 'settings' && (
-        <section className="panel telegram-control-panel" aria-label="Telegram bot control">
+        <section className="panel telegram-control-panel" aria-label={t('telegramControl')}>
           <div className="telegram-control-heading">
-            <div><h2>Telegram Bot Control</h2><p>Manage which operational events send Telegram alerts to the authorized administrator.</p></div>
-            <button className="button secondary" onClick={() => void loadTelegramPreferences()}><RefreshCw size={16}/> Refresh</button>
+            <div>
+              <h2>{t('telegramControl')}</h2>
+              <p>{t('telegramControlIntro')}</p>
+            </div>
+            <button className="button secondary" onClick={() => void loadTelegramPreferences()}>
+              <RefreshCw size={16} /> {t('refresh')}
+            </button>
           </div>
           <div className="telegram-delivery-stats">
-            {['pending','delivered','failed'].map((state) => (
-              <div key={state}><strong>{telegramCounts.filter((r) => r.channel === 'telegram' && r.state === state).reduce((total,r) => total + Number(r.count),0)}</strong><span>{state}</span></div>
+            {['pending', 'delivered', 'failed'].map((state) => (
+              <div key={state}>
+                <strong>
+                  {telegramCounts
+                    .filter((r) => r.channel === 'telegram' && r.state === state)
+                    .reduce((total, r) => total + Number(r.count), 0)}
+                </strong>
+                <span>{t(state)}</span>
+              </div>
             ))}
           </div>
           {alertTypes.map((alert) => (
             <label key={alert.id} className="telegram-preference-row">
-              <span><strong>{alert.label}</strong><small>{alert.description}</small></span>
-              <input type="checkbox" checked={!!telegramPrefs[alert.id]} disabled={telegramSaving !== null || !(alert.id in telegramPrefs)} onChange={(event) => void changeTelegramPreference(alert.id,event.target.checked)}/>
+              <span>
+                <strong>{alert.label}</strong>
+                <small>{alert.description}</small>
+              </span>
+              <input
+                type="checkbox"
+                checked={!!telegramPrefs[alert.id]}
+                disabled={telegramSaving !== null || !(alert.id in telegramPrefs)}
+                onChange={(event) => void changeTelegramPreference(alert.id, event.target.checked)}
+              />
             </label>
           ))}
-          <button className="button secondary" disabled={telegramTesting} onClick={() => void testTelegram()}>{telegramTesting ? 'Sending test…' : 'Send Telegram test'}</button>
-          <p className="muted">Payment and critical-system alerts require their respective event producers. A successful test confirms bot connectivity, not automatic scheduling.</p>
+          <button
+            className="button secondary"
+            disabled={telegramTesting}
+            onClick={() => void testTelegram()}
+          >
+            {telegramTesting ? t('sendingTest') : t('sendTelegramTest')}
+          </button>
+          <p className="muted">{t('telegramNote')}</p>
         </section>
       )}
       <div className="admin-tabs">
@@ -285,7 +390,7 @@ export default function Admin() {
               setSearch('');
             }}
           >
-            {t(value)}
+            {t(value === 'orders' ? 'adminOrders' : value)}
           </button>
         ))}
       </div>
@@ -548,7 +653,8 @@ export default function Admin() {
                     {order.note && <p>{order.note}</p>}
                     <div className="admin-order-actions">
                       {(transitions[order.status] || []).map((status) => (
-                        <button
+                        <Button
+                          busy={busy}
                           key={status}
                           className={
                             'button compact ' +
@@ -560,7 +666,7 @@ export default function Admin() {
                           onClick={() => void changeOrder(order, status)}
                         >
                           {t(status)}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -885,9 +991,9 @@ function ProductEditor({
           <button type="button" className="button secondary" onClick={onClose}>
             {t('cancel')}
           </button>
-          <button className="button primary" disabled={busy || !online}>
+          <Button busy={busy} className="button primary" disabled={busy || !online}>
             {t(busy ? 'loading' : 'save')}
-          </button>
+          </Button>
         </div>
       </form>
     </Dialog>
@@ -906,9 +1012,9 @@ function StockEditor({
   const [busy, setBusy] = useState(false);
   const key = useRef(crypto.randomUUID());
   const [targetStock, setTargetStock] = useState(String(product.stock));
-  const [reason, setReason] = useState('Inventory count correction');
+  const [reason, setReason] = useState(t('stockReasonDefault'));
   const delta = Number(targetStock) - product.stock;
-  const validTarget = /^\\d+$/.test(targetStock) && Number.isSafeInteger(Number(targetStock)) && Number(targetStock) <= 10000000 && Number(targetStock) >= product.reserved;
+  const validTarget = validStockTarget(targetStock, product.reserved);
   async function saveQuantity(e: FormEvent) {
     e.preventDefault();
     if (!validTarget || delta === 0) return;
@@ -919,7 +1025,7 @@ function StockEditor({
         client_key: key.current,
         operation: delta > 0 ? 'add' : 'remove',
         quantity: Math.abs(delta),
-        reason: reason.trim() || 'Inventory count correction',
+        reason: reason.trim() || t('stockReasonDefault'),
       });
       await onSaved();
       toast(t('saved'));
@@ -942,12 +1048,39 @@ function StockEditor({
         </div>
       </div>
       <form onSubmit={saveQuantity} className="stock-direct-edit">
-        <Field label="Set total stock (cartons)" type="number" min={product.reserved} max={10000000} step={1} required value={targetStock} onChange={(e) => setTargetStock(e.target.value)} />
-        <Field label={t('reason')} value={reason} maxLength={500} required onChange={(e) => setReason(e.target.value)} />
-        <p className="muted small-text">{validTarget ? (delta === 0 ? 'No stock change' : `${delta > 0 ? '+' : ''}${delta} cartons will be recorded in inventory history.`) : `Enter a whole number of at least ${product.reserved} reserved cartons.`}</p>
-        <button className="button primary full" disabled={busy || !online || !validTarget || delta === 0}>Save stock quantity</button>
+        <Field
+          label={t('setStock')}
+          type="number"
+          min={product.reserved}
+          max={10000000}
+          step={1}
+          required
+          value={targetStock}
+          onChange={(e) => setTargetStock(e.target.value)}
+        />
+        <Field
+          label={t('reason')}
+          value={reason}
+          maxLength={500}
+          required
+          onChange={(e) => setReason(e.target.value)}
+        />
+        <p className="muted small-text">
+          {validTarget
+            ? delta === 0
+              ? t('stockUnchanged')
+              : t('stockDelta').replace('{count}', `${delta > 0 ? '+' : ''}${delta}`)
+            : t('stockMinimum').replace('{count}', String(product.reserved))}
+        </p>
+        <Button
+          busy={busy}
+          className="button primary full"
+          disabled={busy || !online || !validTarget || delta === 0}
+        >
+          {t('stockSave')}
+        </Button>
       </form>
-      <div className="notice">Or record a separate stock movement below.</div>
+      <div className="notice">{t('stockSeparate')}</div>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -993,9 +1126,9 @@ function StockEditor({
           required
         />
         <Field label={t('reason')} name="reason" maxLength={500} required />
-        <button className="button primary full" disabled={busy || !online}>
+        <Button busy={busy} className="button primary full" disabled={busy || !online}>
           {t(busy ? 'loading' : 'save')}
-        </button>
+        </Button>
       </form>
     </Dialog>
   );
@@ -1110,9 +1243,9 @@ function CustomerReview({
           <span>{t('reason')}</span>
           <textarea name="reason" rows={3} maxLength={1000} defaultValue={customer.review_reason} />
         </label>
-        <button className="button primary full" disabled={busy || !online}>
+        <Button busy={busy} className="button primary full" disabled={busy || !online}>
           {t(busy ? 'loading' : 'save')}
-        </button>
+        </Button>
       </form>
     </Dialog>
   );
@@ -1174,9 +1307,9 @@ function RequestEditor({
           <span>{t('response')}</span>
           <textarea rows={4} name="response" maxLength={3000} defaultValue={request.response} />
         </label>
-        <button className="button primary full" disabled={busy || !online}>
+        <Button busy={busy} className="button primary full" disabled={busy || !online}>
           {t(busy ? 'loading' : 'save')}
-        </button>
+        </Button>
       </form>
     </Dialog>
   );
@@ -1275,9 +1408,9 @@ function Settings({
             />
           </label>
         ))}
-        <button className="button primary" disabled={busy || !online}>
+        <Button busy={busy} className="button primary" disabled={busy || !online}>
           {t(busy ? 'loading' : 'save')}
-        </button>
+        </Button>
       </form>
     </div>
   );

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import {
   authenticate,
+  AppError,
   configured,
   currentProfile,
   openDocument,
@@ -27,8 +28,8 @@ import {
   supabase,
   uploadDocument,
 } from './api';
-import { Badge, Empty, Field, HamiyaMark } from './components';
-import { AuthField, FoodBrandAuthIllustration } from './Auth';
+import { Badge, Button, Empty, Field, HamiyaMark } from './components';
+import { AuthField, AuthIllustration } from './Auth';
 import { authStorage } from './auth-storage';
 import { afterSignIn, authMode, authRoutes, type AuthMode } from './navigation';
 import { languages } from './i18n';
@@ -94,6 +95,7 @@ export default function Account() {
   }, [profileId, notifyError]);
   async function submitAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     setBusy(true);
     setInlineError('');
     const data = new FormData(event.currentTarget);
@@ -125,7 +127,7 @@ export default function Account() {
         if (result.user) navigate(afterSignIn(result.user.verification));
       }
     } catch (error) {
-      notifyError(error);
+      setInlineError(t(error instanceof AppError ? error.code : 'connectionError'));
     } finally {
       setBusy(false);
     }
@@ -259,16 +261,44 @@ export default function Account() {
     const resetting = recovery || mode === 'forgot';
     return (
       <section className="account-auth" aria-labelledby="auth-title">
-        <span className="auth-orbit one" aria-hidden="true" />
-        <span className="auth-orbit two" aria-hidden="true" />
+        <div className="auth-story">
+          <span className="eyebrow">{t('groupName')}</span>
+          <h2>
+            {t('heroTitle')} <em>{t('heroAccent')}</em>
+          </h2>
+          <p>{t('heroText')}</p>
+          <div className="auth-story-steps">
+            <div>
+              <UserRound size={21} />
+              <span>
+                <strong>{t('stepOne')}</strong>
+                <small>{t('stepOneText')}</small>
+              </span>
+            </div>
+            <div>
+              <ShieldCheck size={21} />
+              <span>
+                <strong>{t('stepTwo')}</strong>
+                <small>{t('stepTwoText')}</small>
+              </span>
+            </div>
+            <div>
+              <FileCheck2 size={21} />
+              <span>
+                <strong>{t('stepThree')}</strong>
+                <small>{t('stepThreeText')}</small>
+              </span>
+            </div>
+          </div>
+        </div>
         <div className="auth-card">
           <div className="auth-brand">
             <HamiyaMark size="tiny" />
             <span>
-              HAMIYA <small>FOOD PROCESSING</small>
+              HAMIYA <small>{t('groupName')}</small>
             </span>
           </div>
-          <FoodBrandAuthIllustration />
+          <AuthIllustration register={registering} />
           <div className="auth-heading">
             <h1 id="auth-title">
               {t(resetting ? 'resetPassword' : registering ? 'register' : 'signIn')}
@@ -372,27 +402,21 @@ export default function Account() {
                 {inlineError}
               </p>
             )}
-            <button
+            <Button
               className="button primary full auth-submit"
-              disabled={busy || !online || !configured}
+              busy={busy}
+              disabled={!online || !configured}
             >
-              {busy
-                ? t('loading')
-                : t(
-                    recovery
-                      ? 'save'
-                      : resetting
-                        ? 'resetPassword'
-                        : registering
-                          ? 'signUp'
-                          : 'signIn',
-                  )}
-            </button>
+              {t(
+                recovery ? 'save' : resetting ? 'resetPassword' : registering ? 'signUp' : 'signIn',
+              )}
+            </Button>
           </form>
           {!recovery && (
             <p className="auth-switch">
               {mode === 'forgot' ? '' : t(registering ? 'haveAccount' : 'newAccount')}{' '}
               <button
+                disabled={busy}
                 onClick={() => {
                   changeMode(registering || mode === 'forgot' ? 'login' : 'register');
                 }}
@@ -478,9 +502,14 @@ export default function Account() {
             <div className="email-notice">
               <Mail size={20} />
               <p>{t('verifyEmail')}</p>
-              <button className="text-button" disabled={busy || !online} onClick={resend}>
+              <Button
+                busy={busy}
+                className="text-button"
+                disabled={busy || !online}
+                onClick={resend}
+              >
                 {t('resend')}
-              </button>
+              </Button>
             </div>
           )}
           <button
@@ -711,14 +740,15 @@ export default function Account() {
                   </>
                 )}
                 <div className="form-actions">
-                  <button
+                  <Button
+                    busy={busy}
                     type="button"
                     className="button secondary"
                     disabled={busy || !online}
                     onClick={() => void save()}
                   >
                     {t('saveDraft')}
-                  </button>
+                  </Button>
                   <div>
                     {step > 0 && (
                       <button
@@ -729,10 +759,14 @@ export default function Account() {
                         {t('back')}
                       </button>
                     )}
-                    <button className="button primary" disabled={busy || !!uploading || !online}>
+                    <Button
+                      busy={busy}
+                      className="button primary"
+                      disabled={busy || !!uploading || !online}
+                    >
                       {busy ? t('loading') : t(step === 3 ? 'submitReview' : 'continue')}
                       <ArrowRight size={16} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </form>

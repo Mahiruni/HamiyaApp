@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, type ReactNode, type InputHTMLAttributes } from 'react';
+import {
+  useEffect,
+  useId,
+  useRef,
+  type ReactNode,
+  type InputHTMLAttributes,
+  type ButtonHTMLAttributes,
+} from 'react';
 import {
   Apple,
   Banana,
@@ -12,8 +19,10 @@ import {
   Wheat,
   X,
   ArrowUpRight,
+  LoaderCircle,
 } from 'lucide-react';
 import { useApp } from './state';
+import { useOverlay } from './experience';
 import type { Category, Product } from './types';
 export const categoryIcons = { food: Wheat, coffee: Coffee, vehicles: CarFront };
 
@@ -26,7 +35,13 @@ export function HamiyaMark({
 }) {
   return (
     <span className={'hamiya-mark hamiya-mark-' + size} aria-hidden={label ? undefined : true}>
-      <img src="/brand/hamiya-food-icon-512.png" alt={label || ''} width={48} height={48} />
+      <img
+        src="/brand/hamiya-food-icon-192.png"
+        alt={label || ''}
+        width={48}
+        height={48}
+        decoding="async"
+      />
     </span>
   );
 }
@@ -52,9 +67,10 @@ export function FoodBrandMark({
 }
 
 export function Money({ value }: { value: number | null | undefined }) {
+  const { language } = useApp();
   return (
     <span className="money">
-      {new Intl.NumberFormat('en-ET', {
+      {new Intl.NumberFormat(language + '-ET', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format((value || 0) / 100)}{' '}
@@ -84,12 +100,11 @@ export function Dialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
+  useOverlay(true, onClose);
   useEffect(() => {
     ref.current?.showModal();
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = previous;
+      ref.current?.close();
     };
   }, []);
   const { t } = useApp();
@@ -98,7 +113,10 @@ export function Dialog({
       ref={ref}
       className={'dialog ' + (wide ? 'wide' : '')}
       aria-labelledby={id}
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -125,9 +143,53 @@ export function Field({
         {label}
         {props.required && <b aria-label="required"> *</b>}
       </span>
-      <input id={id} {...props} />
-      {hint && <small>{hint}</small>}
+      <input id={id} aria-describedby={hint ? id + '-hint' : undefined} {...props} />
+      {hint && <small id={id + '-hint'}>{hint}</small>}
     </label>
+  );
+}
+export function Button({
+  busy = false,
+  children,
+  disabled,
+  className = 'button primary',
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { busy?: boolean }) {
+  const { t } = useApp();
+  return (
+    <button className={className} disabled={disabled || busy} aria-busy={busy} {...props}>
+      {busy && <LoaderCircle className="spinner" size={18} aria-hidden="true" />}
+      {busy ? t('loading') : children}
+    </button>
+  );
+}
+
+export function LoadingState() {
+  const { t } = useApp();
+  return (
+    <div className="loading-state" role="status">
+      <LoaderCircle className="spinner" size={24} aria-hidden="true" />
+      <span>{t('loading')}</span>
+    </div>
+  );
+}
+
+export function StartupSplash() {
+  const { t } = useApp();
+  return (
+    <div className="startup-splash" role="status">
+      <img
+        src="/brand/hamiya-food-icon-192.png"
+        alt=""
+        width={88}
+        height={88}
+        fetchPriority="high"
+      />
+      <strong>HAMIYA</strong>
+      <span>{t('groupName')}</span>
+      <span className="startup-progress" aria-hidden="true" />
+      <span className="sr-only">{t('loading')}</span>
+    </div>
   );
 }
 export function Empty({
@@ -171,7 +233,14 @@ export function ProductArt({ product }: { product: Product }) {
   return (
     <div className={'product-art ' + product.category + ' flavor-' + product.id}>
       {product.image_url ? (
-        <img src={product.image_url} alt={product.name} loading="lazy" width="400" height="320" />
+        <img
+          src={product.image_url}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          width="400"
+          height="320"
+        />
       ) : (
         <>
           <Icon size={64} strokeWidth={1.05} />

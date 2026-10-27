@@ -58,6 +58,7 @@ jobs:
         run: |
           pnpm exec cap add android
           pnpm exec cap sync android
+          node scripts/configure-android.mjs
 
       - name: Configure release signing
         env:

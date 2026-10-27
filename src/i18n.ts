@@ -1,3 +1,4 @@
+import { polishCopy } from './polish-translations.ts';
 export type Language = 'en' | 'am' | 'om';
 export const languages: { code: Language; label: string }[] = [
   { code: 'en', label: 'English' },
@@ -1117,7 +1118,13 @@ const extras: Record<Language, Record<string, string>> = {
   },
 };
 export const translate = (language: Language, key: string) =>
+  polishCopy[language][key as keyof typeof polishCopy.en] ||
   dictionaries[language][key as TranslationKey] ||
   extras[language][key] ||
   en[key as TranslationKey] ||
   key;
+
+export const hasTranslation = (language: Language, key: string) =>
+  Object.hasOwn(polishCopy[language], key) ||
+  Object.hasOwn(dictionaries[language], key) ||
+  Object.hasOwn(extras[language], key);

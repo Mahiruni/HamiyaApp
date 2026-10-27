@@ -20,6 +20,8 @@ The workflow `.github/workflows/android-release.yml` builds the current React/Vi
 On macOS/Linux: `base64 -w 0 hamiya-release.jks` (on macOS: `base64 < hamiya-release.jks | tr -d '\\n'`). Do not paste this value into chats.
 
 ## Important
+- After generating and syncing Android, the workflow runs `node scripts/configure-android.mjs` to apply Hamiya launcher artwork, launch colors, keyboard resizing and AndroidX Back navigation.
+- The shared Capacitor configuration keeps the status and navigation bars visible, enables accessibility zoom and uses native safe-area handling. Test these changes on a newly built APK; a website deployment does not update an installed APK.
 - Native Android app ID: `com.hamiyainvestmentgroup.customer`.
 - Signing keys and passwords must **never** be committed to GitHub.
 - This workflow builds from the current website source; native permission, notification, deep-link and hardware integrations require separate implementation and device testing.
