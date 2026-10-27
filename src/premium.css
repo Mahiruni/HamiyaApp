@@ -2362,3 +2362,20 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link) {
     padding-bottom: 18px;
   }
 }
+
+/* Android 16 status-bar protection for the three floating customer controls.
+   WebView safe-area-inset-top can be zero even with an edge-to-edge window. */
+@media (max-width: 767px) {
+  html.hamiya-native {
+    --hamiya-status-clearance: max(env(safe-area-inset-top, 0px), 48px);
+  }
+  html.hamiya-native .app:not(.admin-app-shell) .topbar {
+    box-sizing: border-box;
+    position: sticky;
+    top: 0;
+    padding-top: var(--hamiya-status-clearance);
+    min-height: calc(52px + var(--hamiya-status-clearance));
+    height: auto;
+    align-items: flex-end;
+  }
+}
