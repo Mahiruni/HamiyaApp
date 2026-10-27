@@ -72,7 +72,7 @@ export function CatalogPage() {
     ? catalog.products.find((p) => p.id === selected.id) || selected
     : null;
   return (
-    <section className="catalog-page">
+    <section className="catalog-page hamiya-elegant-catalog">
       <div className="page-heading">
         <div>
           <span className="eyebrow">HAMIYA</span>
