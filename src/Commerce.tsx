@@ -234,7 +234,8 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
   }
   return (
     <Dialog title={name} onClose={onClose} wide>
-      <div className="product-detail-layout hamiya-product-detail">
+      <div className="product-detail-layout hamiya-product-detail hamiya-airbnb-sheet">
+        <div className="hamiya-sheet-handle" aria-hidden="true" />
         <div className="hamiya-product-hero"><ProductArt product={product} /></div>
         <div className="hamiya-product-content">
           <span className="eyebrow">{t(product.category + 'Brand')}</span>
