@@ -6,6 +6,7 @@ import App from './App';
 import { ErrorBoundary } from './ErrorBoundary';
 import './styles.css';
 import './premium.css';
+if (Capacitor.isNativePlatform()) document.documentElement.classList.add('hamiya-native');
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
