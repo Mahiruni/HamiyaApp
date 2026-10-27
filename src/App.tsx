@@ -496,8 +496,8 @@ export default function App() {
               aria-current={root === destination ? 'page' : undefined}
               onClick={() => go(destination)}
             >
-              <Icon size={21} strokeWidth={root === destination ? 2 : 1.7} />
-              <span>{t(label)}</span>
+              <Icon size={23} strokeWidth={root === destination ? 2.3 : 1.8} aria-hidden="true" />
+              <span className="sr-only">{t(label)}</span>
             </button>
           ))}
         </nav>
