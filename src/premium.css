@@ -2252,3 +2252,96 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link) {
     top: max(calc(10dvh + 8px), calc(var(--hamiya-status-clearance) + 20px));
   }
 }
+
+/* Product wrapper refinement: preserve the floating customer navigation dock. */
+@media (max-width: 767px) {
+  .dialog.wide:has(.hamiya-airbnb-sheet) {
+    --hamiya-dock-clearance: calc(94px + env(safe-area-inset-bottom, 0px));
+    bottom: var(--hamiya-dock-clearance);
+    top: auto;
+    height: auto;
+    max-height: min(78dvh, calc(100dvh - var(--hamiya-status-clearance, 32px) - var(--hamiya-dock-clearance) - 14px));
+    border-radius: 26px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+  }
+  .dialog:has(.hamiya-airbnb-sheet) .dialog-head {
+    min-height: 54px;
+    padding: 12px 18px 8px;
+    justify-content: flex-end;
+  }
+  .dialog:has(.hamiya-airbnb-sheet) .dialog-head h2 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .dialog:has(.hamiya-airbnb-sheet) .dialog-body {
+    padding: 0 18px 20px;
+  }
+  .hamiya-airbnb-sheet .hamiya-sheet-handle,
+  html.hamiya-native .hamiya-airbnb-sheet .hamiya-sheet-handle {
+    position: absolute;
+    top: 14px;
+    left: calc(50% - 20px);
+    z-index: 2;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-hero {
+    display: block;
+    min-width: 0;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-hero .product-art {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 180px;
+    aspect-ratio: 1.55;
+    padding: 18px;
+    border-radius: 20px;
+    overflow: hidden;
+    gap: 12px;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-hero .product-art > svg {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    margin: 0;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-hero .product-art > span {
+    display: block;
+    position: static;
+    width: auto;
+    max-width: 90%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-content {
+    gap: 12px;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-content h2 {
+    font-size: 26px;
+    line-height: 1.2;
+  }
+  .hamiya-airbnb-sheet .detail-price {
+    margin: 0;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-facts > div {
+    padding: 12px;
+  }
+  .hamiya-airbnb-sheet .hamiya-product-content .button.primary.full {
+    bottom: 0;
+    min-height: 52px;
+    box-shadow: none;
+  }
+}
