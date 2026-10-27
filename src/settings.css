@@ -23,6 +23,13 @@
   font-size: 21px;
   font-weight: 650;
 }
+.settings-panel-heading > svg {
+  padding: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--surface);
+}
 .update-panel {
   grid-row: span 2;
 }
@@ -31,7 +38,8 @@
   align-items: flex-start;
   gap: 16px;
   padding: 22px;
-  background: var(--surface);
+  background: var(--brand);
+  color: #fff;
   border-radius: 16px;
 }
 .update-status-icon {
@@ -53,9 +61,14 @@
   margin-top: 8px;
   font-size: 14px;
   line-height: 1.7;
+  color: #d5e5ef;
 }
 .update-status-error {
   background: #fff4f1;
+  color: var(--ink);
+}
+.update-status-error p {
+  color: #74463a;
 }
 .update-details {
   margin: 24px 0;

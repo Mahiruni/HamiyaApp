@@ -3,7 +3,6 @@ import {
   ArrowRight,
   ArrowLeft,
   ArrowUpRight,
-  Building2,
   CarFront,
   ClipboardList,
   Package,
@@ -27,7 +26,8 @@ import {
   WifiOff,
 } from 'lucide-react';
 import { configured } from './api';
-import { Empty, FoodBrandMark, HamiyaMark, LoadingState, StartupSplash } from './components';
+import Home from './Home';
+import { Empty, HamiyaMark, LoadingState, StartupSplash } from './components';
 import { useCompactLayout, useKeyboardViewport, useOverlay } from './experience';
 const CatalogPage = lazy(() =>
   import('./Commerce').then((module) => ({ default: module.CatalogPage })),
@@ -64,7 +64,7 @@ export default function App() {
     catalog,
     recovery,
   } = useApp();
-  const root = route.split('/')[0];
+  const root = route.split(/[/?]/)[0];
   const headerPageKey =
     root === 'settings'
       ? 'appSettings'
@@ -384,7 +384,7 @@ export default function App() {
               <HamiyaMark size="tiny" />
               <span className="mobile-wordmark-copy">
                 <strong>HAMIYA</strong>
-                <small>{t('customerPortal')}</small>
+                <small>{t('nativeBrand')}</small>
               </span>
             </button>
           </div>
@@ -507,160 +507,6 @@ export default function App() {
           <Cart />
         </Suspense>
       )}
-    </div>
-  );
-}
-function Home() {
-  const { t, navigate, user, catalog, cart } = useApp();
-  const published = catalog.products.filter((product) => product.published);
-  const available = published.filter((product) => product.available_quantity > 0);
-  const divisions = [
-    {
-      id: 'food',
-      title: t('foodBrand'),
-      detail: t('foodDesc'),
-      icon: Wheat,
-      count: published.filter((p) => p.category === 'food').length,
-    },
-    {
-      id: 'coffee',
-      title: t('coffeeBrand'),
-      detail: t('coffeeDesc'),
-      icon: Coffee,
-      count: published.filter((p) => p.category === 'coffee').length,
-    },
-    {
-      id: 'vehicles',
-      title: t('vehiclesBrand'),
-      detail: t('vehiclesDesc'),
-      icon: CarFront,
-      count: published.filter((p) => p.category === 'vehicles').length,
-    },
-  ] as const;
-  const verificationLabel =
-    user?.verification === 'approved'
-      ? t('verifiedBusiness')
-      : user?.verification === 'submitted' || user?.verification === 'under_review'
-        ? t('verificationInReview')
-        : t('completeVerification');
-  return (
-    <div className="home-page">
-      <section className="hamiya-dashboard" aria-label={t('customerPortal')}>
-        <div className="hamiya-dash-head">
-          <div className="hamiya-dash-heading">
-            <span className="hamiya-dash-kicker">
-              <span className="hamiya-live-dot" /> {t('customerPortal')}
-            </span>
-            <h1>
-              {user
-                ? `${t('welcomeBack')}, ${user.profile.full_name?.split(' ')[0] || t('partner')}.`
-                : t('welcomeToHamiya')}
-            </h1>
-            <p>{user ? t('customerHomeIntro') : t('guestHomeIntro')}</p>
-          </div>
-          <div className="hamiya-dash-date">
-            <Building2 size={17} />
-            <span>{t('groupName')}</span>
-          </div>
-        </div>
-        <div className="hamiya-dash-grid">
-          <div className="hamiya-dash-main">
-            <div className="hamiya-dash-main-top">
-              <span className="hamiya-dash-overline">{t('businessConnected')}</span>
-              <HamiyaMark size="sm" />
-            </div>
-            <h2>
-              {t('discover')} {t('order')}
-              <br />
-              <em>{t('growTogether')}</em>
-            </h2>
-            <p>{t('homeValue')}</p>
-            <div className="hamiya-dash-actions">
-              <button className="hamiya-dash-action-primary" onClick={() => navigate('catalog')}>
-                {t('explore')} <ArrowUpRight size={18} />
-              </button>
-              <button
-                className="hamiya-dash-action-secondary"
-                onClick={() => navigate(user ? 'orders' : 'account')}
-              >
-                {user ? t('orders') : t('createAccount')} <ArrowRight size={17} />
-              </button>
-            </div>
-            <div className="hamiya-dash-main-bottom">
-              <span>{t('groupName')}</span>
-              <span>{t('country')} · ETB</span>
-            </div>
-          </div>
-          <div className="hamiya-dash-side">
-            <div className="hamiya-dash-side-label">
-              <span>{t('atAGlance')}</span>
-              <LayoutGrid size={17} />
-            </div>
-            <div className="hamiya-dash-metrics">
-              <div>
-                <strong>{divisions.length.toString().padStart(2, '0')}</strong>
-                <span>{t('businessDivisions')}</span>
-              </div>
-              <div>
-                <strong>{published.length}</strong>
-                <span>{t('listedProducts')}</span>
-              </div>
-              <div>
-                <strong>{available.length}</strong>
-                <span>{t('inStockNow')}</span>
-              </div>
-              <div>
-                <strong>{cart.reduce((sum, item) => sum + item.quantity, 0)}</strong>
-                <span>{t('cartItems')}</span>
-              </div>
-            </div>
-            <button className="hamiya-dash-status" onClick={() => navigate('account')}>
-              <ShieldCheck size={19} />
-              <span>
-                <strong>{user ? verificationLabel : t('secureRegistration')}</strong>
-                <small>{user ? t('manageBusinessProfile') : t('verifiedAccountCta')}</small>
-              </span>
-              <ChevronRight size={17} />
-            </button>
-          </div>
-        </div>
-        <div className="hamiya-dash-section-heading">
-          <div>
-            <span className="hamiya-dash-overline">{t('exploreHamiya')}</span>
-            <h2>{t('ourBusinesses')}</h2>
-          </div>
-          <button onClick={() => navigate('catalog')}>
-            {t('browseCatalog')} <ArrowRight size={16} />
-          </button>
-        </div>
-        <div className="hamiya-division-grid">
-          {divisions.map(({ id, title, detail, icon: Icon, count }, index) => (
-            <button
-              className={'hamiya-division ' + id}
-              key={id}
-              onClick={() => navigate('catalog/' + id)}
-            >
-              <div className="hamiya-division-top">
-                <span
-                  className={'hamiya-division-icon ' + (id === 'food' ? 'food-brand-icon' : '')}
-                >
-                  {id === 'food' ? <FoodBrandMark alt="" /> : <Icon size={23} strokeWidth={1.6} />}
-                </span>
-                <ArrowUpRight size={19} />
-              </div>
-              <span className="hamiya-division-index">
-                0{index + 1} / {t(id)}
-              </span>
-              <strong>{title}</strong>
-              <small>{detail}</small>
-              <span className="hamiya-division-bottom">
-                {count ? `${count} ${t('listedProducts').toLowerCase()}` : t('exploreDivision')}{' '}
-                <ArrowRight size={15} />
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }

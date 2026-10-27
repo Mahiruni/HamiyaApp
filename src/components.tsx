@@ -16,6 +16,8 @@ import {
   Flower2,
   Leaf,
   Package,
+  Plus,
+  ArrowRight,
   Wheat,
   X,
   ArrowUpRight,
@@ -24,7 +26,74 @@ import {
 import { useApp } from './state';
 import { useOverlay } from './experience';
 import type { Category, Product } from './types';
+import { divisionArtwork, unitLabel, variantLabel } from './storefront';
 export const categoryIcons = { food: Wheat, coffee: Coffee, vehicles: CarFront };
+
+export function DivisionBanner({ category }: { category: Category }) {
+  const { t } = useApp();
+  return (
+    <div className={'division-banner ' + category}>
+      <div>
+        <strong>{t(category + 'Brand')}</strong>
+        <p>{t(category + 'Desc')}</p>
+      </div>
+      <img src={divisionArtwork(category)} alt="" width={240} height={180} decoding="async" />
+    </div>
+  );
+}
+
+export function ProductCard({
+  product,
+  onOpen,
+}: {
+  product: Product;
+  onOpen: (product: Product) => void;
+}) {
+  const { t, language } = useApp();
+  const name = product.translations[language]?.name || product.name;
+  return (
+    <button
+      className="product-card"
+      data-category={product.category}
+      onClick={() => onOpen(product)}
+      aria-label={t('details') + ': ' + name}
+    >
+      <ProductArt product={product} />
+      <div className="product-content">
+        <div className="product-title-row">
+          <span className="product-variant">
+            {variantLabel(product.variant, t) || t(product.category)}
+          </span>
+          <Badge status={product.status} />
+        </div>
+        <h3>{name}</h3>
+        <p>
+          {product.pack_count
+            ? `${product.pack_count} · ${t('pack')}`
+            : t(product.category + 'Brand')}
+        </p>
+        <div className="product-price-row">
+          <div>
+            {product.price_cents ? (
+              <Money value={product.price_cents} compact />
+            ) : (
+              <strong>{t('pricePending')}</strong>
+            )}
+            <small>
+              {product.sales_unit ? '/ ' + unitLabel(product.sales_unit, t) : t('unitPending')}
+            </small>
+          </div>
+          <span className="product-arrow" aria-hidden="true">
+            {product.category === 'food' ? <Plus size={20} /> : <ArrowRight size={18} />}
+          </span>
+        </div>
+        {product.category === 'food' && (
+          <small className="product-minimum">{t('minimumCartons')}</small>
+        )}
+      </div>
+    </button>
+  );
+}
 
 export function HamiyaMark({
   size = 'md',
@@ -66,12 +135,18 @@ export function FoodBrandMark({
   );
 }
 
-export function Money({ value }: { value: number | null | undefined }) {
+export function Money({
+  value,
+  compact = false,
+}: {
+  value: number | null | undefined;
+  compact?: boolean;
+}) {
   const { language } = useApp();
   return (
     <span className="money">
       {new Intl.NumberFormat(language + '-ET', {
-        minimumFractionDigits: 2,
+        minimumFractionDigits: compact ? 0 : 2,
         maximumFractionDigits: 2,
       }).format((value || 0) / 100)}{' '}
       <small>ETB</small>

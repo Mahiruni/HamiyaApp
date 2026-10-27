@@ -29,12 +29,14 @@ import {
   Dialog,
   Empty,
   Field,
-  FoodBrandMark,
+  DivisionBanner,
+  ProductCard,
   Money,
   ProductArt,
 } from './components';
 import { useApp } from './state';
-import type { Category, Enquiry, Order, Product } from './types';
+import type { Enquiry, Order, Product } from './types';
+import { catalogLocation, catalogRoute, unitLabel, variantLabel } from './storefront';
 
 export function CatalogPage() {
   const {
@@ -48,8 +50,12 @@ export function CatalogPage() {
     refreshCatalog,
     cached,
   } = useApp();
-  const category = (route.split('/')[1] || 'all') as Category | 'all';
-  const [search, setSearch] = useState('');
+  const { category, search: routeSearch } = catalogLocation(route);
+  const [search, setSearch] = useState(routeSearch);
+  useEffect(() => {
+    setSearch(routeSearch);
+    setLimit(12);
+  }, [routeSearch]);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [limit, setLimit] = useState(12);
@@ -69,62 +75,21 @@ export function CatalogPage() {
     <section className="catalog-page">
       <div className="page-heading">
         <div>
-          <span className="eyebrow">{t('collection')}</span>
-          <h1>{t('catalogTitle')}</h1>
-          <p>{t('catalogText')}</p>
-        </div>
-        <div className="small-seal">
-          <Package size={26} />
-          <span>
-            HAMIYA
-            <br />
-            FOOD PROCESSING
-          </span>
+          <span className="eyebrow">HAMIYA</span>
+          <h1>{t('browseProducts')}</h1>
+          <p>{t('catalogHint')}</p>
         </div>
       </div>
-      {category === 'food' && (
-        <div className="food-brand-banner">
-          <FoodBrandMark alt={t('foodBrand')} />
-          <div>
-            <span className="eyebrow">{t('food')}</span>
-            <strong>{t('foodBrand')}</strong>
-            <p>{t('foodDesc')}</p>
-          </div>
-          <span className="food-brand-palette" aria-hidden="true">
-            <i className="green" />
-            <i className="orange" />
-            <i className="red" />
-          </span>
-        </div>
-      )}
-      <div className="catalog-snapshot" aria-label={t('catalogSnapshot')}>
-        <div>
-          <span>{t('products')}</span>
-          <strong>{catalog.products.length}</strong>
-        </div>
-        <div>
-          <span>{t('available')}</span>
-          <strong>
-            {
-              catalog.products.filter((product) =>
-                ['available', 'low_stock'].includes(product.status),
-              ).length
-            }
-          </strong>
-        </div>
-        <div>
-          <span>{t('categories')}</span>
-          <strong>03</strong>
-        </div>
-      </div>
+      {category !== 'all' && <DivisionBanner category={category} />}
       <div className="catalog-toolbar">
         <div className="category-tabs">
           {(['all', 'food', 'coffee', 'vehicles'] as const).map((value) => (
             <button
               key={value}
               className={category === value ? 'active' : ''}
+              aria-pressed={category === value}
               onClick={() => {
-                navigate('catalog' + (value === 'all' ? '' : '/' + value));
+                navigate(catalogRoute(value, search));
                 setLimit(12);
               }}
             >
@@ -184,51 +149,14 @@ export function CatalogPage() {
       ) : products.length ? (
         <>
           <div className="catalog-count">
-            {t(category === 'all' ? 'all' : category)}
+            <h2>{t(category === 'all' ? 'all' : category)}</h2>
             <span>
               {products.length} {t('items')}
             </span>
           </div>
           <div className="product-grid">
             {products.slice(0, limit).map((product) => (
-              <button
-                className="product-card"
-                key={product.id}
-                onClick={() => setSelected(product)}
-              >
-                <ProductArt product={product} />
-                <div className="product-content">
-                  <div className="product-title-row">
-                    <span className="product-variant">
-                      {product.variant || t(product.category)}
-                    </span>
-                    <Badge status={product.status} />
-                  </div>
-                  <h3>{product.translations[language]?.name || product.name}</h3>
-                  <p>
-                    {product.pack_count
-                      ? `${product.pack_count} · ${t('pack')}`
-                      : product.category === 'food'
-                        ? t('notProvided')
-                        : t(product.category + 'Brand')}
-                  </p>
-                  <div className="product-price-row">
-                    <div>
-                      {product.price_cents ? (
-                        <Money value={product.price_cents} />
-                      ) : (
-                        <strong>{t('pricePending')}</strong>
-                      )}
-                      <small>
-                        {product.sales_unit ? '/ ' + product.sales_unit : t('unitPending')}
-                      </small>
-                    </div>
-                    <span className="product-arrow">
-                      <ChevronRight size={18} />
-                    </span>
-                  </div>
-                </div>
-              </button>
+              <ProductCard product={product} key={product.id} onOpen={setSelected} />
             ))}
           </div>
           {products.length > limit && (
@@ -267,7 +195,7 @@ export function CatalogPage() {
   );
 }
 
-function ProductDetails({ product, onClose }: { product: Product; onClose: () => void }) {
+export function ProductDetails({ product, onClose }: { product: Product; onClose: () => void }) {
   const { t, language, user, addCart, navigate, toast, notifyError, online } = useApp();
   const minimumOrder = product.category === 'food' ? 20 : 1;
   const [quantity, setQuantity] = useState(String(minimumOrder));
@@ -311,7 +239,7 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
         <div>
           <span className="eyebrow">{t(product.category + 'Brand')}</span>
           <h2>
-            {name} <small>{product.variant}</small>
+            {name} <small>{variantLabel(product.variant, t)}</small>
           </h2>
           <Badge status={product.status} />
           <div className="detail-price">
@@ -320,7 +248,7 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
             ) : (
               <strong>{t('pricePending')}</strong>
             )}
-            <p>{product.sales_unit ? '/ ' + product.sales_unit : t('unitPending')}</p>
+            <p>{product.sales_unit ? '/ ' + unitLabel(product.sales_unit, t) : t('unitPending')}</p>
           </div>
           {description && <p>{description}</p>}
           <dl className="details-list">
@@ -350,7 +278,8 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
           {product.category === 'food' ? (
             <>
               <Field
-                label={t('quantity') + ' (minimum 20 cartons)'}
+                label={t('foodQuantity')}
+                hint={t('minimumCartons')}
                 type="number"
                 min={minimumOrder}
                 max={product.available_quantity || 1}
@@ -376,9 +305,7 @@ function ProductDetails({ product, onClose }: { product: Product; onClose: () =>
                 }}
               />
               {product.available_quantity < minimumOrder && (
-                <p className="muted small-text">
-                  Minimum order: 20 cartons. Not enough stock is currently available.
-                </p>
+                <p className="muted small-text">{t('stockBelowMinimum')}</p>
               )}
               <button
                 className="button primary full"
@@ -704,7 +631,7 @@ export function Cart() {
 }
 
 export function OrdersPage() {
-  const { t, user, navigate, notifyError, online } = useApp();
+  const { t, user, navigate, notifyError, online, route } = useApp();
   const [orders, setOrders] = useState<Order[]>([]);
   const [requests, setRequests] = useState<Enquiry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -712,6 +639,14 @@ export function OrdersPage() {
   const [selected, setSelected] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
   const [filter, setFilter] = useState<'all' | 'orders' | 'requests'>('all');
+  const linkedOrder = route.split('/')[1];
+  useEffect(() => {
+    const order = orders.find((entry) => entry.id === linkedOrder);
+    if (!order) return;
+    // Consume the detail link before opening a Back-aware sheet, so closing it cannot reopen it.
+    navigate('orders', { replace: true });
+    setSelected(order);
+  }, [linkedOrder, orders, navigate]);
   async function load() {
     if (!supabase || !user) return;
     setLoading(true);
@@ -775,6 +710,9 @@ export function OrdersPage() {
       </Empty>
     );
   const current = selected ? orders.find((o) => o.id === selected.id) || selected : null;
+  function closeOrder() {
+    setSelected(null);
+  }
   const visibleOrders = filter === 'requests' ? [] : orders;
   const visibleRequests = filter === 'orders' ? [] : requests;
   const pendingCount =
@@ -786,7 +724,7 @@ export function OrdersPage() {
         <div>
           <span className="eyebrow">{t('business')}</span>
           <h1>{t('orderHistory')}</h1>
-          <p>{t('orderNotice')}</p>
+          <p>{t('orderIntro')}</p>
         </div>
         <button
           className="button secondary"
@@ -808,9 +746,9 @@ export function OrdersPage() {
           <small>{t('requests')}</small>
         </div>
         <div className="orders-overview-card accent">
-          <span>{t('status')}</span>
+          <span>{t('activeOrders')}</span>
           <strong>{pendingCount}</strong>
-          <small>{t('under_review')}</small>
+          <small>{t('orders')}</small>
         </div>
       </div>
       <div className="orders-filter" role="tablist" aria-label={t('orderHistory')}>
@@ -911,7 +849,7 @@ export function OrdersPage() {
       {current && (
         <Dialog
           title={t('orderNumber') + ' #' + current.id.slice(0, 8).toUpperCase()}
-          onClose={() => setSelected(null)}
+          onClose={closeOrder}
         >
           <Badge status={current.status} />
           <div className="order-lines">
@@ -954,7 +892,7 @@ export function OrdersPage() {
                 try {
                   await rpc('order_cancel', { id: current.id });
                   await load();
-                  setSelected(null);
+                  closeOrder();
                 } catch (error) {
                   notifyError(error);
                 } finally {

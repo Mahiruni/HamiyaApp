@@ -1,5 +1,6 @@
 import { updateCopy } from './update-translations.ts';
 import { polishCopy } from './polish-translations.ts';
+import { storefrontCopy } from './storefront-translations.ts';
 export type Language = 'en' | 'am' | 'om';
 export const languages: { code: Language; label: string }[] = [
   { code: 'en', label: 'English' },
@@ -1119,6 +1120,7 @@ const extras: Record<Language, Record<string, string>> = {
   },
 };
 export const translate = (language: Language, key: string) =>
+  storefrontCopy[language][key as keyof typeof storefrontCopy.en] ||
   updateCopy[language][key as keyof typeof updateCopy.en] ||
   polishCopy[language][key as keyof typeof polishCopy.en] ||
   dictionaries[language][key as TranslationKey] ||
@@ -1127,6 +1129,7 @@ export const translate = (language: Language, key: string) =>
   key;
 
 export const hasTranslation = (language: Language, key: string) =>
+  Object.hasOwn(storefrontCopy[language], key) ||
   Object.hasOwn(updateCopy[language], key) ||
   Object.hasOwn(polishCopy[language], key) ||
   Object.hasOwn(dictionaries[language], key) ||

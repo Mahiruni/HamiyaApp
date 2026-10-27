@@ -55,7 +55,7 @@ interface AppContextValue {
   catalogError: string;
   cached: boolean;
   route: string;
-  navigate: (route: string) => void;
+  navigate: (route: string, options?: { replace?: boolean }) => void;
   online: boolean;
   cart: CartItem[];
   setCart: (items: CartItem[]) => void;
@@ -121,8 +121,8 @@ export function Provider({ children }: { children: ReactNode }) {
       ),
     [toast],
   );
-  const navigate = useCallback((next: string) => {
-    navigateHistory(next);
+  const navigate = useCallback((next: string, options?: { replace?: boolean }) => {
+    navigateHistory(next, window, options?.replace);
     setRoute(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);

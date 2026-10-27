@@ -7,7 +7,8 @@
   --surface: #edf3f6;
   --brand-light: #b5cdda;
   --brand-mid: #52778c;
-  --page: #f4f7fa;
+  --page: #f6f8fa;
+  --radius: 18px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -16,6 +17,7 @@
 }
 html {
   scroll-padding-top: calc(100px + var(--safe-top));
+  scroll-padding-bottom: calc(100px + var(--safe-bottom));
 }
 body {
   background: var(--page);
@@ -387,7 +389,7 @@ textarea:focus-visible {
 }
 .app main {
   max-width: 1440px;
-  padding: 30px clamp(20px, 3vw, 44px) 36px;
+  padding: 26px clamp(20px, 3vw, 40px) 32px;
 }
 .app .site-footer {
   padding: 24px clamp(20px, 3vw, 44px);
@@ -419,7 +421,6 @@ dt {
 }
 .auth-heading > p,
 .auth-switch,
-.hamiya-division-index,
 .catalog-count > span,
 .product-variant,
 .product-price-row small,
@@ -438,38 +439,20 @@ dt {
   color: var(--muted);
   background: #fff;
 }
-.hamiya-dash-overline {
-  color: var(--muted);
-}
-.hamiya-dash-main .hamiya-dash-overline {
-  color: #b9d2de;
-}
 .product-art > span {
   color: #425867;
   background: #ffffffeb;
   border-radius: 5px;
   padding: 4px 8px;
 }
-.hamiya-dash-metrics > div {
-  min-width: 0;
-}
-.hamiya-dash-metrics span {
-  overflow-wrap: anywhere;
-}
-@media (min-width: 768px) and (max-width: 900px) {
-  .hamiya-dash-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .hamiya-dash-metrics {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+.page-heading h1 {
+  font-size: clamp(25px, 2.5vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 .page-heading {
-  gap: 18px;
-}
-.page-heading h1 {
-  font-weight: 650;
-  letter-spacing: -0.04em;
+  gap: 16px;
+  margin-bottom: 22px;
 }
 .page-heading p {
   max-width: 62ch;
@@ -480,7 +463,7 @@ dt {
 .account-summary,
 .order-card {
   border-color: var(--border);
-  border-radius: 18px;
+  border-radius: 20px;
   box-shadow: 0 4px 20px #193b4d04;
 }
 .badge {
@@ -489,118 +472,13 @@ dt {
   white-space: normal;
 }
 
-/* Existing customer dashboard, catalog, orders and verification surfaces. */
-.hamiya-dash-grid {
-  grid-template-columns: minmax(0, 1.5fr) minmax(270px, 1fr);
-  gap: 18px;
-}
-.hamiya-dash-main {
-  background: linear-gradient(125deg, #122e40, #244d63);
-  border-radius: 22px;
-  box-shadow: 0 12px 32px #193b4d14;
-  padding: 28px 30px 22px;
-}
-.hamiya-dash-main h2 {
-  letter-spacing: -0.045em;
-  line-height: 1.15;
-}
-.hamiya-dash-main h2 em {
-  color: #b9d5e4;
-}
-.hamiya-dash-main > p {
-  font-size: 14px;
-}
-.hamiya-dash-actions button {
-  min-height: 48px;
-  font-size: 14px;
-  border-radius: 12px;
-}
-.hamiya-dash-action-primary {
-  background: #fff;
-  color: var(--brand);
-}
-.hamiya-dash-side {
-  padding: 22px;
-  border-radius: 22px;
-  border-color: var(--border);
-}
-.hamiya-dash-metrics > div {
-  background: var(--page);
-}
-.hamiya-dash-metrics span {
-  font-size: 12px;
-  color: var(--muted);
-}
-.hamiya-dash-status {
-  background: var(--surface);
-  min-height: 64px;
-}
-.hamiya-dash-status strong {
-  font-size: 12px;
-}
-.hamiya-dash-status small {
-  font-size: 11px;
-  color: var(--muted);
-}
-.hamiya-dash-section-heading > button {
-  min-height: 44px;
-  text-align: end;
-}
-.hamiya-division {
-  min-height: 220px;
-  border-radius: 18px;
-  padding: 20px;
-  border-color: var(--border);
-}
-.hamiya-division-icon {
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--brand);
-}
-.hamiya-division small {
-  font-size: 13px;
-  color: var(--muted);
-}
-.hamiya-division-bottom {
-  font-size: 12px;
-  color: var(--brand);
-}
-.food-brand-banner {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: #fff;
-}
-.food-brand-banner .food-brand-mark {
-  width: 80px;
-  height: 80px;
-  flex-shrink: 0;
-  border-radius: 14px;
-}
-.food-brand-banner strong {
-  display: block;
-  font-size: 17px;
-  color: var(--brand);
-}
-.food-brand-banner p {
-  font-size: 13px;
-  margin-top: 4px;
-}
-.food-brand-palette {
-  display: none;
-}
-.catalog-snapshot,
+/* Shared storefront, orders and verification surfaces. */
 .orders-overview {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 20px;
 }
-.catalog-snapshot > div,
 .orders-overview-card {
   display: flex;
   flex-direction: column;
@@ -610,13 +488,11 @@ dt {
   border-radius: 14px;
   background: #fff;
 }
-.catalog-snapshot span,
 .orders-overview-card span,
 .orders-overview-card small {
   font-size: 12px;
   color: var(--muted);
 }
-.catalog-snapshot strong,
 .orders-overview-card strong {
   font-size: 26px;
   line-height: 1.25;
@@ -669,6 +545,12 @@ dt {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
+.catalog-count h2 {
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 650;
+  letter-spacing: 0;
+}
 .product-card {
   min-width: 0;
   display: flex;
@@ -683,7 +565,9 @@ dt {
     box-shadow 0.18s ease;
 }
 .product-art {
-  min-height: 190px;
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  width: 100%;
   overflow: hidden;
 }
 .product-art img {
@@ -693,11 +577,16 @@ dt {
   font-size: 11px;
   color: var(--muted);
 }
+.product-art > svg {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 24px;
+}
 .product-content {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 18px;
+  padding: 14px;
 }
 .product-title-row {
   flex-wrap: wrap;
@@ -707,22 +596,96 @@ dt {
   font-size: 11px;
 }
 .product-card h3 {
-  font-size: 18px;
-  line-height: 1.4;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 .product-card p {
   font-size: 13px;
 }
 .product-price-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
   margin-top: auto;
-  padding-top: 18px;
+  padding-top: 14px;
   gap: 8px;
 }
 .product-price-row .money {
+  display: block;
   font-size: 19px;
+  font-weight: 650;
+  white-space: nowrap;
 }
 .product-price-row small {
   font-size: 11px;
+}
+.product-arrow {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+}
+.product-minimum {
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.product-price-row .money small {
+  display: inline;
+  margin: 0 0 0 3px;
+  font-size: 10px;
+}
+.product-card:not([data-category='food']) .product-price-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+.product-card:not([data-category='food']) .product-arrow {
+  justify-self: end;
+}
+.division-banner {
+  display: flex;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 122px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  margin-bottom: 20px;
+  background: #dce9f1;
+  color: var(--brand);
+}
+.division-banner.food {
+  background: #12354d;
+  color: #fff;
+}
+.division-banner > div {
+  width: 65%;
+  min-width: 0;
+}
+.division-banner strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.division-banner p {
+  margin-top: 6px;
+  font-size: 12px;
+  color: inherit;
+}
+.division-banner img {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 34%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
 }
 .orders-filter {
   display: flex;
@@ -769,8 +732,58 @@ dt {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: var(--muted);
+  color: #d5e5ef;
   margin-bottom: 12px;
+}
+.account-summary {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+.account-summary h3,
+.account-summary > p {
+  color: #fff;
+}
+.account-summary .avatar {
+  background: #e3eef5;
+  color: var(--brand);
+  border-radius: 18px;
+  font-weight: 650;
+}
+.account-summary .customer-code {
+  padding: 14px;
+  border-radius: 12px;
+  background: #244b60;
+  color: #fff;
+}
+.account-summary .customer-code span {
+  color: #d5e5ef;
+}
+.account-summary .summary-link {
+  min-height: 48px;
+  color: #fff;
+  border-color: #ffffff26;
+  font-size: 13px;
+}
+.account-summary .notice,
+.account-summary .email-notice {
+  background: #fff;
+  color: var(--ink);
+}
+.account-summary .notice p,
+.account-summary .email-notice p {
+  color: var(--muted);
+}
+.profile-status {
+  border-top: 4px solid var(--brand);
+}
+.profile-status > svg {
+  padding: 10px;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--brand);
 }
 .account-summary h3,
 .account-summary > p,
@@ -1097,9 +1110,26 @@ body:has(dialog[open]) {
 .admin-page .metric {
   background: #fff;
 }
+.admin-page .metric:first-child {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+.admin-page .metric:first-child > strong,
+.admin-page .metric:first-child > span,
+.admin-page .metric:first-child > svg {
+  color: #fff;
+}
+.admin-welcome {
+  background: var(--brand);
+  color: #fff;
+}
+.admin-welcome h2 {
+  color: #fff;
+}
 .admin-welcome p,
 .admin-welcome .eyebrow {
-  color: #3d5361;
+  color: #d5e5ef;
 }
 .admin-page th {
   color: var(--muted);
@@ -1140,7 +1170,7 @@ body:has(dialog[open]) {
 .skeleton-card {
   border-radius: 18px;
 }
-html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiya-dash-overline) {
+html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link) {
   letter-spacing: 0;
   line-height: 1.6;
 }
@@ -1202,7 +1232,7 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
     padding-bottom: var(--safe-bottom);
   }
   .app .topbar {
-    min-height: calc(76px + var(--safe-top));
+    min-height: calc(68px + var(--safe-top));
     padding-inline: max(20px, var(--safe-left)) max(20px, var(--safe-right));
     gap: 12px;
   }
@@ -1233,7 +1263,7 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
     font-size: 10px;
     color: var(--muted);
     line-height: 1.3;
-    max-width: 135px;
+    max-width: 110px;
   }
   .topbar .icon-button.mobile-only {
     border: 1px solid var(--border);
@@ -1294,9 +1324,6 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
   .drawer-backdrop {
     animation: hamiya-enter 0.18s ease-out;
   }
-  .hamiya-dash-grid {
-    grid-template-columns: minmax(0, 1.3fr) minmax(230px, 1fr);
-  }
   .product-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1309,7 +1336,7 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
 }
 @media (max-width: 767px) {
   .app main {
-    padding: 22px max(18px, var(--safe-right)) 28px max(18px, var(--safe-left));
+    padding: 20px max(16px, var(--safe-right)) 24px max(16px, var(--safe-left));
   }
   .app .topbar {
     padding-inline: max(12px, var(--safe-left)) max(12px, var(--safe-right));
@@ -1347,6 +1374,69 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
     flex-direction: column;
     gap: 12px;
     text-align: center;
+    margin-bottom: 0;
+    padding: 0 16px 12px;
+  }
+  .app .site-footer > span {
+    display: none;
+  }
+  .app .site-footer > div {
+    justify-content: center;
+  }
+  .app .page-heading .eyebrow {
+    display: none;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .product-content {
+    padding: 12px;
+  }
+  .product-title-row {
+    align-items: flex-start;
+    gap: 5px;
+  }
+  .product-title-row .badge {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  .product-card h3 {
+    margin-top: 10px;
+    font-size: 16px;
+  }
+  .product-card p {
+    font-size: 11px;
+    margin-top: 5px;
+  }
+  .product-price-row .money {
+    font-size: 17px;
+  }
+  .product-art > span {
+    bottom: 8px;
+    font-size: 9px;
+    line-height: 1.3;
+  }
+  .account-summary-kicker {
+    display: none;
+  }
+  .account-summary .avatar {
+    grid-row: 1 / 3;
+  }
+  .account-summary h3 {
+    grid-row: 1;
+  }
+  .account-summary > p {
+    grid-row: 2;
+    font-size: 12px;
+  }
+  .division-banner {
+    min-height: 110px;
+    padding: 16px;
+    border-radius: 18px;
+  }
+  .division-banner strong {
+    font-size: 18px;
   }
   .page-heading {
     align-items: flex-start;
@@ -1354,61 +1444,15 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
     margin-bottom: 24px;
   }
   .page-heading h1 {
-    font-size: clamp(27px, 7.6vw, 34px);
+    font-size: 25px;
     line-height: 1.3;
   }
   .small-seal {
     display: none;
   }
-  .hamiya-dash-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .hamiya-dash-head {
-    gap: 12px;
-  }
-  .hamiya-dash-date {
-    display: none;
-  }
-  .hamiya-dash-heading h1 {
-    font-size: 30px;
-    letter-spacing: -0.04em;
-    line-height: 1.3;
-  }
-  .hamiya-dash-main {
-    padding: 24px 22px;
-    min-height: 330px;
-  }
-  .hamiya-dash-main h2 {
-    font-size: 36px;
-  }
-  .hamiya-dash-actions {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .hamiya-dash-main-bottom {
-    flex-wrap: wrap;
-    font-size: 10px;
-  }
-  .hamiya-dash-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .hamiya-dash-section-heading {
-    align-items: center;
-  }
-  .hamiya-dash-section-heading h2 {
-    font-size: 24px;
-  }
-  .hamiya-division-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .hamiya-division {
-    min-height: 175px;
-  }
-  .catalog-snapshot,
   .orders-overview {
     gap: 8px;
   }
-  .catalog-snapshot > div,
   .orders-overview-card {
     padding: 12px;
   }
@@ -1425,24 +1469,9 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
   .search-field {
     max-width: none;
   }
-  .product-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-  .product-art {
-    min-height: 150px;
-  }
-  .product-content {
-    padding: 14px;
-  }
-  .product-card h3 {
-    font-size: 17px;
-  }
-  .product-price-row .money {
-    font-size: 16px;
-  }
-  .product-price-row {
-    flex-wrap: wrap;
+  .product-price-row > div {
+    min-width: 0;
+    max-width: 100%;
   }
   .order-card {
     padding: 18px;
@@ -1485,7 +1514,9 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
       calc(100dvh - 32px - var(--safe-top) - var(--safe-bottom)),
       var(--visual-height, 100dvh)
     );
-    border-radius: 18px;
+    margin-top: auto;
+    margin-bottom: max(8px, var(--safe-bottom));
+    border-radius: 22px;
   }
   .dialog-head {
     padding: 15px 18px;
@@ -1501,6 +1532,9 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
   }
 }
 @media (max-width: 379px) {
+  .product-price-row .money {
+    font-size: 15px;
+  }
   .app .topbar {
     padding-inline: 8px;
   }
@@ -1516,15 +1550,14 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
     height: 30px;
   }
   .product-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .product-art {
-    min-height: 190px;
+    min-height: 0;
   }
   .orders-overview-card small {
     display: none;
   }
-  .catalog-snapshot > div,
   .orders-overview-card {
     padding: 10px;
   }
@@ -1552,7 +1585,6 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .hamiya-division:hover,
   .button:active:enabled,
   .icon-button:active:enabled,
   .mobile-nav button:active {

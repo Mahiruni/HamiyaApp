@@ -93,3 +93,17 @@ test('reselecting the active page does not grow history', () => {
   navigateHistory('home', host);
   assert.equal(host.length, 1);
 });
+test('consuming an order detail link lets the sheet close before Back returns home', () => {
+  const host = browser();
+  navigateHistory('orders/order-1', host);
+  navigateHistory('orders', host, true);
+  assert.equal(host.length, 2);
+  let closed = 0;
+  const cleanup = registerOverlay(() => closed++, host);
+  host.history.back();
+  cleanup();
+  assert.equal(closed, 1);
+  assert.equal(host.location.hash, '#orders');
+  host.history.back();
+  assert.equal(host.location.hash, '#home');
+});

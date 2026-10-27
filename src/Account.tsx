@@ -456,27 +456,9 @@ export default function Account() {
       <div className="page-heading">
         <div>
           <span className="eyebrow">{t('account')}</span>
-          <h1>
-            {t('welcomeBack')}, <em>{user.profile.full_name?.split(' ')[0]}</em>
-          </h1>
-          <p>{t('accountIntro')}</p>
+          <h1>{t('account')}</h1>
+          <p>{t('accountShort')}</p>
         </div>
-        <button
-          className="button secondary"
-          onClick={async () => {
-            try {
-              await supabase?.auth.signOut();
-              setUser(null);
-              setEditing(false);
-              navigate('signin');
-            } catch (error) {
-              notifyError(error);
-            }
-          }}
-        >
-          <LogOut size={16} />
-          {t('signOut')}
-        </button>
       </div>
       <div className="account-grid">
         <aside className="account-summary">
@@ -533,6 +515,22 @@ export default function Account() {
             <ShieldCheck size={18} />
             {t('privacy')}
             <ChevronRight size={15} />
+          </button>
+          <button
+            className="summary-link account-signout"
+            onClick={async () => {
+              try {
+                await supabase?.auth.signOut();
+                setUser(null);
+                setEditing(false);
+                navigate('signin');
+              } catch (error) {
+                notifyError(error);
+              }
+            }}
+          >
+            <LogOut size={16} />
+            {t('signOut')}
           </button>
         </aside>
         <div className="account-content">

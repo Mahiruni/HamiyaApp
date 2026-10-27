@@ -14,6 +14,9 @@ self.addEventListener('install', (event) => {
           '/fonts/Benaiah.ttf',
           '/brand/hamiya-food-icon-512.png',
           '/brand/hamiya-food-processing.jpg',
+          '/brand/divisions/food.webp',
+          '/brand/divisions/coffee.webp',
+          '/brand/divisions/vehicles.webp',
           '/manifest.webmanifest',
           ...BUILD_ASSETS,
         ]),
@@ -74,6 +77,9 @@ self.addEventListener('fetch', (event) => {
       '/brand/hamiya-food-icon-192.png',
       '/brand/hamiya-food-icon-512.png',
       '/brand/hamiya-food-processing.jpg',
+      '/brand/divisions/food.webp',
+      '/brand/divisions/coffee.webp',
+      '/brand/divisions/vehicles.webp',
       '/manifest.webmanifest',
     ].includes(url.pathname)
   ) {
