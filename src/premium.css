@@ -2345,3 +2345,20 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link) {
     box-shadow: none;
   }
 }
+
+/* HAMIYA bounded product sheet: never full-screen; reserve footer dock space. */
+@media (max-width: 767px) {
+  .dialog.wide:has(.hamiya-airbnb-sheet) {
+    bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+    top: auto;
+    height: min(60dvh, calc(100dvh - var(--hamiya-status-clearance, 32px) - 110px));
+    max-height: min(75dvh, calc(100dvh - var(--hamiya-status-clearance, 32px) - 110px));
+    min-height: 0;
+    border-radius: 26px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .dialog:has(.hamiya-airbnb-sheet) .dialog-body {
+    padding-bottom: 18px;
+  }
+}
