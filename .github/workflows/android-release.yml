@@ -8,6 +8,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'scripts/configure-android.mjs'
+      - 'scripts/verify-android-signature.mjs'
       - '.github/workflows/android-release.yml'
   workflow_dispatch:
 
@@ -129,10 +130,7 @@ jobs:
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
 
           "$APKSIGNER" verify --verbose --print-certs "$APK" | tee "$RUNNER_TEMP/hamiya-signature.txt"
-          grep -F -i 'Signer #1 certificate SHA-256 digest: 7fcd1f1b41d9286ae9f8cfe3e0eeeec6da6237f1a805d70efc4700d8a30f253c' "$RUNNER_TEMP/hamiya-signature.txt" >/dev/null || {
-            echo "The signing identity differs from the existing Hamiya app. Refusing to publish an incompatible update."
-            exit 1
-          }
+          node scripts/verify-android-signature.mjs "$RUNNER_TEMP/hamiya-signature.txt"
           jarsigner -verify "$AAB"
           AAPT="$(dirname "$APKSIGNER")/aapt"
           "$AAPT" dump badging "$APK" > "$RUNNER_TEMP/hamiya-apk-info.txt"
