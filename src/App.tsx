@@ -40,6 +40,7 @@ import { languages } from './i18n';
 import { useApp } from './state';
 import { appView } from './navigation';
 const Account = lazy(() => import('./Account'));
+const Settings = lazy(() => import('./Settings'));
 const Admin = lazy(() => import('./Admin'));
 const navigation = [
   { route: 'home', label: 'home', icon: House },
@@ -65,11 +66,15 @@ export default function App() {
   } = useApp();
   const root = route.split('/')[0];
   const headerPageKey =
-    root === 'catalog'
-      ? 'categories'
-      : ['home', 'orders', 'account', 'admin', 'help', 'privacy', 'terms'].includes(root)
-        ? root
-        : 'home';
+    root === 'settings'
+      ? 'appSettings'
+      : root === 'catalog'
+        ? 'categories'
+        : ['home', 'orders', 'account', 'settings', 'admin', 'help', 'privacy', 'terms'].includes(
+              root,
+            )
+          ? root
+          : 'home';
   const view = appView({
     authLoading,
     signedIn: !!user,
@@ -85,13 +90,33 @@ export default function App() {
     { route: 'admin/orders', label: 'adminOrders', icon: ClipboardList },
     { route: 'admin/products', label: 'products', icon: Package },
     { route: 'admin/requests', label: 'requests', icon: MessageCircle },
-    { route: 'admin/settings', label: 'settings', icon: Settings2 },
+    { route: 'admin/settings', label: 'businessSettings', icon: Settings2 },
   ];
   const [drawer, setDrawer] = useState(false);
   const compact = useCompactLayout();
   const mobileDrawer = drawer && compact && !standalone;
   useOverlay(mobileDrawer, () => setDrawer(false));
   useKeyboardViewport();
+  useEffect(() => {
+    if (authLoading) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const ready = () => {
+      if (cancelled) return;
+      if (document.querySelector('.loading-state')) {
+        timer = setTimeout(ready, 100);
+        return;
+      }
+      void import('./native-updates').then((module) => {
+        if (!cancelled) module.confirmAppReady();
+      });
+    };
+    timer = setTimeout(ready, 100);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [authLoading]);
   const drawerRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!compact) setDrawer(false);
@@ -110,7 +135,13 @@ export default function App() {
     document.title = `${t(title)} · HAMIYA`;
   }, [headerPageKey, root, t, view]);
   useEffect(() => {
-    if (isStaff && view === 'dashboard' && root !== 'admin' && root !== 'account') {
+    if (
+      isStaff &&
+      view === 'dashboard' &&
+      root !== 'admin' &&
+      root !== 'account' &&
+      root !== 'settings'
+    ) {
       navigate('admin');
     }
   }, [isStaff, view, root, navigate]);
@@ -187,7 +218,13 @@ export default function App() {
         )}
         <main id="main" className="entry-main" tabIndex={-1}>
           {view === 'information' ? (
-            <Information page={root} />
+            root === 'settings' ? (
+              <Suspense fallback={<LoadingState />}>
+                <Settings />
+              </Suspense>
+            ) : (
+              <Information page={root} />
+            )
           ) : (
             <Suspense fallback={<LoadingState />}>
               <Account key={user?.id || 'guest'} />
@@ -286,6 +323,14 @@ export default function App() {
           </div>
         )}
         <div className="sidebar-bottom">
+          <button
+            className={'nav-link ' + (root === 'settings' ? 'active' : '')}
+            aria-current={root === 'settings' ? 'page' : undefined}
+            onClick={() => go('settings')}
+          >
+            <Settings2 size={19} />
+            {t('appSettings')}
+          </button>
           {isStaff && (
             <button
               className={'nav-link ' + (root === 'account' ? 'active' : '')}
@@ -416,10 +461,18 @@ export default function App() {
               <OrdersPage />
             ) : root === 'account' ? (
               <Account key={user?.id || 'guest'} />
+            ) : root === 'settings' ? (
+              <Settings />
             ) : root === 'admin' ? (
               <Admin />
             ) : ['help', 'privacy', 'terms'].includes(root) ? (
-              <Information page={root} />
+              root === 'settings' ? (
+                <Suspense fallback={<LoadingState />}>
+                  <Settings />
+                </Suspense>
+              ) : (
+                <Information page={root} />
+              )
             ) : (
               <Home />
             )}

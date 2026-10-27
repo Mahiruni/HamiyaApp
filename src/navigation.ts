@@ -25,7 +25,7 @@ export function appView({
   if (authLoading) return 'loading';
   if (
     (!signedIn || recovery || needsProfile) &&
-    ['privacy', 'terms', 'help'].includes(route.split('/')[0])
+    ['privacy', 'terms', 'help', 'settings'].includes(route.split('/')[0])
   )
     return 'information';
   if (!signedIn || recovery) return 'auth';

@@ -426,6 +426,7 @@ export default function Account() {
             </p>
           )}
           <div className="auth-legal">
+            <button onClick={() => navigate('settings')}>{t('appSettings')}</button>
             <button onClick={() => navigate('privacy')}>{t('privacy')}</button>
             <span aria-hidden="true">·</span>
             <button onClick={() => navigate('terms')}>{t('terms')}</button>
@@ -804,20 +805,11 @@ export default function Account() {
               </div>
             </>
           )}
-          <div className="panel">
-            <h2>{t('language')}</h2>
-            <div className="language-pills">
-              {languages.map((l) => (
-                <button
-                  key={l.code}
-                  className={language === l.code ? 'active' : ''}
-                  onClick={() => setLanguage(l.code)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <button className="button secondary" onClick={() => navigate('settings')}>
+            <Globe2 size={17} />
+            {t('appSettings')}
+            <ChevronRight size={17} />
+          </button>
           <div className="panel">
             <h2>{t('security')}</h2>
             <p>{t('deleteText')}</p>

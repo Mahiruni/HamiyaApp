@@ -1575,3 +1575,12 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link, .hamiya-dash-kicker, .hamiy
 .auth-options {
   column-gap: 14px;
 }
+
+.auth-legal {
+  flex-wrap: wrap;
+}
+
+.sidebar-note > span,
+.sidebar-copyright {
+  color: var(--muted);
+}

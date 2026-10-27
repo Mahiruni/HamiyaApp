@@ -1,11 +1,18 @@
-
 name: HAMIYA Signed Android Release
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'capacitor.config.ts'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'scripts/configure-android.mjs'
+      - '.github/workflows/android-release.yml'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   release:
@@ -29,8 +36,8 @@ jobs:
       - name: Install web dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Capacitor tooling
-        run: pnpm add --save-exact @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8
+      - name: Run application checks
+        run: pnpm test && pnpm typecheck
 
       - name: Build production web assets
         env:
@@ -42,6 +49,7 @@ jobs:
             exit 1
           }
           pnpm build
+          node -e "require('fs').rmSync('dist/updates', { recursive: true, force: true })"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -52,7 +60,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+          packages: 'platform-tools platforms;android-36 build-tools;36.0.0'
 
       - name: Generate Android native project
         run: |
@@ -112,6 +120,7 @@ jobs:
 
       - name: Verify APK and AAB signatures
         run: |
+          set -euo pipefail
           APK="$(find android/app/build/outputs/apk/release -name '*.apk' -print -quit)"
           AAB="$(find android/app/build/outputs/bundle/release -name '*.aab' -print -quit)"
 
@@ -119,8 +128,15 @@ jobs:
 
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)"
 
-          "$APKSIGNER" verify --verbose "$APK"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" | tee "$RUNNER_TEMP/hamiya-signature.txt"
+          grep -F -i 'Signer #1 certificate SHA-256 digest: 7fcd1f1b41d9286ae9f8cfe3e0eeeec6da6237f1a805d70efc4700d8a30f253c' "$RUNNER_TEMP/hamiya-signature.txt" >/dev/null || {
+            echo "The signing identity differs from the existing Hamiya app. Refusing to publish an incompatible update."
+            exit 1
+          }
           jarsigner -verify "$AAB"
+          AAPT="$(dirname "$APKSIGNER")/aapt"
+          "$AAPT" dump badging "$APK" > "$RUNNER_TEMP/hamiya-apk-info.txt"
+          grep -F "package: name='com.hamiyainvestmentgroup.customer'" "$RUNNER_TEMP/hamiya-apk-info.txt"
 
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v4
@@ -131,3 +147,25 @@ jobs:
             android/app/build/outputs/bundle/release/*.aab
           retention-days: 30
           if-no-files-found: error
+
+      - name: Publish Android update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p release
+          cp android/app/build/outputs/apk/release/*.apk release/Hamiya.apk
+          cp android/app/build/outputs/bundle/release/*.aab release/Hamiya.aab
+          cd release
+          sha256sum Hamiya.apk Hamiya.aab > SHA256SUMS.txt
+          cat > release-notes.md <<'NOTES'
+          Hamiya Android with App settings → App updates.
+
+          Screen and feature updates can be applied inside the app without another APK. Native Android upgrades install over this app and preserve its data. Keep the same signing identity for future releases.
+          NOTES
+          tag="android-build-${GITHUB_RUN_NUMBER}"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt --target "$GITHUB_SHA" --title "Hamiya Android — build ${GITHUB_RUN_NUMBER}" --notes-file release-notes.md --latest --repo "$GITHUB_REPOSITORY"
+          fi

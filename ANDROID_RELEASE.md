@@ -26,3 +26,11 @@ On macOS/Linux: `base64 -w 0 hamiya-release.jks` (on macOS: `base64 < hamiya-rel
 - Signing keys and passwords must **never** be committed to GitHub.
 - This workflow builds from the current website source; native permission, notification, deep-link and hardware integrations require separate implementation and device testing.
 - A GitHub Actions run is **not** a Google Play publication.
+
+## Updates from Settings
+
+Version 1.1.0 adds **App settings → App updates**, also available before sign-in. Opening Settings checks the HTTPS release manifest. Customers can apply a compatible web update and restart the app without installing another APK. Downloads are checked against the release SHA-256; failed startup confirmation triggers the updater's return to the last working bundle. The application does not send updater telemetry to Capgo.
+
+Every production web build creates a bundle and `/updates/latest.json` on the existing Vercel project. Native changes require an APK with a higher version code and the existing signing certificate. Increase the package version and the `minimumNativeVersion` in `scripts/package-updates.mjs` when introducing new native requirements. The Android workflow publishes `Hamiya.apk` to GitHub Releases after signature verification. It refuses a signing certificate different from the previous Hamiya release.
+
+The first 1.1.0 APK must be installed over the existing Hamiya app to enable live updates. Do not uninstall the old app. Live updates cover JavaScript, CSS and static assets; they cannot change Android permissions, native plugins or the app's signing identity.

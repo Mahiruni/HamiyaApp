@@ -3,7 +3,13 @@ import react from '@vitejs/plugin-react';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 export default defineConfig(({ mode, command }) => {
+  const commit =
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.GITHUB_SHA ||
+    execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const version = JSON.parse(readFileSync('package.json', 'utf8')).version;
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   const key = env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
   if (key.startsWith('sb_secret_'))
@@ -18,8 +24,9 @@ export default defineConfig(({ mode, command }) => {
     if (role !== 'anon') throw new Error('A legacy frontend key must have the anon role.');
   }
   const url = env.VITE_SUPABASE_URL || 'https://lhdsodqeojxogcwgyjpo.supabase.co';
-  const csp = `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: ${new URL(url).origin}; connect-src 'self' ${new URL(url).origin} ${new URL(url).origin.replace('https:', 'wss:')}; font-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'`;
+  const csp = `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: ${new URL(url).origin}; connect-src 'self' https://hamiyainvestmentgroup.vercel.app ${new URL(url).origin} ${new URL(url).origin.replace('https:', 'wss:')}; font-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'`;
   return {
+    define: { __APP_VERSION__: JSON.stringify(version), __BUILD_COMMIT__: JSON.stringify(commit) },
     plugins: [
       react(),
       {

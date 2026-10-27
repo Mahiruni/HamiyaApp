@@ -99,3 +99,14 @@ if (!activity.includes('hamiyaBackNavigation')) {
   writeFileSync(activityPath, activity);
 }
 console.log('Hamiya native artwork, system launch theme, keyboard and Back navigation configured.');
+
+const packageInfo = JSON.parse(readFileSync('package.json', 'utf8'));
+const versionCode = 10000 + Number(process.env.GITHUB_RUN_NUMBER || 0);
+if (!Number.isSafeInteger(versionCode) || versionCode < 10000)
+  throw new Error('Invalid Android version code');
+const gradlePath = join(root, 'app/build.gradle');
+const gradle = readFileSync(gradlePath, 'utf8')
+  .replace(/\bversionCode\s+\d+/, `versionCode ${versionCode}`)
+  .replace(/\bversionName\s+['"][^'"]+['"]/, `versionName "${packageInfo.version}"`);
+writeFileSync(gradlePath, gradle);
+console.log(`Android version ${packageInfo.version}, build ${versionCode}`);

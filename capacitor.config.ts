@@ -7,6 +7,14 @@ const config: CapacitorConfig = {
   backgroundColor: '#f4f7fa',
   zoomEnabled: true,
   plugins: {
+    CapacitorUpdater: {
+      autoUpdate: 'off',
+      appReadyTimeout: 30000,
+      statsUrl: '',
+      updateUrl: '',
+      channelUrl: '',
+      resetWhenUpdate: true,
+    },
     SystemBars: {
       insetsHandling: 'native',
       initialViewportFitValueHint: 'cover',
