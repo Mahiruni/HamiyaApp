@@ -2228,3 +2228,27 @@ html[lang='am'] :is(h1, h2, h3, .eyebrow, .nav-link) {
 @media (prefers-reduced-motion: reduce) {
   .dialog:has(.hamiya-airbnb-sheet)[open] { animation: none; }
 }
+
+/* Android edge-to-edge: keep content below the real status bar. Some Android
+   WebViews report a zero CSS safe inset despite drawing edge-to-edge. */
+@media (max-width: 767px) {
+  html.hamiya-native {
+    --hamiya-status-clearance: max(env(safe-area-inset-top, 0px), 28px);
+  }
+  html.hamiya-native .app:not(.admin-app-shell) .topbar {
+    padding-top: var(--hamiya-status-clearance);
+    min-height: calc(52px + var(--hamiya-status-clearance));
+    top: 0;
+  }
+  html.hamiya-native .app:not(.admin-app-shell) .topbar .topbar-left,
+  html.hamiya-native .app:not(.admin-app-shell) .topbar .topbar-actions {
+    min-height: 48px;
+  }
+  html.hamiya-native .dialog.wide:has(.hamiya-airbnb-sheet) {
+    max-height: calc(100dvh - var(--hamiya-status-clearance) - 12px);
+    height: min(90dvh, calc(100dvh - var(--hamiya-status-clearance) - 12px));
+  }
+  html.hamiya-native .hamiya-airbnb-sheet .hamiya-sheet-handle {
+    top: max(calc(10dvh + 8px), calc(var(--hamiya-status-clearance) + 20px));
+  }
+}
