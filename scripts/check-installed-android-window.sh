@@ -8,6 +8,22 @@ adb install -r "$apk_path"
 adb shell dumpsys package com.hamiyainvestmentgroup.customer | grep -E 'versionCode=|versionName='
 adb shell settings put system accelerometer_rotation 0
 adb shell settings put secure show_ime_with_hard_keyboard 1
+launcher_component="$(adb shell cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tr -d '\r' | tail -n 1)"
+launcher_package="${launcher_component%%/*}"
+[[ "$launcher_package" =~ ^[a-zA-Z0-9_.]+$ ]] || { echo 'Could not resolve the emulator home activity'; exit 1; }
+wait_for_focus() {
+  local package="$1"
+  local focus=''
+  for attempt in {1..20}; do
+    focus="$(adb shell dumpsys window windows | awk '/mCurrentFocus/ {print}')"
+    if [[ "$focus" == *"$package/"* ]]; then
+      return 0
+    fi
+    sleep 0.25
+  done
+  echo "Expected foreground window for $package; observed: $focus"
+  return 1
+}
 capture_window() {
   local stage="$1"
   # UiAutomation enables WebView accessibility asynchronously. Its first dump can
@@ -57,7 +73,11 @@ PY
   capture_window "keyboard-$mode"
   adb shell input keyevent KEYCODE_BACK
   adb shell input keyevent KEYCODE_HOME
+  # Home dispatch is asynchronous, especially on Android 16. Relaunching before
+  # the launcher owns focus lets its pending transition hide the resumed app.
+  wait_for_focus "$launcher_package"
   adb shell am start -W -n com.hamiyainvestmentgroup.customer/.MainActivity
+  wait_for_focus com.hamiyainvestmentgroup.customer
   sleep 2
   capture_window "resume-$mode"
   adb shell settings put system user_rotation 1
