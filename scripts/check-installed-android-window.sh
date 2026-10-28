@@ -15,7 +15,7 @@ wait_for_focus() {
   local package="$1"
   local focus=''
   for attempt in {1..20}; do
-    focus="$(adb shell dumpsys window windows | awk '/mCurrentFocus/ {print}')"
+    focus="$(adb shell dumpsys window | awk '/mCurrentFocus/ {print}')"
     if [[ "$focus" == *"$package/"* ]]; then
       return 0
     fi

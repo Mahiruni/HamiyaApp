@@ -31,12 +31,12 @@ The production product prices were read and preserved. Banana and Cappuccino Sof
 - Bounded sheet: `src/ProductSheet.tsx`, `src/sheet-geometry.ts`, `src/product-sheet.css`.
 - Languages: `src/production-translations.ts` adds matching English, Amharic and Afaan Oromo recovery text; existing language persistence and Ethiopic fallback remain.
 - Android/release: `package.json`, `scripts/configure-android.mjs`, `scripts/check-installed-android-window.sh`, `scripts/verify-android-window.py`, `.github/workflows/android-release.yml`.
-- Regression coverage: `tests/production.test.mjs`, `tests/android-generation.test.mjs`, `tests/browser/production-upgrade.spec.ts`.
+- Regression coverage: `tests/production.test.mjs`, `tests/android-generation.test.mjs`, `tests/android-window.test.mjs`, `tests/browser/production-upgrade.spec.ts`.
 
 ## Local verification
 
 - ESLint and TypeScript pass.
-- 51 unit/database tests pass, including execution of the existing SQL/RPC in PGlite and a regression for the actual Android 15 InsetsSource dump format.
+- 52 unit/database tests pass, including execution of the existing SQL/RPC in PGlite and regressions for actual Android InsetsSource and global foreground-window dumps.
 - Production build passes; lazy customer/admin chunks remain separate.
 - 31 Chromium browser tests pass against the production build.
 - Phone widths 320/390px, tablet 768px, desktop 1280px and native-layout simulation are covered.

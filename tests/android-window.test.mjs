@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -47,4 +47,40 @@ test('Android window gate reads current and legacy InsetsSource dumps and reject
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test('resume gate reads global window focus and fails closed for a different foreground app', () => {
+  const script = readFileSync('scripts/check-installed-android-window.sh', 'utf8');
+  const implementation = script.match(/wait_for_focus\(\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(implementation);
+  const driver = `set -euo pipefail
+adb() {
+  if [[ "$*" == 'shell dumpsys window' ]]; then
+    printf '%s\\n' "$HAMIYA_TEST_WINDOW_DUMP"
+  else
+    return 3
+  fi
+}
+sleep() { :; }
+${implementation}
+wait_for_focus "$1"`;
+  // Global focus format captured from the Android 16 resume failure. The
+  // narrower "dumpsys window windows" section contains no mCurrentFocus.
+  const captured =
+    '  mCurrentFocus=Window{ec6c4f u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}';
+  const run = (packageName, dump) =>
+    spawnSync('bash', ['-c', driver, 'hamiya-focus-test', packageName], {
+      encoding: 'utf8',
+      env: { ...process.env, HAMIYA_TEST_WINDOW_DUMP: dump },
+    });
+  assert.equal(run('com.google.android.apps.nexuslauncher', captured).status, 0);
+  assert.equal(run('com.hamiyainvestmentgroup.customer', captured).status, 1);
+  assert.equal(run('com.hamiyainvestmentgroup.customer', 'mCurrentFocus=null').status, 1);
+  assert.equal(
+    run(
+      'com.hamiyainvestmentgroup.customer',
+      'mCurrentFocus=Window{a u0 com.hamiyainvestmentgroup.customer/com.hamiyainvestmentgroup.customer.MainActivity}',
+    ).status,
+    0,
+  );
 });
