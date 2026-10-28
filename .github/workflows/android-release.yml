@@ -152,6 +152,41 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+      - name: Enable Android emulator acceleration
+        run: |
+          sudo chgrp "$(id -gn)" /dev/kvm
+          sudo chmod g+rw /dev/kvm
+
+      - name: Check the signed APK on Android 15 before publication
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash scripts/check-installed-android-window.sh android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Check the signed APK on Android 16 before publication
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash scripts/check-installed-android-window.sh android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Save Android runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HAMIYA-native-window-evidence
+          path: android-window-results/
+          if-no-files-found: warn
+
       - name: Publish Android update
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

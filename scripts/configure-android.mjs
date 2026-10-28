@@ -52,13 +52,16 @@ styles = styles.replace(
   /(<style name="AppTheme.NoActionBar"[^>]*>)([\s\S]*?)(<\/style>)/,
   (_, start, body, end) =>
     start +
-    body.replace(/<item name="android:windowBackground">[\s\S]*?<\/item>/g, '') +
-    '<item name="android:windowBackground">@color/hamiya_surface</item>' +
+    body.replace(
+      /<item name="android:(?:windowBackground|windowNoTitle|windowActionBar|windowActionBarOverlay)">[\s\S]*?<\/item>/g,
+      '',
+    ) +
+    '<item name="android:windowBackground">@color/hamiya_surface</item><item name="android:windowNoTitle">true</item><item name="android:windowActionBar">false</item><item name="android:windowActionBarOverlay">false</item>' +
     end,
 );
 styles = styles.replace(
   /<style name="AppTheme.NoActionBarLaunch"[\s\S]*?<\/style>/,
-  '<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"><item name="windowSplashScreenBackground">@color/hamiya_surface</item><item name="windowSplashScreenAnimatedIcon">@drawable/hamiya_launcher_foreground</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item><item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item></style>',
+  '<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"><item name="android:windowNoTitle">true</item><item name="android:windowActionBar">false</item><item name="android:windowActionBarOverlay">false</item><item name="windowNoTitle">true</item><item name="windowActionBar">false</item><item name="windowSplashScreenBackground">@color/hamiya_surface</item><item name="windowSplashScreenAnimatedIcon">@drawable/hamiya_launcher_foreground</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item><item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item></style>',
 );
 writeFileSync(stylesPath, styles);
 const manifestPath = join(root, 'app/src/main/AndroidManifest.xml');
@@ -92,6 +95,7 @@ writeFileSync(
   `package ${packageName};
 
 import android.os.Bundle;
+import android.view.Window;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.ViewCompat;
@@ -100,12 +104,17 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // SplashScreen's platform theme can otherwise create an android:id/action_bar,
+        // independent of AppCompat's action bar. Remove both features before content exists.
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         // Android 15/16 enforce edge-to-edge. Capacitor SystemBars owns WindowInsets:
         // older WebViews get native padding + zero CSS insets; newer ones get real CSS insets.
         EdgeToEdge.enable(this);
         registerPlugin(HamiyaSystemUiPlugin.class);
         super.onCreate(savedInstanceState);
         // The app supplies floating controls; never add a native title/action bar.
+        if (getActionBar() != null) getActionBar().hide();
         if (getSupportActionBar() != null) getSupportActionBar().hide();
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override public void handleOnBackPressed() {

@@ -40,3 +40,11 @@ The Android workflow checks that the public production endpoint returns a byte-i
 ## Floating controls (1.2.2)
 
 The header no longer renders the HAMIYA wordmark. Android uses the compact floating controls and menu drawer at every viewport width, including landscape and tablets. The header has no rectangular background and keeps the hamburger, language selector and customer cart below the actual status/cutout inset while scrolling. The black customer dock remains in place. The base Android theme has no action bar, and the activity explicitly hides any action bar to prevent a native app-title strip. Install the new signed APK to receive both the bundled screens and native title-bar safeguard.
+
+## Platform title-bar fix (1.2.3)
+
+Native testing of the signed 1.2.2 APK reproduced `android:id/action_bar` on both Android 15 and Android 16, covering the floating controls. Hiding AppCompat's action bar did not hide this separate platform bar. `EdgeToEdge.enable()` obtains the decor view before Capacitor's later theme change, so the launch theme must prohibit the platform bar and both no-title features must be requested before edge-to-edge/decor creation.
+
+The native generator now disables the platform action bar/title/overlay in the launch and runtime themes, requests the platform and support no-title features before edge-to-edge initialization, and hides any platform action bar as a fallback. It leaves Android's status and navigation bars visible. Version 1.2.3 is the minimum compatible native version; a web update cannot apply this native fix.
+
+The signed-release workflow now installs the exact release APK on Android 15 and 16 emulators and rejects any visible native action-bar container or app-title label in light/dark mode before publishing. Screenshots and native view hierarchies are retained as CI evidence. These checks start a fresh guest session and do not submit customer orders or documents.

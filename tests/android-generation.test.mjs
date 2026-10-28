@@ -47,6 +47,21 @@ test('Android generation is repeatable and retains edge-to-edge, system surfaces
     assert.match(before[0], /OnBackPressedCallback/);
     assert.match(before[0], /requestApplyInsets/);
     assert.match(before[0], /getSupportActionBar\(\)\.hide\(\)/);
+    assert.match(before[0], /getActionBar\(\)\.hide\(\)/);
+    assert.ok(
+      before[0].indexOf('requestWindowFeature(Window.FEATURE_NO_TITLE)') <
+        before[0].indexOf('super.onCreate'),
+    );
+    assert.ok(
+      before[0].indexOf('supportRequestWindowFeature(Window.FEATURE_NO_TITLE)') <
+        before[0].indexOf('super.onCreate'),
+    );
+    assert.ok(
+      before[0].indexOf('requestWindowFeature(Window.FEATURE_NO_TITLE)') <
+        before[0].indexOf('EdgeToEdge.enable(this)'),
+    );
+    assert.match(before[2], /name="android:windowNoTitle">true/);
+    assert.match(before[2], /name="android:windowActionBar">false/);
     assert.doesNotMatch(before[2], /DarkActionBar/);
     assert.match(before[1], /setAppearanceLightStatusBars/);
     assert.match(before[1], /Type.systemBars\(\)/);

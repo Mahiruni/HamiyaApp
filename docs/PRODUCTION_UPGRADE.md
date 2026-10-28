@@ -67,3 +67,11 @@ Removed the HAMIYA header wordmark from the rendered component, including the st
 The customer header contains only three floating controls: menu on the left, language and cart on the right. Controls remain fixed during scrolling, reserve actual system safe areas, have 48-pixel touch targets and preserve page clearance. Staff retains its menu and language control. The drawer stacks above the controls, locks background scrolling and restores focus on dismissal. The Android generator also uses a base theme without an action bar and explicitly hides any native action bar, preventing a second native app-title strip.
 
 Production-build browser regression tests exercise visible, unobstructed controls, scrolling, drawer opening/dismissal, cart access, staff navigation, emulated top/bottom insets and Android layouts at 390 and 1280 pixels. The existing food-ordering and bounded-sheet tests still pass. Physical Android/Tecno testing remains outstanding.
+
+## Native platform-bar regression — 1.2.3
+
+The user's screenshot exposed a native issue that browser tests cannot detect. Installing the exact signed 1.2.2 release (`10013`) on API 35 and 36 reproduced a visible `android:id/action_bar_container` / `android:id/action_bar` with the full application label. The baseline native checks failed on both systems. The earlier `getSupportActionBar().hide()` only covered AppCompat's separate action bar.
+
+The fix removes the platform and support title features before `EdgeToEdge.enable()` can inflate the window decor, explicitly disables platform title/action-bar/overlay attributes in both launch and runtime themes, and hides a platform action bar defensively. Android's clock and navigation bars remain enabled. The web-update minimum native version is 1.2.3, since this window change requires a new APK.
+
+The signed APK is now subject to Android 15/16 light/dark-mode runtime checks before publication. These inspect the actual installed app's native view hierarchy and retain screenshots. Browser regression coverage still verifies the customer hamburger/language/cart controls and their safe-area bounds; native smoke tests use a fresh guest session. Physical Tecno testing remains a separate limitation.

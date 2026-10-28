@@ -42,7 +42,7 @@ const release = {
   appId: 'com.hamiyainvestmentgroup.customer',
   version: `${version}-r${commit.slice(0, 12)}`,
   commit,
-  minimumNativeVersion: '1.2.0',
+  minimumNativeVersion: '1.2.3',
   nativeVersion: version,
   url: `https://hamiyainvestmentgroup.vercel.app/updates/hamiya-${commit}.zip`,
   checksum: createHash('sha256').update(archive).digest('hex'),
