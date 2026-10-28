@@ -34,6 +34,8 @@ import {
   Money,
   ProductArt,
 } from './components';
+import { ProductSheet } from './ProductSheet';
+import { foodMinimum, purchasable, validFoodQuantity } from './quantity';
 import { useApp } from './state';
 import type { Enquiry, Order, Product } from './types';
 import { catalogLocation, catalogRoute, unitLabel, variantLabel } from './storefront';
@@ -196,25 +198,24 @@ export function CatalogPage() {
 }
 
 export function ProductDetails({ product, onClose }: { product: Product; onClose: () => void }) {
-  const { t, language, user, addCart, navigate, toast, notifyError, online } = useApp();
-  const minimumOrder = product.category === 'food' ? 20 : 1;
-  const [quantity, setQuantity] = useState(String(minimumOrder));
+  const { t, language, user, addCart, navigate, toast, notifyError, online, cart } = useApp();
+  const [quantity, setQuantity] = useState(String(foodMinimum));
   const quantityNumber = Number(quantity);
-  const validQuantity =
-    /^\d+$/.test(quantity) &&
-    Number.isSafeInteger(quantityNumber) &&
-    quantityNumber >= minimumOrder &&
-    quantityNumber <= product.available_quantity;
+  const inCart = cart.find((item) => item.id === product.id)?.quantity || 0;
+  const remaining = Math.max(0, product.available_quantity - inCart);
+  const validQuantity = validFoodQuantity(quantity, remaining);
   const [enquiring, setEnquiring] = useState(false);
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
   const key = useRef(crypto.randomUUID());
   const name = product.translations[language]?.name || product.name;
   const description =
     product.translations[language]?.description || product.translations.en?.description;
-  const available = ['available', 'low_stock'].includes(product.status);
-  const orderable = product.confirmed && product.category === 'food' && available;
+  const orderable = purchasable(product);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting.current || !online) return;
+    submitting.current = true;
     setBusy(true);
     try {
       const data = new FormData(event.currentTarget);
@@ -229,147 +230,162 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
     } catch (error) {
       notifyError(error);
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
-  return (
-    <Dialog title={name} onClose={onClose} wide>
-      <div className="product-detail-layout hamiya-product-detail hamiya-airbnb-sheet">
-        <div className="hamiya-sheet-handle" aria-hidden="true" />
-        <div className="hamiya-product-hero"><ProductArt product={product} /></div>
-        <div className="hamiya-product-content">
-          <span className="eyebrow">{t(product.category + 'Brand')}</span>
-          <h2>
-            {name} <small>{variantLabel(product.variant, t)}</small>
-          </h2>
-          <Badge status={product.status} />
-          <div className="detail-price">
-            {product.price_cents ? (
-              <Money value={product.price_cents} />
-            ) : (
-              <strong>{t('pricePending')}</strong>
-            )}
-            <p>{product.sales_unit ? '/ ' + unitLabel(product.sales_unit, t) : t('unitPending')}</p>
+  const footer =
+    product.category === 'food' ? (
+      <>
+        <div className="sheet-quantity-line">
+          <div className="sheet-quantity-copy">
+            <label htmlFor={'quantity-' + product.id}>{t('foodQuantity')}</label>
+            <small>{t('minimumCartons')}</small>
           </div>
-          {description && <p>{description}</p>}
-          <dl className="details-list hamiya-product-facts">
-            {product.pack_count && (
-              <div>
-                <dt>{t('pack')}</dt>
-                <dd>{product.pack_count}</dd>
-              </div>
-            )}
-            {product.category === 'food' && product.confirmed && (
-              <div>
-                <dt>{t('stock')}</dt>
-                <dd>
-                  {product.available_quantity} {product.sales_unit}
-                </dd>
-              </div>
-            )}
-            {Object.entries(product.attributes)
-              .filter(([, v]) => v)
-              .map(([k, v]) => (
-                <div key={k}>
-                  <dt>{t(k)}</dt>
-                  <dd>{v}</dd>
-                </div>
-              ))}
-          </dl>
-          {product.category === 'food' ? (
-            <>
-              <div className="hamiya-product-quantity">
-                <span className="hamiya-quantity-label">{t('foodQuantity')}</span>
-                <div className="hamiya-quantity-stepper">
-                  <button type="button" aria-label={t('remove')} disabled={quantityNumber <= minimumOrder} onClick={() => setQuantity(String(Math.max(minimumOrder, (Number.isFinite(quantityNumber) ? quantityNumber : minimumOrder) - 1)))}><Minus size={18} /></button>
-              <Field
-                label={t('foodQuantity')}
-                hint={t('minimumCartons')}
-                type="number"
-                min={minimumOrder}
-                max={product.available_quantity || 1}
-                step={1}
-                inputMode="numeric"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                onBlur={() => {
-                  if (!validQuantity)
-                    setQuantity(
-                      String(
-                        Math.max(
-                          minimumOrder,
-                          Math.min(
-                            product.available_quantity || minimumOrder,
-                            Number.isFinite(quantityNumber)
-                              ? Math.floor(quantityNumber) || minimumOrder
-                              : minimumOrder,
-                          ),
-                        ),
-                      ),
-                    );
-                }}
-              />
-                  <button type="button" aria-label={t('add')} disabled={!available || quantityNumber >= product.available_quantity} onClick={() => setQuantity(String(Math.min(product.available_quantity, (Number.isFinite(quantityNumber) ? quantityNumber : minimumOrder) + 1)))}><Plus size={18} /></button>
-                </div>
-              </div>
-              {product.available_quantity < minimumOrder && (
-                <p className="muted small-text">{t('stockBelowMinimum')}</p>
-              )}
-              <button
-                className="button primary full"
-                disabled={!orderable || !online || !validQuantity}
-                onClick={() => {
-                  if (!validQuantity) return;
-                  addCart(product, quantityNumber);
-                  onClose();
-                }}
-              >
-                <ShoppingBag size={17} />
-                {t(orderable ? 'addCart' : 'unavailable')}
-              </button>
-            </>
-          ) : !enquiring ? (
+          <div className="sheet-stepper">
             <button
-              className="button primary full"
-              disabled={!['available', 'coming_soon'].includes(product.status) || !online}
-              onClick={() => {
-                if (!user || user.verification !== 'approved' || !user.email_verified) {
-                  onClose();
-                  navigate('account');
-                  toast(t('approvalNotice'));
-                  return;
-                }
-                setEnquiring(true);
-              }}
+              type="button"
+              aria-label={t('remove')}
+              disabled={quantityNumber <= foodMinimum}
+              onClick={() => setQuantity(String(Math.max(foodMinimum, quantityNumber - 1)))}
             >
-              {t(product.category === 'coffee' ? 'requestQuote' : 'enquire')}
-              <ArrowRight size={16} />
+              <Minus size={18} />
             </button>
+            <input
+              id={'quantity-' + product.id}
+              type="number"
+              inputMode="numeric"
+              min={foodMinimum}
+              max={remaining}
+              step={1}
+              value={quantity}
+              aria-invalid={!validQuantity}
+              aria-describedby={'quantity-hint-' + product.id}
+              onChange={(event) => setQuantity(event.target.value)}
+            />
+            <button
+              type="button"
+              aria-label={t('add')}
+              disabled={!orderable || quantityNumber >= remaining}
+              onClick={() => setQuantity(String(Math.min(remaining, quantityNumber + 1)))}
+            >
+              <Plus size={18} />
+            </button>
+          </div>
+        </div>
+        <div
+          id={'quantity-hint-' + product.id}
+          className={validQuantity ? 'sheet-total' : 'sheet-quantity-error'}
+          aria-live="polite"
+        >
+          {validQuantity ? (
+            <>
+              {t('total')}: <Money value={quantityNumber * (product.price_cents || 0)} />
+            </>
           ) : (
-            <form onSubmit={submit}>
-              {product.category === 'coffee' && (
-                <>
-                  <div className="form-grid">
-                    <Field label={t('quantity')} name="quantity" required maxLength={100} />
-                    <Field label={t('unit')} name="unit" required maxLength={100} />
-                  </div>
-                  <Field label={t('packaging')} name="packaging" maxLength={300} />
-                  <Field label={t('destination')} name="destination" required maxLength={500} />
-                </>
-              )}
-              <label className="field">
-                <span>{t('notes')} *</span>
-                <textarea name="notes" required rows={3} maxLength={2000} />
-              </label>
-              <Button busy={busy} className="button primary full" disabled={busy || !online}>
-                {t(busy ? 'loading' : 'submit')}
-                <ArrowRight size={16} />
-              </Button>
-            </form>
+            t(remaining < foodMinimum ? 'stockBelowMinimum' : 'quantityInvalid')
           )}
         </div>
+        <button
+          className="button primary"
+          disabled={!orderable || !online || !validQuantity}
+          onClick={() => {
+            if (validQuantity) {
+              addCart(product, quantityNumber);
+              onClose();
+            }
+          }}
+        >
+          <ShoppingBag size={18} />
+          {t(orderable ? 'addCart' : 'unavailable')}
+        </button>
+      </>
+    ) : undefined;
+  return (
+    <ProductSheet title={name} onClose={onClose} footer={footer}>
+      <div className="sheet-art">
+        <ProductArt product={product} />
       </div>
-    </Dialog>
+      <div className="sheet-summary">
+        <span className="eyebrow">
+          {variantLabel(product.variant, t) || t(product.category + 'Brand')}
+        </span>
+        <Badge status={product.status} />
+      </div>
+      <div className="sheet-price">
+        {product.price_cents ? (
+          <Money value={product.price_cents} />
+        ) : (
+          <strong>{t('pricePending')}</strong>
+        )}
+        <p>{product.sales_unit ? '/ ' + unitLabel(product.sales_unit, t) : t('unitPending')}</p>
+      </div>
+      {description && <p>{description}</p>}
+      <dl className="sheet-facts">
+        {product.pack_count && (
+          <div>
+            <dt>{t('pack')}</dt>
+            <dd>{product.pack_count}</dd>
+          </div>
+        )}
+        {product.category === 'food' && product.confirmed && (
+          <div>
+            <dt>{t('stock')}</dt>
+            <dd>
+              {product.available_quantity} {unitLabel(product.sales_unit, t)}
+            </dd>
+          </div>
+        )}
+        {Object.entries(product.attributes)
+          .filter(([, value]) => value)
+          .map(([key, value]) => (
+            <div key={key}>
+              <dt>{t(key)}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+      </dl>
+      {product.category !== 'food' &&
+        (!enquiring ? (
+          <button
+            className="button primary full"
+            disabled={!['available', 'coming_soon'].includes(product.status) || !online}
+            onClick={() => {
+              if (!user || user.verification !== 'approved' || !user.email_verified) {
+                onClose();
+                navigate('account');
+                toast(t('approvalNotice'));
+                return;
+              }
+              setEnquiring(true);
+            }}
+          >
+            {t(product.category === 'coffee' ? 'requestQuote' : 'enquire')}
+            <ArrowRight size={16} />
+          </button>
+        ) : (
+          <form onSubmit={submit}>
+            {product.category === 'coffee' && (
+              <>
+                <div className="form-grid">
+                  <Field label={t('quantity')} name="quantity" required maxLength={100} />
+                  <Field label={t('unit')} name="unit" required maxLength={100} />
+                </div>
+                <Field label={t('packaging')} name="packaging" maxLength={300} />
+                <Field label={t('destination')} name="destination" required maxLength={500} />
+              </>
+            )}
+            <label className="field">
+              <span>{t('notes')} *</span>
+              <textarea name="notes" required rows={3} maxLength={2000} />
+            </label>
+            <Button busy={busy} disabled={!online}>
+              {t('submit')}
+              <ArrowRight size={16} />
+            </Button>
+          </form>
+        ))}
+    </ProductSheet>
   );
 }
 
@@ -388,6 +404,8 @@ export function Cart() {
     refreshCatalog,
   } = useApp();
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
+  const [draftQuantities, setDraftQuantities] = useState<Record<string, string>>({});
   const [fulfilment, setFulfilment] = useState(catalog.settings.pickup ? 'pickup' : 'delivery');
   const [note, setNote] = useState('');
   const key = useRef(crypto.randomUUID());
@@ -396,6 +414,8 @@ export function Cart() {
     const p = catalog.products.find((p) => p.id === item.id);
     return (
       !p ||
+      !purchasable(p) ||
+      !validFoodQuantity(draftQuantities[item.id] ?? String(item.quantity), p.available_quantity) ||
       p.price_cents !== item.price_cents ||
       p.sales_unit !== item.sales_unit ||
       item.quantity < 20 ||
@@ -407,14 +427,8 @@ export function Cart() {
   const fee = fulfilment === 'delivery' ? catalog.settings.delivery_fee_cents || 0 : 0;
   function setCartQuantity(id: string, quantity: number) {
     const p = catalog.products.find((product) => product.id === id);
-    if (!p || !Number.isSafeInteger(quantity) || quantity < 20) return;
-    setCart(
-      cart.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.min(quantity, Math.max(1, p.available_quantity)) }
-          : item,
-      ),
-    );
+    if (!p || !validFoodQuantity(String(quantity), p.available_quantity)) return;
+    setCart(cart.map((item) => (item.id === id ? { ...item, quantity } : item)));
     key.current = crypto.randomUUID();
   }
   function adjust(id: string, amount: number) {
@@ -432,11 +446,13 @@ export function Cart() {
     key.current = crypto.randomUUID();
   }
   async function submit() {
+    if (submitting.current || !online || !cart.length || changed) return;
     if (!allowed) {
       setCartOpen(false);
       navigate('account');
       return;
     }
+    submitting.current = true;
     setBusy(true);
     try {
       const payload = {
@@ -462,6 +478,7 @@ export function Cart() {
       if (error instanceof AppError && ['stock_changed', 'price_changed'].includes(error.code))
         await refreshCatalog();
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -496,7 +513,14 @@ export function Cart() {
                   <div className="quantity-stepper">
                     <button
                       aria-label={t('remove')}
-                      onClick={() => adjust(item.id, -1)}
+                      onClick={() => {
+                        setDraftQuantities((values) => {
+                          const next = { ...values };
+                          delete next[item.id];
+                          return next;
+                        });
+                        adjust(item.id, -1);
+                      }}
                       disabled={busy || item.quantity <= 20}
                     >
                       <Minus size={13} />
@@ -509,16 +533,36 @@ export function Cart() {
                       max={catalog.products.find((p) => p.id === item.id)?.available_quantity || 20}
                       step={1}
                       aria-label={t('quantity') + ' · ' + item.name}
-                      value={item.quantity}
+                      value={draftQuantities[item.id] ?? String(item.quantity)}
+                      aria-invalid={
+                        !validFoodQuantity(
+                          draftQuantities[item.id] ?? String(item.quantity),
+                          catalog.products.find((p) => p.id === item.id)?.available_quantity || 0,
+                        )
+                      }
                       disabled={busy}
                       onChange={(event) => {
-                        if (event.target.value !== '')
-                          setCartQuantity(item.id, Number(event.target.value));
+                        const value = event.target.value;
+                        setDraftQuantities((previous) => ({ ...previous, [item.id]: value }));
+                        if (
+                          validFoodQuantity(
+                            value,
+                            catalog.products.find((p) => p.id === item.id)?.available_quantity || 0,
+                          )
+                        )
+                          setCartQuantity(item.id, Number(value));
                       }}
                     />
                     <button
                       aria-label={t('quantity')}
-                      onClick={() => adjust(item.id, 1)}
+                      onClick={() => {
+                        setDraftQuantities((values) => {
+                          const next = { ...values };
+                          delete next[item.id];
+                          return next;
+                        });
+                        adjust(item.id, 1);
+                      }}
                       disabled={busy}
                     >
                       <Plus size={13} />
@@ -549,7 +593,7 @@ export function Cart() {
                   setCart(
                     cart.flatMap((item) => {
                       const p = catalog.products.find((p) => p.id === item.id);
-                      return p?.price_cents && ['available', 'low_stock'].includes(p.status)
+                      return p && purchasable(p)
                         ? [
                             {
                               ...item,
@@ -561,6 +605,7 @@ export function Cart() {
                         : [];
                     }),
                   );
+                  setDraftQuantities({});
                   key.current = crypto.randomUUID();
                 }}
               >

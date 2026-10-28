@@ -234,7 +234,7 @@ begin
    if payload->>'fulfilment' not in ('pickup','delivery') or settings->>(payload->>'fulfilment')<>'true' then raise exception 'fulfilment_unavailable';end if;
    if payload->>'fulfilment'='delivery' then if jsonb_typeof(settings->'delivery_fee_cents')<>'number' then raise exception 'fulfilment_unavailable';end if;fee:=(settings->>'delivery_fee_cents')::bigint;end if;
    for entry in select value from jsonb_array_elements(payload->'items') order by value->>'id' loop
-    quantity:=(entry->>'quantity')::integer;if quantity is null or quantity not between 1 and 10000 then raise exception 'invalid_request';end if;
+    quantity:=(entry->>'quantity')::integer;if quantity is null or quantity not between 20 and 10000 then raise exception 'invalid_request';end if;
     select * into p from public.hamiya_products where id=entry->>'id' for share;
     if not found or p.category<>'food' or not p.published or not p.confirmed or p.status<>'available' or p.stock-p.reserved<quantity then raise exception 'stock_changed';end if;
     if (entry->>'price_cents')::bigint is distinct from p.price_cents or coalesce(entry->>'sales_unit','')<>p.sales_unit then raise exception 'price_changed';end if;

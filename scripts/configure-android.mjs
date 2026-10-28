@@ -24,7 +24,7 @@ write(
 );
 write(
   join(res, 'values/hamiya.xml'),
-  '<resources><color name="hamiya_surface">#f4f7fa</color></resources>',
+  '<resources><color name="hamiya_surface">#193b4d</color></resources>',
 );
 write(
   join(res, 'drawable/hamiya_launcher_foreground.xml'),
@@ -44,20 +44,32 @@ for (const name of ['ic_launcher', 'ic_launcher_round']) {
 const stylesPath = join(res, 'values/styles.xml');
 let styles = readFileSync(stylesPath, 'utf8');
 styles = styles.replace(
+  'Theme.AppCompat.DayNight.NoActionBar',
+  'Theme.AppCompat.Light.NoActionBar',
+);
+styles = styles.replace(
+  /(<style name="AppTheme.NoActionBar"[^>]*>)([\s\S]*?)(<\/style>)/,
+  (_, start, body, end) =>
+    start +
+    body.replace(/<item name="android:windowBackground">[\s\S]*?<\/item>/g, '') +
+    '<item name="android:windowBackground">@color/hamiya_surface</item>' +
+    end,
+);
+styles = styles.replace(
   /<style name="AppTheme.NoActionBarLaunch"[\s\S]*?<\/style>/,
-  '<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"><item name="windowSplashScreenBackground">@color/hamiya_surface</item><item name="windowSplashScreenAnimatedIcon">@drawable/hamiya_launcher_foreground</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item><item name="android:windowLightStatusBar">true</item><item name="android:windowLightNavigationBar">true</item></style>',
+  '<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"><item name="windowSplashScreenBackground">@color/hamiya_surface</item><item name="windowSplashScreenAnimatedIcon">@drawable/hamiya_launcher_foreground</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item><item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item></style>',
 );
 writeFileSync(stylesPath, styles);
 const manifestPath = join(root, 'app/src/main/AndroidManifest.xml');
 let manifest = readFileSync(manifestPath, 'utf8');
 if (!manifest.includes('android:windowSoftInputMode='))
   manifest = manifest.replace(
-    /<activity\s/,
+    /<activity\b/,
     '<activity android:windowSoftInputMode="adjustResize" ',
   );
 if (!manifest.includes('android:enableOnBackInvokedCallback='))
   manifest = manifest.replace(
-    /<application\s/,
+    /<application\b/,
     '<application android:enableOnBackInvokedCallback="true" ',
   );
 writeFileSync(manifestPath, manifest);
@@ -72,32 +84,89 @@ const findActivity = (path) => {
 };
 const activityPath = findActivity(join(root, 'app/src/main/java'));
 if (!activityPath) throw new Error('Generated MainActivity.java was not found.');
-let activity = readFileSync(activityPath, 'utf8');
-if (!activity.includes('hamiyaBackNavigation')) {
-  activity = activity.replace(
-    /extends BridgeActivity\s*\{/,
-    `extends BridgeActivity {
-    // hamiyaBackNavigation: AndroidX supports both button and gesture Back.
+const packageName = readFileSync(activityPath, 'utf8').match(/package\s+([\w.]+);/)?.[1];
+if (!packageName) throw new Error('Android activity package not found');
+writeFileSync(
+  activityPath,
+  `package ${packageName};
+
+import android.os.Bundle;
+import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
+import androidx.core.view.ViewCompat;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
     @Override
-    public void onCreate(android.os.Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        // Android 15/16 enforce edge-to-edge. Capacitor SystemBars owns WindowInsets:
+        // older WebViews get native padding + zero CSS insets; newer ones get real CSS insets.
+        EdgeToEdge.enable(this);
+        registerPlugin(HamiyaSystemUiPlugin.class);
         super.onCreate(savedInstanceState);
-        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override public void handleOnBackPressed() {
                 android.webkit.WebView webView = getBridge() == null ? null : getBridge().getWebView();
-                if (webView != null && webView.canGoBack()) {
-                    webView.goBack();
-                } else {
-                    setEnabled(false);
-                    getOnBackPressedDispatcher().onBackPressed();
-                    setEnabled(true);
-                }
+                if (webView != null && webView.canGoBack()) webView.goBack();
+                else moveTaskToBack(true);
             }
         });
     }
-`,
-  );
-  writeFileSync(activityPath, activity);
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh display-cutout, gesture navigation and IME insets after returning to the app.
+        ViewCompat.requestApplyInsets(getWindow().getDecorView());
+        HamiyaSystemUiPlugin.applySurface(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration config) {
+        super.onConfigurationChanged(config);
+        HamiyaSystemUiPlugin.applySurface(this);
+    }
 }
+`,
+);
+writeFileSync(
+  join(resolve(activityPath, '..'), 'HamiyaSystemUiPlugin.java'),
+  `package ${packageName};
+
+import android.app.Activity;
+import android.graphics.Color;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
+
+@CapacitorPlugin(name = "HamiyaSystemUi")
+public class HamiyaSystemUiPlugin extends Plugin {
+    private static boolean darkSurface = true;
+    @PluginMethod
+    public void setSurface(PluginCall call) {
+        darkSurface = call.getBoolean("dark", false);
+        getActivity().runOnUiThread(() -> { applySurface(getActivity()); call.resolve(); });
+    }
+    public static void applySurface(Activity activity) {
+        int color = Color.parseColor(darkSurface ? "#193b4d" : "#f6f8fa");
+        activity.getWindow().getDecorView().setBackgroundColor(color);
+        WindowInsetsControllerCompat controls = WindowCompat.getInsetsController(activity.getWindow(), activity.getWindow().getDecorView());
+        controls.setAppearanceLightStatusBars(!darkSurface);
+        controls.setAppearanceLightNavigationBars(!darkSurface);
+        controls.show(WindowInsetsCompat.Type.systemBars());
+        // Android 15/16 use the insets/decor surface. Earlier Android also needs bar colors.
+        if (android.os.Build.VERSION.SDK_INT < 35) {
+            activity.getWindow().setStatusBarColor(color);
+            activity.getWindow().setNavigationBarColor(color);
+        }
+    }
+}
+`,
+);
 console.log('Hamiya native artwork, system launch theme, keyboard and Back navigation configured.');
 
 const packageInfo = JSON.parse(readFileSync('package.json', 'utf8'));

@@ -38,9 +38,16 @@ export function useKeyboardViewport() {
     if (!viewport) return;
     const update = () => {
       const editable = document.activeElement?.matches('input, textarea, [contenteditable="true"]');
-      const keyboard = !!editable && window.innerHeight - viewport.height > 150;
+      const keyboard =
+        !!editable &&
+        (window.innerHeight - viewport.height > 150 || viewport.height < screen.height * 0.65);
       document.documentElement.classList.toggle('keyboard-open', keyboard);
       document.documentElement.style.setProperty('--visual-height', `${viewport.height}px`);
+      if (editable)
+        requestAnimationFrame(() => {
+          if (document.activeElement instanceof HTMLElement)
+            document.activeElement.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+        });
     };
     viewport.addEventListener('resize', update);
     document.addEventListener('focusin', update);

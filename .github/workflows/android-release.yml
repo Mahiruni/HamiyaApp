@@ -38,12 +38,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run application checks
-        run: pnpm test && pnpm typecheck
+        run: pnpm lint && pnpm test && pnpm typecheck
 
       - name: Build production web assets
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_HAMIYA_UPDATE_PUBLIC_KEY: ${{ vars.VITE_HAMIYA_UPDATE_PUBLIC_KEY }}
         run: |
           test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" || {
             echo "Missing Supabase publishable key"
@@ -159,7 +160,7 @@ jobs:
           cat > release-notes.md <<'NOTES'
           Hamiya Android with App settings → App updates.
 
-          Screen and feature updates can be applied inside the app without another APK. Native Android upgrades install over this app and preserve its data. Keep the same signing identity for future releases.
+          Compatible web releases can be installed in-app only when signed with the configured HAMIYA update key. Native Android upgrades install over this app and preserve its data. Keep the same signing identity for future releases.
           NOTES
           tag="android-build-${GITHUB_RUN_NUMBER}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then

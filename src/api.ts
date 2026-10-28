@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { boundedFetch } from './async';
 import { authStorage } from './auth-storage';
 import { projectUrl, projectPublishableKey } from './project';
 import type { Catalog, Product, Customer, DocumentRecord } from './types';
@@ -12,6 +13,7 @@ export const configured =
 // A missing public key produces an honest setup state, never a fake backend.
 export const supabase = configured
   ? createClient(supabaseUrl, key, {
+      global: { fetch: boundedFetch },
       auth: {
         flowType: 'pkce',
         persistSession: true,

@@ -2,25 +2,30 @@
   box-sizing: border-box;
   position: fixed;
   inset: 0;
-  min-height: 100dvh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: max(28px, env(safe-area-inset-top, 0px)) 24px max(28px, env(safe-area-inset-bottom, 0px));
+  padding: max(28px, var(--safe-area-inset-top, env(safe-area-inset-top, 0px))) 24px
+    max(28px, var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px)));
   background: radial-gradient(ellipse 90% 55% at 50% 42%, #244e62 0%, #193b4d 66%, #102c3b 100%);
   color: #fff;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
   text-align: center;
   overflow: hidden;
 }
 .startup-splash::before {
-  content: "";
+  content: '';
   position: absolute;
   width: min(78vw, 330px);
   aspect-ratio: 1;
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
   transform: translateY(-25px) scale(1.25);
   pointer-events: none;
@@ -37,25 +42,25 @@
   box-shadow: 0 18px 45px #071b2766;
   margin-bottom: 14px;
   position: relative;
-  animation: startup-reveal .55s ease-out both;
+  animation: startup-reveal 0.55s ease-out both;
 }
 .startup-splash strong {
   position: relative;
   font-size: clamp(27px, 7vw, 34px);
   font-weight: 800;
-  letter-spacing: .19em;
+  letter-spacing: 0.19em;
   line-height: 1.25;
-  margin-left: .19em;
-  animation: startup-reveal .65s .08s ease-out both;
+  margin-left: 0.19em;
+  animation: startup-reveal 0.65s 0.08s ease-out both;
 }
 .startup-splash > span:not(.startup-progress):not(.sr-only) {
   position: relative;
   font-size: 12px;
   font-weight: 500;
-  letter-spacing: .055em;
+  letter-spacing: 0.055em;
   line-height: 1.5;
   color: #d5e2e9;
-  animation: startup-reveal .65s .14s ease-out both;
+  animation: startup-reveal 0.65s 0.14s ease-out both;
 }
 .startup-progress {
   position: relative;
@@ -68,7 +73,7 @@
   margin-top: 26px;
 }
 .startup-progress::after {
-  content: "";
+  content: '';
   display: block;
   width: 45%;
   height: 100%;
@@ -77,16 +82,50 @@
   animation: startup-track 1.2s ease-in-out infinite alternate;
 }
 @keyframes startup-track {
-  from { transform: translateX(0); }
-  to { transform: translateX(68px); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(68px);
+  }
 }
 @keyframes startup-reveal {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .startup-splash img,
   .startup-splash strong,
   .startup-splash > span,
-  .startup-progress::after { animation: none; }
+  .startup-progress::after {
+    animation: none;
+  }
+}
+
+.startup-recovery {
+  max-width: 320px;
+  margin-top: 20px;
+  position: relative;
+}
+.startup-recovery p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e1eaf0;
+}
+.startup-recovery button {
+  margin-top: 16px;
+  min-height: 48px;
+  padding: 12px 28px;
+  background: #fff;
+  color: #193b4d;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  cursor: pointer;
 }

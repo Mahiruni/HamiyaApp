@@ -2,6 +2,7 @@ import {
   useEffect,
   useId,
   useRef,
+  useState,
   type ReactNode,
   type InputHTMLAttributes,
   type ButtonHTMLAttributes,
@@ -249,7 +250,13 @@ export function LoadingState() {
   );
 }
 
-export function StartupSplash() {
+export function StartupSplash({
+  failed = false,
+  onRetry,
+}: {
+  failed?: boolean;
+  onRetry?: () => void;
+}) {
   const { t } = useApp();
   return (
     <div className="startup-splash" role="status">
@@ -262,8 +269,17 @@ export function StartupSplash() {
       />
       <strong>HAMIYA</strong>
       <span>{t('groupName')}</span>
-      <span className="startup-progress" aria-hidden="true" />
-      <span className="sr-only">{t('loading')}</span>
+      {failed ? (
+        <div className="startup-recovery" role="alert">
+          <p>{t('startupFailed')}</p>
+          <button className="button secondary" onClick={onRetry}>
+            {t('retry')}
+          </button>
+        </div>
+      ) : (
+        <span className="startup-progress" aria-hidden="true" />
+      )}
+      {!failed && <span className="sr-only">{t('loading')}</span>}
     </div>
   );
 }
@@ -305,11 +321,13 @@ export function ProductArt({ product }: { product: Product }) {
   };
   const Icon = icons[product.id] || categoryIcons[product.category];
   const { t } = useApp();
+  const [failedImage, setFailedImage] = useState('');
   return (
     <div className={'product-art ' + product.category + ' flavor-' + product.id}>
-      {product.image_url ? (
+      {product.image_url && failedImage !== product.image_url ? (
         <img
           src={product.image_url}
+          onError={() => setFailedImage(product.image_url!)}
           alt={product.name}
           loading="lazy"
           decoding="async"
@@ -318,8 +336,15 @@ export function ProductArt({ product }: { product: Product }) {
         />
       ) : (
         <>
-          <Icon size={64} strokeWidth={1.05} />
-          <span>{t('noPhoto')}</span>
+          <img
+            className="product-brand-fallback"
+            src="/brand/hamiya-food-icon-192.png"
+            alt=""
+            width={96}
+            height={96}
+          />
+          <Icon size={28} strokeWidth={1.3} aria-hidden="true" />
+          <span>{t(product.category + 'Brand')}</span>
         </>
       )}
     </div>

@@ -6,6 +6,7 @@ import App from './App';
 import { ErrorBoundary } from './ErrorBoundary';
 import './styles.css';
 import './premium.css';
+import './mobile-shell.css';
 if (Capacitor.isNativePlatform()) document.documentElement.classList.add('hamiya-native');
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+window.dispatchEvent(new Event('hamiya:booted'));
 if (Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
   void navigator.serviceWorker
     .getRegistrations()

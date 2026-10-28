@@ -26,7 +26,11 @@ export default defineConfig(({ mode, command }) => {
   const url = env.VITE_SUPABASE_URL || 'https://lhdsodqeojxogcwgyjpo.supabase.co';
   const csp = `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: ${new URL(url).origin}; connect-src 'self' https://hamiyainvestmentgroup.vercel.app ${new URL(url).origin} ${new URL(url).origin.replace('https:', 'wss:')}; font-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'`;
   return {
-    define: { __APP_VERSION__: JSON.stringify(version), __BUILD_COMMIT__: JSON.stringify(commit) },
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+      __BUILD_COMMIT__: JSON.stringify(commit),
+      __UPDATE_PUBLIC_KEY__: JSON.stringify(env.VITE_HAMIYA_UPDATE_PUBLIC_KEY || ''),
+    },
     plugins: [
       react(),
       {
@@ -66,6 +70,19 @@ export default defineConfig(({ mode, command }) => {
       },
     ],
     server: { host: '0.0.0.0', port: 4173, allowedHosts: ['terminal.local'] },
-    build: { sourcemap: false, target: 'es2022' },
+    build: {
+      sourcemap: false,
+      target: 'es2022',
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              { name: 'react-vendor', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
+              { name: 'supabase-vendor', test: /node_modules[\\/]@supabase[\\/]/ },
+            ],
+          },
+        },
+      },
+    },
   };
 });

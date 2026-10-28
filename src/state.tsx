@@ -11,6 +11,8 @@ import {
 import { AppError, configured, currentProfile, loadCatalog, rpc, supabase } from './api';
 import { languages, translate, type Language } from './i18n';
 import type { CartItem, Catalog, Customer, Product } from './types';
+import { withTimeout } from './async';
+import { purchasable, validFoodQuantity } from './quantity';
 import { navigateHistory } from './overlay-history';
 const initialCatalog: Catalog = {
   products: [],
@@ -47,6 +49,7 @@ interface AppContextValue {
   setLanguage: (language: Language) => void;
   user: Customer | null;
   authLoading: boolean;
+  authError: boolean;
   setUser: (user: Customer | null) => void;
   refreshUser: () => Promise<void>;
   catalog: Catalog;
@@ -74,7 +77,11 @@ export function Provider({ children }: { children: ReactNode }) {
     return languages.some((l) => l.code === value) ? (value as Language) : 'en';
   });
   const [user, setUser] = useState<Customer | null>(null);
+  const userRef = useRef(user);
+  userRef.current = user;
   const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
+  const authGeneration = useRef(0);
   const [catalog, setCatalog] = useState<Catalog>(() =>
     stored('hamiya-catalog-v1', initialCatalog),
   );
@@ -123,22 +130,30 @@ export function Provider({ children }: { children: ReactNode }) {
   );
   const navigate = useCallback((next: string, options?: { replace?: boolean }) => {
     navigateHistory(next, window, options?.replace);
+    window.dispatchEvent(new Event('hamiya:navigate'));
     setRoute(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
   const refreshUser = useCallback(async () => {
+    const generation = ++authGeneration.current;
+    if (!userRef.current) setAuthLoading(true);
+    setAuthError(false);
     try {
-      const { user } = await currentProfile();
+      const { user } = await withTimeout(currentProfile());
+      if (generation !== authGeneration.current) return;
       setUser(user);
+    } catch (error) {
+      if (generation === authGeneration.current) setAuthError(true);
+      throw error;
     } finally {
-      setAuthLoading(false);
+      if (generation === authGeneration.current) setAuthLoading(false);
     }
   }, []);
   const refreshCatalog = useCallback(() => {
     if (catalogRequest.current) return catalogRequest.current;
     const request = (async () => {
       try {
-        const data = await loadCatalog();
+        const data = await withTimeout(loadCatalog(), 16000);
         setCatalog(data);
         persist('hamiya-catalog-v1', data);
         setCached(false);
@@ -173,22 +188,31 @@ export function Provider({ children }: { children: ReactNode }) {
   }, []);
   const addCart = useCallback(
     (p: Product, quantity: number) => {
-      if (!p.confirmed || !p.price_cents || !['available', 'low_stock'].includes(p.status)) return;
+      if (!purchasable(p) || !validFoodQuantity(String(quantity), p.available_quantity)) return;
+      const latest = catalog.products.find((entry) => entry.id === p.id);
+      if (!latest || !purchasable(latest) || latest.price_cents !== p.price_cents) {
+        toast(t('cartChanged'));
+        return;
+      }
       const existing = cart.find((x) => x.id === p.id);
-      const amount = Math.min((existing?.quantity || 0) + quantity, p.available_quantity);
+      const amount = (existing?.quantity || 0) + quantity;
+      if (!validFoodQuantity(String(amount), latest.available_quantity)) {
+        toast(t('insufficient_stock'));
+        return;
+      }
       setCart([
         ...cart.filter((x) => x.id !== p.id),
         {
           id: p.id,
           name: p.name,
           quantity: amount,
-          price_cents: p.price_cents,
+          price_cents: latest.price_cents!,
           sales_unit: p.sales_unit,
         },
       ]);
       toast(t('addedCart'));
     },
-    [cart, setCart, t, toast],
+    [cart, catalog.products, setCart, t, toast],
   );
   useEffect(() => {
     const client = supabase;
@@ -231,8 +255,12 @@ export function Provider({ children }: { children: ReactNode }) {
         setRecovery(true);
         setRoute('account');
       }
-      if (!session) setUser(null);
-      else
+      if (!session) {
+        ++authGeneration.current;
+        setUser(null);
+        setAuthError(false);
+        setAuthLoading(false);
+      } else
         setTimeout(() => {
           void refreshUser().catch(notifyError);
         }, 0);
@@ -267,6 +295,7 @@ export function Provider({ children }: { children: ReactNode }) {
       setLanguage,
       user,
       authLoading,
+      authError,
       setUser,
       refreshUser,
       catalog,
@@ -293,6 +322,7 @@ export function Provider({ children }: { children: ReactNode }) {
       setLanguage,
       user,
       authLoading,
+      authError,
       refreshUser,
       catalog,
       refreshCatalog,

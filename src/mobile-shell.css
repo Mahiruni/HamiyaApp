@@ -1,0 +1,198 @@
+.product-art:has(.product-brand-fallback)::before,
+.product-art:has(.product-brand-fallback)::after {
+  display: none;
+}
+/* Component ownership: native SystemBars/CSS insets -> shell -> dock -> product sheet. */
+.product-art .product-brand-fallback,
+.hamiya-elegant-catalog .product-art .product-brand-fallback {
+  position: static;
+  flex: 0 0 auto;
+  margin: 0;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 18px;
+  background: white;
+  padding: 6px;
+  box-shadow: 0 6px 20px #193b4d0c;
+}
+.product-art:has(.product-brand-fallback) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.product-art:has(.product-brand-fallback) > svg {
+  position: static;
+  width: 24px;
+  height: 24px;
+  color: var(--brand-mid);
+}
+.product-art:has(.product-brand-fallback) > span {
+  position: static;
+  font-size: 10px;
+  padding: 0 8px;
+  background: transparent;
+  color: var(--muted);
+  text-align: center;
+}
+@media (max-width: 1023px) {
+  .app:not(.admin-app-shell) .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    height: auto;
+    min-height: calc(64px + var(--safe-top));
+    padding: calc(8px + var(--safe-top)) max(16px, var(--safe-right)) 8px
+      max(16px, var(--safe-left));
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    backdrop-filter: none;
+    pointer-events: none;
+  }
+  .app:not(.admin-app-shell) .topbar::before,
+  .app:not(.admin-app-shell) .topbar::after,
+  .app:not(.admin-app-shell) .mobile-wordmark,
+  .app:not(.admin-app-shell) .topbar-context,
+  .app:not(.admin-app-shell) .connection-pill,
+  .app:not(.admin-app-shell) .topbar-user,
+  .app:not(.admin-app-shell) .topbar-separator {
+    display: none;
+  }
+  .app:not(.admin-app-shell) .topbar-left,
+  .app:not(.admin-app-shell) .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .app:not(.admin-app-shell) .topbar .icon-button.mobile-only,
+  .app:not(.admin-app-shell) .topbar .cart-button,
+  .app:not(.admin-app-shell) .topbar-language {
+    display: grid;
+    place-items: center;
+    position: relative;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0;
+    border: 1px solid #dce5eb;
+    border-radius: 50%;
+    background: var(--page);
+    color: var(--brand);
+    box-shadow: 0 3px 12px #193b4d09;
+    pointer-events: auto;
+  }
+  .app:not(.admin-app-shell) .topbar-language select {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .app:not(.admin-app-shell) .topbar .icon-button:focus-visible,
+  .app:not(.admin-app-shell) .topbar-language:focus-within {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .app:not(.admin-app-shell) .topbar .cart-count {
+    top: -3px;
+    right: -3px;
+    max-width: 40px;
+    font-size: 10px;
+  }
+  .app:not(.admin-app-shell) main {
+    padding-top: 10px;
+  }
+  .app .mobile-nav {
+    display: grid;
+    position: fixed;
+    z-index: 90;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    left: max(16px, var(--safe-left));
+    right: max(16px, var(--safe-right));
+    bottom: calc(12px + var(--safe-bottom));
+    max-width: 360px;
+    margin-inline: auto;
+    padding: 7px 8px;
+    border-radius: 32px;
+    background: #08090b;
+    border: 1px solid #292b2f;
+    box-shadow: 0 10px 32px #08090b26;
+    backdrop-filter: none;
+  }
+  .mobile-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0;
+    width: 100%;
+    min-height: 50px;
+    height: auto;
+    padding: 5px 2px;
+    color: #b4b7be;
+    border-radius: 22px;
+  }
+  .mobile-nav button span {
+    font-size: 10px;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .mobile-nav button.active {
+    background: #24262b;
+    color: #fff;
+  }
+  .mobile-nav button.active::before {
+    display: none;
+  }
+  .mobile-nav button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+  }
+  .app:not(.admin-app-shell) .app-body {
+    padding-bottom: calc(116px + var(--safe-bottom));
+  }
+  .app:not(.admin-app-shell) .site-footer {
+    display: none;
+  }
+  .app:has(.mobile-nav[inert]) .mobile-nav {
+    z-index: 50;
+  }
+  .keyboard-open .app .mobile-nav {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-nav button {
+    transition:
+      color 150ms ease,
+      background 150ms ease;
+  }
+  .mobile-nav button:active {
+    background: #34373d;
+  }
+}
+
+.update-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 16px;
+  padding: 12px 14px;
+  background: #e3edf4;
+  color: var(--brand);
+  border-radius: 14px;
+  font-size: 13px;
+  text-align: start;
+}
+.update-notice span {
+  margin-inline-start: auto;
+  font-weight: 700;
+}

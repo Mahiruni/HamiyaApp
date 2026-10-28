@@ -4,6 +4,7 @@ export const apkDownloadUrl =
 export const updateAppId = 'com.hamiyainvestmentgroup.customer';
 export interface AppRelease {
   schema: 1;
+  signature?: string;
   appId: string;
   version: string;
   commit: string;
@@ -29,6 +30,7 @@ export function validateRelease(input: unknown): AppRelease {
   const value = input as AppRelease;
   if (
     value.schema !== 1 ||
+    (value.signature !== undefined && !/^[A-Za-z0-9+/]{86}==$/.test(value.signature)) ||
     value.appId !== updateAppId ||
     !/^[a-f0-9]{40}$/.test(value.commit) ||
     !/^[a-f0-9]{64}$/.test(value.checksum) ||
@@ -61,4 +63,19 @@ export function updateAction(
   if (nativeVersion !== null && compareVersions(nativeVersion, release.minimumNativeVersion) < 0)
     return 'apk';
   return release.commit === currentCommit ? 'current' : 'live';
+}
+
+export function releaseSigningPayload(value: AppRelease) {
+  return JSON.stringify([
+    value.schema,
+    value.appId,
+    value.version,
+    value.commit,
+    value.minimumNativeVersion,
+    value.nativeVersion,
+    value.url,
+    value.checksum,
+    value.bytes,
+    value.releasedAt,
+  ]);
 }

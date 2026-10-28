@@ -1,3 +1,4 @@
+import { Capacitor, registerPlugin, SystemBars, SystemBarsStyle } from '@capacitor/core';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -41,13 +42,17 @@ import { useApp } from './state';
 import { appView } from './navigation';
 const Account = lazy(() => import('./Account'));
 const Settings = lazy(() => import('./Settings'));
+const UpdateNotice = lazy(() => import('./UpdateNotice'));
 const Admin = lazy(() => import('./Admin'));
 const navigation = [
   { route: 'home', label: 'home', icon: House },
-  { route: 'catalog', label: 'categories', icon: LayoutGrid },
-  { route: 'orders', label: 'orders', icon: ShoppingBag },
-  { route: 'account', label: 'account', icon: UserRound },
+  { route: 'catalog', label: 'products', icon: LayoutGrid },
+  { route: 'orders', label: 'navOrders', icon: ShoppingBag },
+  { route: 'account', label: 'navProfile', icon: UserRound },
 ];
+const nativeSurface = registerPlugin<{ setSurface(options: { dark: boolean }): Promise<void> }>(
+  'HamiyaSystemUi',
+);
 export default function App() {
   const {
     t,
@@ -55,6 +60,8 @@ export default function App() {
     navigate,
     user,
     authLoading,
+    authError,
+    refreshUser,
     language,
     setLanguage,
     cart,
@@ -98,11 +105,12 @@ export default function App() {
   useOverlay(mobileDrawer, () => setDrawer(false));
   useKeyboardViewport();
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || authError) return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     const ready = () => {
       if (cancelled) return;
+      if (document.querySelector('.recovery-screen')) return;
       if (document.querySelector('.loading-state')) {
         timer = setTimeout(ready, 100);
         return;
@@ -116,7 +124,27 @@ export default function App() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [authLoading]);
+  }, [authLoading, authError]);
+  useEffect(() => {
+    const loading = authLoading || (authError && !user);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', loading ? '#193b4d' : '#f6f8fa');
+    if (!Capacitor.isNativePlatform()) return;
+    const update = () => {
+      void (async () => {
+        await SystemBars.show();
+        await SystemBars.setStyle({
+          style: loading ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
+        });
+        if (Capacitor.isPluginAvailable('HamiyaSystemUi'))
+          await nativeSurface.setSurface({ dark: loading });
+      })().catch(() => {});
+    };
+    update();
+    document.addEventListener('visibilitychange', update);
+    return () => document.removeEventListener('visibilitychange', update);
+  }, [authLoading, authError, !!user]);
   const drawerRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!compact) setDrawer(false);
@@ -181,6 +209,8 @@ export default function App() {
     navigate(value);
     setDrawer(false);
   }
+  if (authError && !user)
+    return <StartupSplash failed onRetry={() => void refreshUser().catch(() => {})} />;
   if (view === 'loading') return <StartupSplash />;
   if (standalone)
     return (
@@ -446,6 +476,11 @@ export default function App() {
             {t('offline')}
           </div>
         )}
+        {!isStaff && Capacitor.isNativePlatform() && (
+          <Suspense fallback={null}>
+            <UpdateNotice />
+          </Suspense>
+        )}
         {!isStaff && catalog.settings.announcement[language] && (
           <div className="announcement-bar">{catalog.settings.announcement[language]}</div>
         )}
@@ -497,7 +532,7 @@ export default function App() {
               onClick={() => go(destination)}
             >
               <Icon size={23} strokeWidth={root === destination ? 2.3 : 1.8} aria-hidden="true" />
-              <span className="sr-only">{t(label)}</span>
+              <span>{t(label)}</span>
             </button>
           ))}
         </nav>

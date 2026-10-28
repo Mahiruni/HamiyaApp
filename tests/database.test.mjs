@@ -27,7 +27,23 @@ create function storage.foldername(name text) returns text[] language sql immuta
 test('Supabase schema, permissions and inventory workflows', async (t) => {
   const db = new PGlite();
   await db.exec(bootstrap);
-  await db.exec(await readFile(new URL('../supabase/setup.sql', import.meta.url), 'utf8'));
+  const schema = await readFile(new URL('../supabase/setup.sql', import.meta.url), 'utf8');
+  await db.exec(
+    schema.replace(
+      'quantity not between 20 and 10000 then',
+      'quantity not between 1 and 10000 then',
+    ),
+  );
+  const minimumMigration = await readFile(
+    new URL(
+      '../supabase/migrations/20261028014357_enforce_food_carton_minimum.sql',
+      import.meta.url,
+    ),
+    'utf8',
+  );
+  await db.exec(minimumMigration);
+  await db.exec(minimumMigration); // Reapplying cannot change unrelated rules or data.
+
   async function as(user, fn) {
     await db.exec('reset role');
     await db.query("select set_config('request.jwt.claim.sub',$1,false)", [user ? ids[user] : '']);
@@ -192,7 +208,7 @@ test('Supabase schema, permissions and inventory workflows', async (t) => {
       call('admin_stock', {
         id: 'banana',
         operation: 'add',
-        quantity: 5,
+        quantity: 250,
         reason: 'Opening stock',
         client_key: crypto.randomUUID(),
       }),
@@ -204,7 +220,7 @@ test('Supabase schema, permissions and inventory workflows', async (t) => {
     const payload = {
       client_key: key,
       fulfilment: 'pickup',
-      items: [{ id: 'banana', quantity: 4, price_cents: 71500, sales_unit: 'carton' }],
+      items: [{ id: 'banana', quantity: 200, price_cents: 71500, sales_unit: 'carton' }],
     };
     await assert.rejects(
       as('a', () =>
@@ -212,12 +228,23 @@ test('Supabase schema, permissions and inventory workflows', async (t) => {
       ),
       /price_changed/,
     );
+    for (const quantity of [1, 19])
+      await assert.rejects(
+        as('a', () =>
+          call('order_submit', {
+            ...payload,
+            client_key: crypto.randomUUID(),
+            items: [{ ...payload.items[0], quantity }],
+          }),
+        ),
+        /invalid_request/,
+      );
     orderA = (await as('a', () => call('order_submit', payload))).order;
     assert.equal((await as('a', () => call('order_submit', payload))).order.id, orderA.id);
     orderB = (
       await as('b', () => call('order_submit', { ...payload, client_key: crypto.randomUUID() }))
     ).order;
-    assert.equal(Number(orderA.total_cents), 286000);
+    assert.equal(Number(orderA.total_cents), 14300000);
   });
   await t.test('competing accepted orders cannot reserve more than available stock', async () => {
     await as('admin', () => call('admin_order', { id: orderA.id, status: 'accepted' }));
@@ -226,14 +253,14 @@ test('Supabase schema, permissions and inventory workflows', async (t) => {
       /insufficient_stock/,
     );
     const p = (await db.query("select * from hamiya_products where id='banana'")).rows[0];
-    assert.equal(p.stock, 5);
-    assert.equal(p.reserved, 4);
+    assert.equal(p.stock, 250);
+    assert.equal(p.reserved, 200);
     await assert.rejects(
       as('admin', () =>
         call('admin_stock', {
           id: 'banana',
           operation: 'sale',
-          quantity: 2,
+          quantity: 100,
           reason: 'Offline sale',
           client_key: crypto.randomUUID(),
         }),
@@ -251,11 +278,11 @@ test('Supabase schema, permissions and inventory workflows', async (t) => {
       for (const status of ['preparing', 'ready', 'completed', 'completed'])
         await as('admin', () => call('admin_order', { id: orderB.id, status }));
       const p = (await db.query("select * from hamiya_products where id='banana'")).rows[0];
-      assert.equal(p.stock, 1);
+      assert.equal(p.stock, 50);
       assert.equal(p.reserved, 0);
       const order = (await db.query('select * from hamiya_orders where id=$1', [orderB.id]))
         .rows[0];
-      assert.equal(Number(order.total_cents), 286000);
+      assert.equal(Number(order.total_cents), 14300000);
       assert.equal(
         (await db.query('select * from hamiya_inventory_events where order_id=$1', [orderB.id]))
           .rows.length,

@@ -10,3 +10,8 @@ coverage/
 qa-mobile.html
 
 android/
+
+playwright-report/
+test-results/
+
+supabase/.temp/

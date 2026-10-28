@@ -2,22 +2,11 @@
 
 The workflow `.github/workflows/android-release.yml` builds the current React/Vite customer app into a Capacitor Android application, signs **both** APK and AAB with the same persistent release keystore, and verifies their signatures. The APK is for direct distribution; the AAB is for Google Play.
 
-## One-time secure setup
+## Existing signing identity
 
-1. Generate a persistent Android release keystore **on a trusted computer** (do not put the keystore or passwords in GitHub source files):
-   `keytool -genkeypair -v -keystore hamiya-release.jks -alias hamiya -keyalg RSA -keysize 3072 -validity 10000`
-2. Back up the keystore and its passwords securely. Future Android updates require the same signing identity. If you later enroll in Google Play App Signing, follow Play Console's upload-key instructions.
-3. In GitHub repository **Settings → Secrets and variables → Actions → Secrets**, add:
-   - `HAMIYA_ANDROID_KEYSTORE_BASE64`: base64 representation of the entire JKS file (single line)
-   - `HAMIYA_ANDROID_KEYSTORE_PASSWORD`: keystore password
-   - `HAMIYA_ANDROID_KEY_ALIAS`: `hamiya` (or your actual alias)
-   - `HAMIYA_ANDROID_KEY_PASSWORD`: key password
-   - `VITE_SUPABASE_PUBLISHABLE_KEY`: public/anon key used by the existing frontend (never service-role key)
-4. Under **Actions → Variables**, optionally set `VITE_SUPABASE_URL` to your existing Supabase project URL. The Vite configuration defaults to the HAMIYA Supabase URL if omitted.
-5. Open **Actions → HAMIYA Signed Android Release → Run workflow**.
-6. Download the `HAMIYA-signed-android-release` artifact containing both files. Test the APK on a real Android device before distributing. Upload the AAB through Play Console after completing store listing and policy requirements.
+The production keystore already exists in GitHub Actions secrets. Reuse it; do not generate another key. The workflow requires `HAMIYA_ANDROID_KEYSTORE_BASE64`, `HAMIYA_ANDROID_KEYSTORE_PASSWORD`, `HAMIYA_ANDROID_KEY_ALIAS`, `HAMIYA_ANDROID_KEY_PASSWORD`, and the existing `VITE_SUPABASE_PUBLISHABLE_KEY`. Missing secrets fail the build with the missing variable name. No secret values are logged.
 
-On macOS/Linux: `base64 -w 0 hamiya-release.jks` (on macOS: `base64 < hamiya-release.jks | tr -d '\\n'`). Do not paste this value into chats.
+The accepted certificate SHA-256 is `7fcd1f1b41d9286ae9f8cfe3e0eeeec6da6237f1a805d70efc4700d8a30f253c`. Both APK and AAB signatures are checked before publishing. The version code is `10000 + GITHUB_RUN_NUMBER`; package version supplies the version name. Run the existing **HAMIYA Signed Android Release** workflow or push a native configuration change to `main`.
 
 ## Important
 - After generating and syncing Android, the workflow runs `node scripts/configure-android.mjs` to apply Hamiya launcher artwork, launch colors, keyboard resizing and AndroidX Back navigation.
@@ -27,10 +16,17 @@ On macOS/Linux: `base64 -w 0 hamiya-release.jks` (on macOS: `base64 < hamiya-rel
 - This workflow builds from the current website source; native permission, notification, deep-link and hardware integrations require separate implementation and device testing.
 - A GitHub Actions run is **not** a Google Play publication.
 
-## Updates from Settings
+## Android 1.2.0 and signed web updates
 
-Version 1.1.0 adds **App settings → App updates**, also available before sign-in. Opening Settings checks the HTTPS release manifest. Customers can apply a compatible web update and restart the app without installing another APK. Downloads are checked against the release SHA-256; failed startup confirmation triggers the updater's return to the last working bundle. The application does not send updater telemetry to Capgo.
+Version 1.2.0 includes native changes: explicit AndroidX edge-to-edge setup, Capacitor's WindowInsets-to-CSS bridge, a small system-surface plugin, keyboard resizing and Back handling. Install the signed APK over the existing app to receive these changes. A web deployment cannot repair an older binary's native configuration. Never uninstall to update.
 
-Every production web build creates a bundle and `/updates/latest.json` on the existing Vercel project. Native changes require an APK with a higher version code and the existing signing certificate. Increase the package version and the `minimumNativeVersion` in `scripts/package-updates.mjs` when introducing new native requirements. The Android workflow publishes `Hamiya.apk` to GitHub Releases after signature verification. It refuses a signing certificate different from the previous Hamiya release.
+`SystemBars.insetsHandling = 'css'` publishes actual status/navigation/cutout values. Capacitor pads older WebViews natively and publishes zero CSS insets in that mode; newer WebViews receive the actual CSS insets. The shell consumes one set of insets. The native surface plugin keeps system icons readable through splash, resume and configuration changes. Physical Android 15/16 device testing is still required.
 
-The first 1.1.0 APK must be installed over the existing Hamiya app to enable live updates. Do not uninstall the old app. Live updates cover JavaScript, CSS and static assets; they cannot change Android permissions, native plugins or the app's signing identity.
+Settings shows the installed native version and checks the existing HTTPS release manifest. A new native build is required when the manifest's minimum native version exceeds the installed version. Compatible web packages require a valid ECDSA P-256 signature over the manifest, plus the archive's SHA-256 checksum and the trusted application/origin/path checks.
+
+Signing configuration:
+
+- `VITE_HAMIYA_UPDATE_PUBLIC_KEY`: base64 DER/SPKI ECDSA P-256 public key. Set it in the web build and in the GitHub repository variable used by the APK build. The verification key becomes pinned in the installed application.
+- `HAMIYA_UPDATE_PRIVATE_KEY`: matching PEM private key, stored only in the trusted production web build environment. Never prefix this variable with `VITE_`, commit it, or paste it into chat.
+
+Without these signing settings, web and APK builds still work, but the native app refuses unsigned live packages and uses the existing signed APK release flow. Automatic updates remain off. A failed live bundle that does not confirm readiness within the updater's timeout rolls back. The first 1.2.0 APK and later native changes must use the existing Android signing identity.

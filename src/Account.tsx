@@ -182,7 +182,7 @@ export default function Account() {
     }
   }
   async function upload(file: File | undefined, kind: string) {
-    if (!file) return;
+    if (!file || uploading) return;
     setUploading(kind);
     try {
       await uploadDocument(file, kind);
@@ -520,7 +520,8 @@ export default function Account() {
             className="summary-link account-signout"
             onClick={async () => {
               try {
-                await supabase?.auth.signOut();
+                const result = await supabase?.auth.signOut({ scope: 'local' });
+                if (result?.error) throw result.error;
                 setUser(null);
                 setEditing(false);
                 navigate('signin');
@@ -651,6 +652,7 @@ export default function Account() {
                           <div className={'upload-card ' + (uploaded ? 'uploaded' : '')} key={kind}>
                             {uploaded ? <CheckCircle2 size={30} /> : <Upload size={30} />}
                             <h3>{t(label)} *</h3>
+                            {uploading === kind && <progress aria-label={t('upload')} />}
                             <span>{t(uploaded ? 'uploaded' : 'required')}</span>
                             <label className="button secondary">
                               {uploading === kind ? t('loading') : t('upload')}

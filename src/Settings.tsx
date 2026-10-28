@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Download, Globe2, RefreshCw, ShieldCheck, Smartphone } from 'lucide-react';
 import { Button } from './components';
 import { languages } from './i18n';
+import { verifyReleaseSignature } from './update-signature';
 import { useApp } from './state';
 import {
   apkDownloadUrl,
@@ -95,14 +96,18 @@ function Updates() {
       if (!response.ok) throw new Error('Update service unavailable');
       const latest = validateRelease(await response.json());
       const current = await installedRelease();
-      if (!active.current) return;
+      if (!active.current || request.current !== controller) return;
       if (controller.signal.aborted) throw new Error('Update check timed out');
       const action = updateAction(latest, current.commit, current.native);
+      const signed = !nativeApp() || (await verifyReleaseSignature(latest, __UPDATE_PUBLIC_KEY__));
+      if (!active.current || request.current !== controller || controller.signal.aborted) return;
+      const needsNative = action === 'apk' || (nativeApp() && (!liveUpdatesSupported() || !signed));
       setRelease(latest);
       setNative(current.native);
-      const needsNative = action === 'apk' || (nativeApp() && !liveUpdatesSupported());
       setNativeRequired(needsNative);
-      setStatus(needsNative ? 'available' : action === 'current' ? 'current' : 'available');
+      setStatus(
+        action === 'current' && !(nativeApp() && !liveUpdatesSupported()) ? 'current' : 'available',
+      );
     } catch {
       if (active.current && request.current === controller) setStatus('error');
     } finally {
@@ -111,6 +116,11 @@ function Updates() {
   }, []);
   useEffect(() => {
     active.current = true;
+    void installedRelease()
+      .then((current) => {
+        if (active.current) setNative(current.native);
+      })
+      .catch(() => {});
     void check();
     const onOnline = () => void check();
     const onVisible = () => {
@@ -174,7 +184,7 @@ function Updates() {
                         : 'updateCheckFailed',
             )}
           </h3>
-          <p>{t(nativeRequired ? 'nativeUpdateHint' : 'liveUpdateHint')}</p>
+          <p>{t(nativeRequired ? 'secureUpdateHint' : 'liveUpdateHint')}</p>
         </div>
       </div>
       <dl className="update-details">
