@@ -2,7 +2,7 @@
 set -euo pipefail
 mkdir -p android-window-results
 adb install -r Hamiya.apk
-adb shell dumpsys package com.hamiyainvestmentgroup.customer | rg 'versionCode=|versionName='
+adb shell dumpsys package com.hamiyainvestmentgroup.customer | grep -E 'versionCode=|versionName='
 for mode in no yes; do
   adb shell cmd uimode night "$mode"
   adb shell am force-stop com.hamiyainvestmentgroup.customer
