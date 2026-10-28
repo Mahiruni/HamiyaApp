@@ -36,7 +36,7 @@ The production product prices were read and preserved. Banana and Cappuccino Sof
 ## Local verification
 
 - ESLint and TypeScript pass.
-- 50 unit/database tests pass, including execution of the existing SQL/RPC in PGlite.
+- 51 unit/database tests pass, including execution of the existing SQL/RPC in PGlite and a regression for the actual Android 15 InsetsSource dump format.
 - Production build passes; lazy customer/admin chunks remain separate.
 - 31 Chromium browser tests pass against the production build.
 - Phone widths 320/390px, tablet 768px, desktop 1280px and native-layout simulation are covered.
