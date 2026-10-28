@@ -10,6 +10,13 @@ export function validFoodQuantity(value: string, available: number) {
     Number(value) <= Math.min(available, foodMaximum)
   );
 }
+export function stepFoodQuantity(value: string, change: number, available: number) {
+  const maximum = Math.min(available, foodMaximum);
+  if (maximum < foodMinimum) return foodMinimum;
+  const current =
+    /^\d+$/.test(value) && Number.isSafeInteger(Number(value)) ? Number(value) : foodMinimum;
+  return Math.max(foodMinimum, Math.min(maximum, current + change));
+}
 export function purchasable(product: Product): product is Product & { price_cents: number } {
   return (
     product.category === 'food' &&

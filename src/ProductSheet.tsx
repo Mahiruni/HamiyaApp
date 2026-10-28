@@ -2,22 +2,26 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode 
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useOverlay } from './experience';
-import { nearestSheetSnap, usableSheetHeight, type SheetSnap } from './sheet-geometry';
+import { nearestSheetSnap, sheetViewportGeometry, type SheetSnap } from './sheet-geometry';
 import { useApp } from './state';
 import './product-sheet.css';
 
 function measureGeometry() {
   const dock = document.querySelector<HTMLElement>('.mobile-nav');
-  const viewport = window.visualViewport?.height || window.innerHeight;
+  const viewport = window.visualViewport;
   const top =
     parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0;
   const safeBottom =
     parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
   const dockVisible = dock && getComputedStyle(dock).display !== 'none';
-  const bottom = dockVisible
-    ? Math.max(0, viewport - dock.getBoundingClientRect().top) + 12
-    : safeBottom + 12;
-  return { usable: usableSheetHeight(viewport, top, bottom), bottom };
+  return sheetViewportGeometry({
+    layoutHeight: window.innerHeight,
+    visualHeight: viewport?.height || window.innerHeight,
+    visualTop: viewport?.offsetTop || 0,
+    safeTop: top,
+    safeBottom,
+    dockTop: dockVisible ? dock.getBoundingClientRect().top : undefined,
+  });
 }
 
 // A non-modal region: the customer dock remains interactive and in the tab order.
@@ -49,6 +53,11 @@ export function ProductSheet({
     const dock = document.querySelector<HTMLElement>('.mobile-nav');
     const measure = () => setGeometry(measureGeometry());
     const observer = new ResizeObserver(measure);
+    const insets = new MutationObserver(measure);
+    insets.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
     if (dock) observer.observe(dock);
     measure();
     window.addEventListener('resize', measure);
@@ -58,6 +67,7 @@ export function ProductSheet({
     document.addEventListener('focusout', measure);
     return () => {
       observer.disconnect();
+      insets.disconnect();
       window.removeEventListener('resize', measure);
       window.visualViewport?.removeEventListener('resize', measure);
       window.visualViewport?.removeEventListener('scroll', measure);
@@ -70,9 +80,7 @@ export function ProductSheet({
     const previous = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    const background = Array.from(
-      document.querySelectorAll<HTMLElement>('.app-body main, .site-footer'),
-    );
+    const background = Array.from(document.querySelectorAll<HTMLElement>('.app-body, .sidebar'));
     const inert = background.map((element) => element.inert);
     background.forEach((element) => {
       element.inert = true;
@@ -100,8 +108,9 @@ export function ProductSheet({
   }, []);
   const height = dragHeight ?? (geometry.usable * snap) / 100;
   const style = {
+    '--sheet-top': `${geometry.top}px`,
     '--sheet-bottom': `${geometry.bottom}px`,
-    '--sheet-height': geometry.usable ? `${height}px` : '40dvh',
+    '--sheet-height': `${height}px`,
   } as CSSProperties;
   return createPortal(
     <>

@@ -35,23 +35,22 @@ import {
   ProductArt,
 } from './components';
 import { ProductSheet } from './ProductSheet';
-import { foodMinimum, purchasable, validFoodQuantity } from './quantity';
+import {
+  foodMaximum,
+  foodMinimum,
+  purchasable,
+  stepFoodQuantity,
+  validFoodQuantity,
+} from './quantity';
+import { availableForCustomer, matchesProduct } from './catalog';
+import { confirmFeedback } from './native-platform';
 import { useApp } from './state';
 import type { Enquiry, Order, Product } from './types';
 import { catalogLocation, catalogRoute, unitLabel, variantLabel } from './storefront';
 
 export function CatalogPage() {
-  const {
-    t,
-    catalog,
-    language,
-    route,
-    navigate,
-    catalogLoading,
-    catalogError,
-    refreshCatalog,
-    cached,
-  } = useApp();
+  const { t, catalog, route, navigate, catalogLoading, catalogError, refreshCatalog, cached } =
+    useApp();
   const { category, search: routeSearch } = catalogLocation(route);
   const [search, setSearch] = useState(routeSearch);
   useEffect(() => {
@@ -63,11 +62,10 @@ export function CatalogPage() {
   const [limit, setLimit] = useState(12);
   const products = catalog.products.filter(
     (p) =>
+      p.published &&
       (category === 'all' || p.category === category) &&
-      (!onlyAvailable || ['available', 'low_stock'].includes(p.status)) &&
-      ((p.translations[language]?.name || p.name) + ' ' + p.variant)
-        .toLowerCase()
-        .includes(search.toLowerCase()),
+      (!onlyAvailable || availableForCustomer(p)) &&
+      matchesProduct(p, search, t),
   );
   const Icon = category === 'all' ? Package : categoryIcons[category] || Package;
   const currentSelected = selected
@@ -203,6 +201,7 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
   const quantityNumber = Number(quantity);
   const inCart = cart.find((item) => item.id === product.id)?.quantity || 0;
   const remaining = Math.max(0, product.available_quantity - inCart);
+  const maximum = Math.min(foodMaximum, remaining);
   const validQuantity = validFoodQuantity(quantity, remaining);
   const [enquiring, setEnquiring] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -225,6 +224,7 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
         ...Object.fromEntries(data),
       });
       toast(t('requestSent'));
+      confirmFeedback();
       onClose();
       navigate('orders');
     } catch (error) {
@@ -247,7 +247,7 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
               type="button"
               aria-label={t('remove')}
               disabled={quantityNumber <= foodMinimum}
-              onClick={() => setQuantity(String(Math.max(foodMinimum, quantityNumber - 1)))}
+              onClick={() => setQuantity(String(stepFoodQuantity(quantity, -1, remaining)))}
             >
               <Minus size={18} />
             </button>
@@ -256,7 +256,7 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
               type="number"
               inputMode="numeric"
               min={foodMinimum}
-              max={remaining}
+              max={maximum}
               step={1}
               value={quantity}
               aria-invalid={!validQuantity}
@@ -266,8 +266,8 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
             <button
               type="button"
               aria-label={t('add')}
-              disabled={!orderable || quantityNumber >= remaining}
-              onClick={() => setQuantity(String(Math.min(remaining, quantityNumber + 1)))}
+              disabled={!orderable || quantityNumber >= maximum}
+              onClick={() => setQuantity(String(stepFoodQuantity(quantity, 1, remaining)))}
             >
               <Plus size={18} />
             </button>
@@ -392,6 +392,7 @@ export function ProductDetails({ product, onClose }: { product: Product; onClose
 export function Cart() {
   const {
     t,
+    language,
     cart,
     setCart,
     setCartOpen,
@@ -438,7 +439,7 @@ export function Cart() {
         item.id === id
           ? {
               ...item,
-              quantity: Math.max(20, Math.min(p?.available_quantity || 20, item.quantity + amount)),
+              quantity: stepFoodQuantity(String(item.quantity), amount, p?.available_quantity || 0),
             }
           : item,
       ),
@@ -472,6 +473,7 @@ export function Cart() {
       setCartOpen(false);
       navigate('orders');
       toast(t('orderPlaced'));
+      confirmFeedback();
       await refreshCatalog();
     } catch (error) {
       notifyError(error);
@@ -500,88 +502,94 @@ export function Cart() {
       ) : (
         <>
           <div className="cart-list">
-            {cart.map((item) => (
-              <div className="cart-item" key={item.id}>
-                <span className="cart-product-icon">
-                  <Package size={24} />
-                </span>
-                <div className="cart-item-content">
-                  <strong>{item.name}</strong>
-                  <span>
-                    <Money value={item.price_cents} /> / {item.sales_unit}
+            {cart.map((item) => {
+              const product = catalog.products.find((p) => p.id === item.id);
+              const name = product?.translations[language]?.name || item.name;
+              const maximum = Math.min(foodMaximum, product?.available_quantity || 0);
+              return (
+                <div className="cart-item" key={item.id}>
+                  <span className="cart-product-icon">
+                    <Package size={24} />
                   </span>
-                  <div className="quantity-stepper">
-                    <button
-                      aria-label={t('remove')}
-                      onClick={() => {
-                        setDraftQuantities((values) => {
-                          const next = { ...values };
-                          delete next[item.id];
-                          return next;
-                        });
-                        adjust(item.id, -1);
-                      }}
-                      disabled={busy || item.quantity <= 20}
-                    >
-                      <Minus size={13} />
-                    </button>
-                    <input
-                      className="cart-quantity-input"
-                      type="number"
-                      inputMode="numeric"
-                      min={20}
-                      max={catalog.products.find((p) => p.id === item.id)?.available_quantity || 20}
-                      step={1}
-                      aria-label={t('quantity') + ' · ' + item.name}
-                      value={draftQuantities[item.id] ?? String(item.quantity)}
-                      aria-invalid={
-                        !validFoodQuantity(
-                          draftQuantities[item.id] ?? String(item.quantity),
-                          catalog.products.find((p) => p.id === item.id)?.available_quantity || 0,
-                        )
-                      }
-                      disabled={busy}
-                      onChange={(event) => {
-                        const value = event.target.value;
-                        setDraftQuantities((previous) => ({ ...previous, [item.id]: value }));
-                        if (
-                          validFoodQuantity(
-                            value,
+                  <div className="cart-item-content">
+                    <strong>{name}</strong>
+                    <span>
+                      <Money value={item.price_cents} /> / {unitLabel(item.sales_unit, t)}
+                    </span>
+                    <div className="quantity-stepper">
+                      <button
+                        aria-label={t('remove')}
+                        onClick={() => {
+                          setDraftQuantities((values) => {
+                            const next = { ...values };
+                            delete next[item.id];
+                            return next;
+                          });
+                          adjust(item.id, -1);
+                        }}
+                        disabled={busy || item.quantity <= 20}
+                      >
+                        <Minus size={13} />
+                      </button>
+                      <input
+                        className="cart-quantity-input"
+                        type="number"
+                        inputMode="numeric"
+                        min={20}
+                        max={maximum}
+                        step={1}
+                        aria-label={t('quantity') + ' · ' + name}
+                        value={draftQuantities[item.id] ?? String(item.quantity)}
+                        aria-invalid={
+                          !validFoodQuantity(
+                            draftQuantities[item.id] ?? String(item.quantity),
                             catalog.products.find((p) => p.id === item.id)?.available_quantity || 0,
                           )
-                        )
-                          setCartQuantity(item.id, Number(value));
-                      }}
-                    />
-                    <button
-                      aria-label={t('quantity')}
-                      onClick={() => {
-                        setDraftQuantities((values) => {
-                          const next = { ...values };
-                          delete next[item.id];
-                          return next;
-                        });
-                        adjust(item.id, 1);
-                      }}
-                      disabled={busy}
-                    >
-                      <Plus size={13} />
-                    </button>
+                        }
+                        disabled={busy}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          setDraftQuantities((previous) => ({ ...previous, [item.id]: value }));
+                          if (
+                            validFoodQuantity(
+                              value,
+                              catalog.products.find((p) => p.id === item.id)?.available_quantity ||
+                                0,
+                            )
+                          )
+                            setCartQuantity(item.id, Number(value));
+                        }}
+                      />
+                      <button
+                        aria-label={t('add')}
+                        onClick={() => {
+                          setDraftQuantities((values) => {
+                            const next = { ...values };
+                            delete next[item.id];
+                            return next;
+                          });
+                          adjust(item.id, 1);
+                        }}
+                        disabled={busy || item.quantity >= maximum}
+                      >
+                        <Plus size={13} />
+                      </button>
+                    </div>
                   </div>
+                  <button
+                    className="icon-button danger"
+                    aria-label={t('remove')}
+                    disabled={busy}
+                    onClick={() => {
+                      setCart(cart.filter((x) => x.id !== item.id));
+                      key.current = crypto.randomUUID();
+                    }}
+                  >
+                    <Trash2 size={17} />
+                  </button>
                 </div>
-                <button
-                  className="icon-button danger"
-                  aria-label={t('remove')}
-                  disabled={busy}
-                  onClick={() => {
-                    setCart(cart.filter((x) => x.id !== item.id));
-                    key.current = crypto.randomUUID();
-                  }}
-                >
-                  <Trash2 size={17} />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
           {changed && (
             <div className="notice">

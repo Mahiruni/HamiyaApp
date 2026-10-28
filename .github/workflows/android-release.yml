@@ -14,6 +14,8 @@ on:
       - 'pnpm-lock.yaml'
       - 'scripts/configure-android.mjs'
       - 'scripts/verify-android-signature.mjs'
+      - 'scripts/check-installed-android-window.sh'
+      - 'scripts/verify-android-window.py'
       - '.github/workflows/android-release.yml'
   workflow_dispatch:
 
@@ -63,6 +65,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+
+      - name: Verify production customer and administrator screens before signing
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm test:browser
+        env:
+          PLAYWRIGHT_PRODUCTION: '1'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3

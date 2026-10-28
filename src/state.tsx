@@ -14,6 +14,7 @@ import type { CartItem, Catalog, Customer, Product } from './types';
 import { withTimeout } from './async';
 import { purchasable, validFoodQuantity } from './quantity';
 import { navigateHistory } from './overlay-history';
+import { confirmFeedback } from './native-platform';
 const initialCatalog: Catalog = {
   products: [],
   settings: {
@@ -141,6 +142,14 @@ export function Provider({ children }: { children: ReactNode }) {
     try {
       const { user } = await withTimeout(currentProfile());
       if (generation !== authGeneration.current) return;
+      if (user) {
+        const owner = stored<string | null>('hamiya-cart-owner-v1', null);
+        if (owner && owner !== user.id) {
+          updateCart([]);
+          persist('hamiya-cart-v1', []);
+        }
+        persist('hamiya-cart-owner-v1', user.id);
+      }
       setUser(user);
     } catch (error) {
       if (generation === authGeneration.current) setAuthError(true);
@@ -211,6 +220,7 @@ export function Provider({ children }: { children: ReactNode }) {
         },
       ]);
       toast(t('addedCart'));
+      confirmFeedback();
     },
     [cart, catalog.products, setCart, t, toast],
   );
@@ -256,6 +266,11 @@ export function Provider({ children }: { children: ReactNode }) {
         setRoute('account');
       }
       if (!session) {
+        if (event === 'SIGNED_OUT') {
+          setCart([]);
+          setCartOpen(false);
+          persist('hamiya-cart-owner-v1', null);
+        }
         ++authGeneration.current;
         setUser(null);
         setAuthError(false);
@@ -287,7 +302,7 @@ export function Provider({ children }: { children: ReactNode }) {
       clearInterval(interval);
       clearTimeout(timer.current);
     };
-  }, [refreshCatalog, refreshUser, notifyError]);
+  }, [refreshCatalog, refreshUser, notifyError, setCart]);
   const value = useMemo(
     () => ({
       language,

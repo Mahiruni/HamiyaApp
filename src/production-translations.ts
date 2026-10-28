@@ -4,6 +4,7 @@ const en = {
   add: 'Increase quantity',
   quantityInvalid: 'Enter a whole number of at least 20 cartons, within available stock.',
   startupFailed: 'HAMIYA could not connect. Check your connection, then try again.',
+  screenLoadFailed: 'This screen is taking too long to load. Check your connection and try again.',
   sheetSize: 'Adjust product sheet size',
   sheetCompact: 'Compact product details',
   sheetStandard: 'Product details',
@@ -18,6 +19,7 @@ export const productionCopy = {
     add: 'ብዛት ጨምር',
     quantityInvalid: 'ቢያንስ 20 ካርቶን እና ካለው ክምችት ያልበለጠ ሙሉ ቁጥር ያስገቡ።',
     startupFailed: 'ሀሚያ መገናኘት አልቻለም። ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።',
+    screenLoadFailed: 'ይህ ገጽ ለመጫን እየዘገየ ነው። ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።',
     sheetSize: 'የምርት ዝርዝር መጠን ያስተካክሉ',
     sheetCompact: 'አጭር የምርት ዝርዝር',
     sheetStandard: 'የምርት ዝርዝር',
@@ -32,6 +34,8 @@ export const productionCopy = {
       'Lakkoofsa guutuu kaartoonii yoo xiqqaate 20, kan kuusaa jiru hin caalle galchi.',
     startupFailed:
       'HAMIYA walqunnamuu hin dandeenye. Walqunnamtii kee mirkaneessiitii irra deebiʼii yaali.',
+    screenLoadFailed:
+      'Fuulli kun feʼamuuf yeroo dheeraa fudhachaa jira. Walqunnamtii kee mirkaneessiitii irra deebiʼii yaali.',
     sheetSize: 'Hammamtaa ibsa oomishaa sirreessi',
     sheetCompact: 'Ibsa oomishaa gabaabaa',
     sheetStandard: 'Ibsa oomishaa',

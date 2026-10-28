@@ -1,5 +1,11 @@
 # HAMIYA Android release (APK + AAB)
 
+## Production hardening (1.2.4)
+
+See `docs/PRODUCTION_UPGRADE_1.2.4.md` for the audited scope and verification. This release protects the real status-area surface while scrolling, handles keyboard/panned product-sheet viewports, bounds lazy-screen recovery, fixes HTML/React startup ownership and delays live-bundle readiness until the actual screen renders. Optional confirmation haptics respect the Android setting without adding permissions. Android backup and cleartext traffic are disabled; installing over the existing signed app preserves local data and sessions.
+
+Before publication the signed-release workflow now runs the production browser suite and checks the exact signed APK on Android 15/16 in light/dark portrait, keyboard, resume and landscape states. It validates visible status bars and accessible control bounds, in addition to rejecting native action bars. These guest-window emulator checks complement signed-in browser fixtures; they do not replace a physical-device customer acceptance pass.
+
 The workflow `.github/workflows/android-release.yml` builds the current React/Vite customer app into a Capacitor Android application, signs **both** APK and AAB with the same persistent release keystore, and verifies their signatures. The APK is for direct distribution; the AAB is for Google Play.
 
 ## Existing signing identity

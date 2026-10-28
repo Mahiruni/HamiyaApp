@@ -212,12 +212,13 @@ export function Field({
   hint,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string }) {
+  const { t } = useApp();
   const id = useId();
   return (
     <label className="field" htmlFor={id}>
       <span>
         {label}
-        {props.required && <b aria-label="required"> *</b>}
+        {props.required && <b aria-label={t('required')}> *</b>}
       </span>
       <input id={id} aria-describedby={hint ? id + '-hint' : undefined} {...props} />
       {hint && <small id={id + '-hint'}>{hint}</small>}
@@ -242,12 +243,33 @@ export function Button({
 
 export function LoadingState() {
   const { t } = useApp();
+  const expired = useLoadingTimeout();
   return (
     <div className="loading-state" role="status">
-      <LoaderCircle className="spinner" size={24} aria-hidden="true" />
-      <span>{t('loading')}</span>
+      {expired ? (
+        <div className="loading-recovery" role="alert">
+          <p>{t('screenLoadFailed')}</p>
+          <button className="button secondary" onClick={() => window.location.reload()}>
+            {t('retry')}
+          </button>
+        </div>
+      ) : (
+        <>
+          <LoaderCircle className="spinner" size={24} aria-hidden="true" />
+          <span>{t('loading')}</span>
+        </>
+      )}
     </div>
   );
+}
+
+function useLoadingTimeout() {
+  const [expired, setExpired] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setExpired(true), 20000);
+    return () => clearTimeout(timer);
+  }, []);
+  return expired;
 }
 
 export function StartupSplash({
@@ -258,6 +280,8 @@ export function StartupSplash({
   onRetry?: () => void;
 }) {
   const { t } = useApp();
+  const expired = useLoadingTimeout();
+  const recovery = failed || expired;
   return (
     <div className="startup-splash" role="status">
       <img
@@ -269,17 +293,20 @@ export function StartupSplash({
       />
       <strong>HAMIYA</strong>
       <span>{t('groupName')}</span>
-      {failed ? (
+      {recovery ? (
         <div className="startup-recovery" role="alert">
-          <p>{t('startupFailed')}</p>
-          <button className="button secondary" onClick={onRetry}>
+          <p>{t(failed ? 'startupFailed' : 'screenLoadFailed')}</p>
+          <button
+            className="button secondary"
+            onClick={onRetry || (() => window.location.reload())}
+          >
             {t('retry')}
           </button>
         </div>
       ) : (
         <span className="startup-progress" aria-hidden="true" />
       )}
-      {!failed && <span className="sr-only">{t('loading')}</span>}
+      {!recovery && <span className="sr-only">{t('loading')}</span>}
     </div>
   );
 }

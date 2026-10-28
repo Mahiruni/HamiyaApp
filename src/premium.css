@@ -136,6 +136,14 @@ textarea:focus-visible {
   gap: 12px;
   color: var(--muted);
 }
+.loading-recovery {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 360px;
+  padding: 20px;
+  text-align: center;
+}
 .hamiya-mark {
   display: inline-flex;
   align-items: center;

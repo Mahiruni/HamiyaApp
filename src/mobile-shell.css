@@ -38,6 +38,20 @@
   text-align: center;
 }
 /* The same compact state owns Android, responsive web, the drawer and the dock. */
+/* Older WebViews are padded natively and publish zero CSS insets. Modern
+   edge-to-edge WebViews need a stable surface behind the actual status area. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: var(--safe-top);
+  z-index: 1000;
+  background: var(--page);
+  pointer-events: none;
+}
+body:has(.startup-splash)::before {
+  background: var(--brand);
+}
 .app-menu-button,
 .drawer-close-button {
   display: none;

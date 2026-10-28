@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { boundedFetch } from './async';
+import { boundedFetch, withTimeout } from './async';
 import { authStorage } from './auth-storage';
 import { projectUrl, projectPublishableKey } from './project';
+import { foodAvailability } from './catalog';
 import type { Catalog, Product, Customer, DocumentRecord } from './types';
 const env = import.meta.env;
 export const supabaseUrl = env.VITE_SUPABASE_URL || projectUrl;
@@ -79,20 +80,13 @@ export async function rpc<T = Record<string, unknown>>(
   payload: unknown = {},
 ): Promise<T> {
   if (!supabase) throw new AppError('servicePending');
-  return check(await supabase.rpc('hamiya_action', { action, payload })) as T;
+  return check(await withTimeout(supabase.rpc('hamiya_action', { action, payload }), 20000)) as T;
 }
 export function hydrateProduct(p: Product): Product {
   return {
     ...p,
     available_quantity: p.stock - p.reserved,
-    status:
-      p.category === 'food' && p.status === 'available'
-        ? p.stock - p.reserved === 0
-          ? 'out_of_stock'
-          : p.stock - p.reserved <= 5
-            ? 'low_stock'
-            : 'available'
-        : p.status,
+    status: foodAvailability(p),
     image_url: p.image_path
       ? `${supabaseUrl}/storage/v1/object/public/hamiya-products/${p.image_path}`
       : null,

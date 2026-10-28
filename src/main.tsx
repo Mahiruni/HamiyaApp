@@ -4,12 +4,14 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from './state';
 import App from './App';
 import { ErrorBoundary } from './ErrorBoundary';
+import { NativeSystemSurface } from './native-platform';
 import './styles.css';
 import './premium.css';
 import './mobile-shell.css';
 if (Capacitor.isNativePlatform()) document.documentElement.classList.add('hamiya-native');
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <NativeSystemSurface />
     <ErrorBoundary>
       <Provider>
         <App />

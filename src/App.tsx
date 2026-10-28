@@ -1,4 +1,4 @@
-import { Capacitor, registerPlugin, SystemBars, SystemBarsStyle } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import {
   ArrowRight,
@@ -50,9 +50,6 @@ const navigation = [
   { route: 'orders', label: 'navOrders', icon: ShoppingBag },
   { route: 'account', label: 'navProfile', icon: UserRound },
 ];
-const nativeSurface = registerPlugin<{ setSurface(options: { dark: boolean }): Promise<void> }>(
-  'HamiyaSystemUi',
-);
 export default function App() {
   const {
     t,
@@ -107,53 +104,34 @@ export default function App() {
   useEffect(() => {
     if (authLoading || authError) return;
     let cancelled = false;
-    let timer: ReturnType<typeof setTimeout>;
+    let pending = false;
+    const blocked = () =>
+      !!document.querySelector(
+        '.recovery-screen, .startup-recovery, .loading-recovery, .loading-state, .startup-splash',
+      );
     const ready = () => {
-      if (cancelled) return;
-      if (document.querySelector('.recovery-screen')) return;
-      if (document.querySelector('.loading-state')) {
-        timer = setTimeout(ready, 100);
-        return;
-      }
-      void import('./native-updates').then((module) => {
-        if (!cancelled) module.confirmAppReady();
-      });
+      if (cancelled || pending || blocked()) return;
+      pending = true;
+      void import('./native-updates')
+        .then((module) => {
+          pending = false;
+          if (!cancelled && !blocked()) {
+            module.confirmAppReady();
+            observer.disconnect();
+          }
+        })
+        .catch(() => {
+          pending = false;
+        });
     };
-    timer = setTimeout(ready, 100);
+    const observer = new MutationObserver(ready);
+    observer.observe(document.getElementById('root')!, { childList: true, subtree: true });
+    ready();
     return () => {
       cancelled = true;
-      clearTimeout(timer);
+      observer.disconnect();
     };
   }, [authLoading, authError]);
-  useEffect(() => {
-    let lastSurface: boolean | undefined;
-    const sync = (force = false) => {
-      const loading = !!document.querySelector('.startup-splash');
-      if (!force && loading === lastSurface) return;
-      lastSurface = loading;
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute('content', loading ? '#193b4d' : '#f6f8fa');
-      if (!Capacitor.isNativePlatform()) return;
-      void (async () => {
-        await SystemBars.show();
-        await SystemBars.setStyle({
-          style: loading ? SystemBarsStyle.Dark : SystemBarsStyle.Light,
-        });
-        if (Capacitor.isPluginAvailable('HamiyaSystemUi'))
-          await nativeSurface.setSurface({ dark: loading });
-      })().catch(() => {});
-    };
-    const observer = new MutationObserver(() => sync());
-    observer.observe(document.getElementById('root')!, { childList: true, subtree: true });
-    const visible = () => sync(true);
-    sync(true);
-    document.addEventListener('visibilitychange', visible);
-    return () => {
-      observer.disconnect();
-      document.removeEventListener('visibilitychange', visible);
-    };
-  }, []);
   const drawerRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!compact) setDrawer(false);

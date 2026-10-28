@@ -1,7 +1,10 @@
 // Recovery still works when the React module itself cannot be downloaded.
+// Capture only the static HTML element. A late deferred script must never mutate
+// the React splash, even if it missed the module's booted event.
+const initialSplash = document.getElementById('hamiya-startup');
 const bootTimer = setTimeout(() => {
-  const splash = document.querySelector('.startup-splash');
-  if (!splash || document.querySelector('.startup-recovery')) return;
+  const splash = initialSplash;
+  if (!splash?.isConnected || splash.querySelector('.startup-recovery')) return;
   let language = 'en';
   try {
     language = JSON.parse(localStorage.getItem('hamiya-language')) || 'en';

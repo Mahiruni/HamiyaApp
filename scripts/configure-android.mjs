@@ -76,6 +76,12 @@ if (!manifest.includes('android:enableOnBackInvokedCallback='))
     /<application\b/,
     '<application android:enableOnBackInvokedCallback="true" ',
   );
+manifest = manifest.replace(/\sandroid:allowBackup="[^"]*"/g, '');
+manifest = manifest.replace(/\sandroid:usesCleartextTraffic="[^"]*"/g, '');
+manifest = manifest.replace(
+  /<application\b/,
+  '<application android:allowBackup="false" android:usesCleartextTraffic="false"',
+);
 writeFileSync(manifestPath, manifest);
 const findActivity = (path) => {
   for (const entry of readdirSync(path, { withFileTypes: true })) {
@@ -147,6 +153,7 @@ writeFileSync(
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.view.HapticFeedbackConstants;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -162,6 +169,15 @@ public class HamiyaSystemUiPlugin extends Plugin {
     public void setSurface(PluginCall call) {
         darkSurface = call.getBoolean("dark", false);
         getActivity().runOnUiThread(() -> { applySurface(getActivity()); call.resolve(); });
+    }
+    @PluginMethod
+    public void feedback(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            getBridge().getWebView().performHapticFeedback(
+                android.os.Build.VERSION.SDK_INT >= 30
+                    ? HapticFeedbackConstants.CONFIRM : HapticFeedbackConstants.VIRTUAL_KEY);
+            call.resolve();
+        });
     }
     public static void applySurface(Activity activity) {
         int color = Color.parseColor(darkSurface ? "#193b4d" : "#f6f8fa");

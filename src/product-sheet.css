@@ -1,7 +1,7 @@
 .product-sheet-backdrop {
   position: fixed;
   z-index: 70;
-  inset: var(--safe-top) 0 var(--sheet-bottom);
+  inset: var(--sheet-top) 0 var(--sheet-bottom);
   background: #142b3d52;
   cursor: default;
 }
@@ -77,7 +77,10 @@
   scroll-padding-block: 12px;
 }
 .product-sheet-footer {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  max-height: calc(100% - 76px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 10px 16px 14px;
   border-top: 1px solid var(--border);
   background: #fff;
@@ -236,14 +239,13 @@
 }
 
 .sheet-art .product-art .product-brand-fallback {
-  width: 56px;
-  height: 56px;
-  padding: 5px;
+  width: 80px;
+  height: 80px;
+  padding: 8px;
 }
 .sheet-art .product-art:has(.product-brand-fallback) {
   gap: 5px;
 }
 .sheet-art .product-art:has(.product-brand-fallback) > svg {
-  width: 20px;
-  height: 20px;
+  display: none;
 }

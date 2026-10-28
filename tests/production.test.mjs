@@ -1,8 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { generateKeyPairSync, sign } from 'node:crypto';
-import { validFoodQuantity, purchasable } from '../src/quantity.ts';
-import { nearestSheetSnap, usableSheetHeight } from '../src/sheet-geometry.ts';
+import { validFoodQuantity, purchasable, stepFoodQuantity } from '../src/quantity.ts';
+import {
+  nearestSheetSnap,
+  usableSheetHeight,
+  sheetViewportGeometry,
+} from '../src/sheet-geometry.ts';
+import { availableForCustomer, foodAvailability, matchesProduct } from '../src/catalog.ts';
 import { withTimeout } from '../src/async.ts';
 import { verifyReleaseSignature } from '../src/update-signature.ts';
 import { releaseSigningPayload } from '../src/update-policy.ts';
@@ -55,6 +60,70 @@ test('startup work times out and preserves successful values and original failur
   assert.equal(await withTimeout(Promise.resolve('ready'), 50), 'ready');
   await assert.rejects(withTimeout(new Promise(() => {}), 5), /timed out/);
   await assert.rejects(withTimeout(Promise.reject(new Error('offline')), 50), /offline/);
+});
+test('sheet remains above a keyboard when the layout viewport does not resize or is panned', () => {
+  for (const visualTop of [0, 80]) {
+    const geometry = sheetViewportGeometry({
+      layoutHeight: 844,
+      visualHeight: 360,
+      visualTop,
+      safeTop: 44,
+    });
+    const bottom = 844 - geometry.bottom;
+    assert.ok(bottom <= visualTop + 360 - 12);
+    assert.ok(bottom - geometry.usable * 0.75 >= Math.max(44, visualTop));
+    assert.ok(geometry.bottom > 400 - visualTop);
+  }
+  const docked = sheetViewportGeometry({
+    layoutHeight: 844,
+    visualHeight: 844,
+    safeTop: 44,
+    safeBottom: 24,
+    dockTop: 744,
+  });
+  assert.equal(docked.bottom, 112);
+  assert.equal(docked.usable, 676);
+});
+test('quantity stepping recovers from empty input and respects the stock and transaction maximum', () => {
+  assert.equal(stepFoodQuantity('', 1, 200), 21);
+  assert.equal(stepFoodQuantity('20', -1, 200), 20);
+  assert.equal(stepFoodQuantity('200', 1, 200), 200);
+  assert.equal(stepFoodQuantity('10000', 1, 12000), 10000);
+  assert.equal(stepFoodQuantity('200', -1, 19), 20);
+  assert.equal(stepFoodQuantity('1e3', 1, 200), 21);
+});
+test('stock and search use actual records and all translated product names and variants', () => {
+  const product = {
+    category: 'food',
+    published: true,
+    confirmed: true,
+    status: 'available',
+    stock: 25,
+    reserved: 10,
+    available_quantity: 15,
+    sales_unit: 'carton',
+    price_cents: 71500,
+    name: 'Banana',
+    variant: 'Hard',
+    translations: { am: { name: 'ሙዝ' }, om: { name: 'Muuzii' } },
+  };
+  assert.equal(foodAvailability(product), 'low_stock');
+  assert.equal(availableForCustomer(product), false);
+  assert.equal(foodAvailability({ ...product, reserved: 25 }), 'out_of_stock');
+  assert.equal(foodAvailability({ ...product, status: 'coming_soon' }), 'coming_soon');
+  assert.equal(
+    foodAvailability({ ...product, status: 'out_of_stock', stock: 200 }),
+    'out_of_stock',
+  );
+  for (const query of [' banana ', 'ሙዝ', 'MUUZII', 'ጠንካራ'])
+    assert.ok(
+      matchesProduct(product, query, (key) => (key === 'variantHard' ? 'ጠንካራ' : key)),
+      query,
+    );
+  assert.equal(
+    matchesProduct(product, 'not in catalog', (key) => key),
+    false,
+  );
 });
 test('release signatures reject unsigned manifests, tampered content, and a different signing key', async () => {
   const keys = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });

@@ -67,6 +67,8 @@ test('Android generation is repeatable and retains edge-to-edge, system surfaces
     assert.match(before[1], /Type.systemBars\(\)/);
     assert.match(before[3], /adjustResize/);
     assert.match(before[3], /enableOnBackInvokedCallback="true"/);
+    assert.match(before[3], /allowBackup="false"/);
+    assert.match(before[3], /usesCleartextTraffic="false"/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
