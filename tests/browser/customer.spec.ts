@@ -242,3 +242,24 @@ test('catalog request failures show recovery and retry replaces the empty state 
     .click();
   await expect(page.locator('.product-grid .product-card')).toHaveCount(2);
 });
+
+test('sign-in chunk loading retains the branded splash until the entry screen is ready', async ({
+  page,
+}) => {
+  await setup(page, { signedIn: false });
+  let releaseChunk: (() => void) | undefined;
+  const gate = new Promise<void>((resolve) => {
+    releaseChunk = resolve;
+  });
+  await page.route('**/src/Account.tsx*', async (route) => {
+    await gate;
+    await route.continue();
+  });
+  await page.goto('/');
+  await expect(page.locator('.startup-splash')).toBeVisible();
+  await expect(page.locator('.loading-state')).toHaveCount(0);
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#193b4d');
+  releaseChunk!();
+  await expect(page.locator('.account-auth')).toBeVisible();
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#f6f8fa');
+});

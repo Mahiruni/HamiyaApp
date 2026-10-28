@@ -30,7 +30,7 @@ Audited upstream `main` at `a38392adfad7cae30e4a35cab19088d7ac098d50`, including
 - `pnpm typecheck`: pass.
 - `pnpm lint`: pass.
 - `pnpm test`: 43 tests pass, including actual Postgres-compatible RLS/verification/order behavior in isolated PGlite and Android generator idempotence.
-- `pnpm test:browser`: 16 tests pass on Chromium, using isolated mocked Supabase responses. Widths: 320, 390, 768 and 1280 pixels. Covers all three languages, safe-area emulation, sheet bounds/dock access, 200-carton totals, cart editing, duplicate submission, stock blocking, search/filtering, auth recovery/timeouts, logout, registration validation, staff/customer separation, dragging/scroll separation, Back/focus restoration, reduced motion and catalog retry.
+- `pnpm test:browser`: 17 tests pass on Chromium, using isolated mocked Supabase responses. Widths: 320, 390, 768 and 1280 pixels. Covers all three languages, safe-area emulation, sheet bounds/dock access, 200-carton totals, cart editing, duplicate submission, stock blocking, search/filtering, auth recovery/timeouts, logout, registration validation, staff/customer separation, dragging/scroll separation, Back/focus restoration, reduced motion, catalog retry and delayed sign-in chunk handoff.
 - `pnpm build`: pass, with lazy screen chunks and separate vendor chunks. Built update metadata honestly reports when release signing is absent.
 - Existing production public startup and standalone sign-in were inspected. No real authenticated customer/admin order or document mutation was performed against production.
 - Capacitor Android generation and sync: pass. Native application ID remains `com.hamiyainvestmentgroup.customer`; existing signing fingerprint validation is unchanged.

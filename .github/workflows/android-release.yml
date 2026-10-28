@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
     paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'scripts/package-updates.mjs'
       - 'capacitor.config.ts'
       - 'package.json'
       - 'pnpm-lock.yaml'

@@ -126,12 +126,15 @@ export default function App() {
     };
   }, [authLoading, authError]);
   useEffect(() => {
-    const loading = authLoading || (authError && !user);
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', loading ? '#193b4d' : '#f6f8fa');
-    if (!Capacitor.isNativePlatform()) return;
-    const update = () => {
+    let lastSurface: boolean | undefined;
+    const sync = (force = false) => {
+      const loading = !!document.querySelector('.startup-splash');
+      if (!force && loading === lastSurface) return;
+      lastSurface = loading;
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute('content', loading ? '#193b4d' : '#f6f8fa');
+      if (!Capacitor.isNativePlatform()) return;
       void (async () => {
         await SystemBars.show();
         await SystemBars.setStyle({
@@ -141,10 +144,16 @@ export default function App() {
           await nativeSurface.setSurface({ dark: loading });
       })().catch(() => {});
     };
-    update();
-    document.addEventListener('visibilitychange', update);
-    return () => document.removeEventListener('visibilitychange', update);
-  }, [authLoading, authError, !!user]);
+    const observer = new MutationObserver(() => sync());
+    observer.observe(document.getElementById('root')!, { childList: true, subtree: true });
+    const visible = () => sync(true);
+    sync(true);
+    document.addEventListener('visibilitychange', visible);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', visible);
+    };
+  }, []);
   const drawerRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!compact) setDrawer(false);
@@ -256,7 +265,7 @@ export default function App() {
               <Information page={root} />
             )
           ) : (
-            <Suspense fallback={<LoadingState />}>
+            <Suspense fallback={<StartupSplash />}>
               <Account key={user?.id || 'guest'} />
             </Suspense>
           )}
