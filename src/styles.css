@@ -436,9 +436,7 @@
     font-size: 13px;
     font-weight: 600;
   }
-  .mobile-only,
-  .mobile-nav,
-  .mobile-wordmark {
+  .mobile-nav {
     display: none;
   }
   main {
@@ -2480,28 +2478,11 @@
     .app-body {
       margin-left: 0;
     }
-    .mobile-only {
-      display: inline-flex;
-    }
     .topbar-left {
       gap: 12px;
     }
     .breadcrumb {
       display: none;
-    }
-    .mobile-wordmark {
-      display: block;
-      font-size: 27px;
-      font-weight: 650;
-      letter-spacing: -1.5px;
-      padding: 0;
-    }
-    .mobile-wordmark > span {
-      font-size: 7px;
-      vertical-align: top;
-      margin: 6px 0 0 3px;
-      display: inline-block;
-      letter-spacing: 0;
     }
     .drawer-backdrop {
       position: fixed;
@@ -2655,9 +2636,6 @@
     .topbar .icon-button {
       width: 33px;
       min-width: 33px;
-    }
-    .mobile-wordmark {
-      font-size: 25px;
     }
     .home-intro {
       font-size: 10px;
@@ -3334,9 +3312,6 @@
     }
     .topbar-separator {
       display: none;
-    }
-    .mobile-wordmark {
-      font-size: 23px;
     }
     .hero-copy {
       padding: 28px 21px 0;

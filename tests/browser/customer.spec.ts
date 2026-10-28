@@ -150,7 +150,7 @@ for (const language of ['en', 'am', 'om']) {
     await expect(page.locator('.division-card')).toHaveCount(3);
     await expect(page.locator('html')).toHaveAttribute('lang', language);
     const controlTop = await page
-      .locator('.topbar .mobile-only')
+      .locator('.topbar .app-menu-button')
       .evaluate((element) => element.getBoundingClientRect().top);
     expect(controlTop).toBeGreaterThanOrEqual(44);
     const safeDock = await page
@@ -277,11 +277,14 @@ test('sign-in chunk loading retains the branded splash until the entry screen is
   const gate = new Promise<void>((resolve) => {
     releaseChunk = resolve;
   });
-  await page.route('**/src/Account.tsx*', async (route) => {
-    await gate;
-    await route.continue();
-  });
-  await page.goto('/');
+  await page.route(
+    /\/(?:src\/Account\.tsx[^/]*|assets\/Account-[^/]+\.js)(?:\?.*)?$/,
+    async (route) => {
+      await gate;
+      await route.continue();
+    },
+  );
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.startup-splash')).toBeVisible();
   await expect(page.locator('.loading-state')).toHaveCount(0);
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#193b4d');

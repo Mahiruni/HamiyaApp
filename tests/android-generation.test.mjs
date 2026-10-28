@@ -17,7 +17,7 @@ test('Android generation is repeatable and retains edge-to-edge, system surfaces
   );
   writeFileSync(
     join(res, 'styles.xml'),
-    '<resources><style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar"></style><style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"></style></resources>',
+    '<resources><style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar"></style><style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar"></style><style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"></style></resources>',
   );
   writeFileSync(
     join(root, 'app/src/main/AndroidManifest.xml'),
@@ -46,6 +46,8 @@ test('Android generation is repeatable and retains edge-to-edge, system surfaces
     assert.match(before[0], /EdgeToEdge.enable\(this\)/);
     assert.match(before[0], /OnBackPressedCallback/);
     assert.match(before[0], /requestApplyInsets/);
+    assert.match(before[0], /getSupportActionBar\(\)\.hide\(\)/);
+    assert.doesNotMatch(before[2], /DarkActionBar/);
     assert.match(before[1], /setAppearanceLightStatusBars/);
     assert.match(before[1], /Type.systemBars\(\)/);
     assert.match(before[3], /adjustResize/);

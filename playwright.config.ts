@@ -20,7 +20,9 @@ export default defineConfig({
       : undefined,
   },
   webServer: {
-    command: 'pnpm exec vite --host 127.0.0.1 --port 4173',
+    command: process.env.PLAYWRIGHT_PRODUCTION
+      ? 'pnpm exec vite preview --host 127.0.0.1 --port 4173'
+      : 'pnpm exec vite --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
   },

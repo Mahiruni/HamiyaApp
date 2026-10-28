@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { registerOverlay } from './overlay-history';
 
 export function useCompactLayout() {
-  const [compact, setCompact] = useState(() => matchMedia('(max-width: 1023px)').matches);
+  const [compact, setCompact] = useState(
+    () => Capacitor.isNativePlatform() || matchMedia('(max-width: 1023px)').matches,
+  );
   useEffect(() => {
     const query = matchMedia('(max-width: 1023px)');
-    const update = () => setCompact(query.matches);
+    const update = () => setCompact(Capacitor.isNativePlatform() || query.matches);
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);

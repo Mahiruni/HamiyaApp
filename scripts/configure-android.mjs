@@ -47,6 +47,7 @@ styles = styles.replace(
   'Theme.AppCompat.DayNight.NoActionBar',
   'Theme.AppCompat.Light.NoActionBar',
 );
+styles = styles.replace('Theme.AppCompat.Light.DarkActionBar', 'Theme.AppCompat.Light.NoActionBar');
 styles = styles.replace(
   /(<style name="AppTheme.NoActionBar"[^>]*>)([\s\S]*?)(<\/style>)/,
   (_, start, body, end) =>
@@ -104,6 +105,8 @@ public class MainActivity extends BridgeActivity {
         EdgeToEdge.enable(this);
         registerPlugin(HamiyaSystemUiPlugin.class);
         super.onCreate(savedInstanceState);
+        // The app supplies floating controls; never add a native title/action bar.
+        if (getSupportActionBar() != null) getSupportActionBar().hide();
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override public void handleOnBackPressed() {
                 android.webkit.WebView webView = getBridge() == null ? null : getBridge().getWebView();

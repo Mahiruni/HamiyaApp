@@ -273,7 +273,14 @@ export default function App() {
       </div>
     );
   return (
-    <div className={(isStaff ? 'app admin-app-shell' : 'app') + ' route-' + root}>
+    <div
+      className={
+        (isStaff ? 'app admin-app-shell' : 'app') +
+        (compact ? ' compact-app-shell' : '') +
+        ' route-' +
+        root
+      }
+    >
       <a
         className="skip-link"
         href="#main"
@@ -305,7 +312,7 @@ export default function App() {
             </span>
           </button>
           <button
-            className="icon-button mobile-only"
+            className="icon-button drawer-close-button"
             aria-label={t('close')}
             onClick={() => setDrawer(false)}
           >
@@ -401,39 +408,32 @@ export default function App() {
         <header className="topbar">
           <div className="topbar-left">
             <button
-              className="icon-button mobile-only"
+              className="icon-button app-menu-button"
               aria-label={t('openMenu')}
               aria-expanded={mobileDrawer}
               aria-controls="app-drawer"
               onClick={() => setDrawer(true)}
             >
-              <Menu size={23} />
+              <Menu size={23} aria-hidden="true" />
             </button>
-            <div className="topbar-context">
-              <div className="topbar-context-copy">
-                <span>{t(isStaff ? 'workspace' : 'customerPortal')}</span>
-                <strong>{t(headerPageKey)}</strong>
+            {!compact && (
+              <div className="topbar-context">
+                <div className="topbar-context-copy">
+                  <span>{t(isStaff ? 'workspace' : 'customerPortal')}</span>
+                  <strong>{t(headerPageKey)}</strong>
+                </div>
               </div>
-            </div>
-            <button
-              className="mobile-wordmark"
-              onClick={() => navigate(isStaff ? 'admin' : 'home')}
-              aria-label="HAMIYA"
-            >
-              <HamiyaMark size="tiny" />
-              <span className="mobile-wordmark-copy">
-                <strong>HAMIYA</strong>
-                <small>{t('nativeBrand')}</small>
-              </span>
-            </button>
+            )}
           </div>
           <div className="topbar-actions">
-            <span className={'connection-pill ' + (online ? 'online' : 'offline')}>
-              <span aria-hidden="true" />
-              {online ? t('connected') : t('offlineShort')}
-            </span>
+            {!compact && (
+              <span className={'connection-pill ' + (online ? 'online' : 'offline')}>
+                <span aria-hidden="true" />
+                {online ? t('connected') : t('offlineShort')}
+              </span>
+            )}
             <label className="language-select topbar-language">
-              <Globe2 size={16} />
+              <Globe2 size={20} aria-hidden="true" />
               <select
                 aria-label={t('language')}
                 value={language}
@@ -446,37 +446,39 @@ export default function App() {
                 ))}
               </select>
             </label>
-            <span className="topbar-separator" />
+            {!compact && <span className="topbar-separator" />}
             {!isStaff && (
               <button
                 className="icon-button cart-button"
                 aria-label={t('cart')}
                 onClick={() => setCartOpen(true)}
               >
-                <ShoppingBag size={21} />
+                <ShoppingBag size={22} aria-hidden="true" />
                 {cart.length > 0 && (
                   <span className="cart-count">{cart.reduce((a, b) => a + b.quantity, 0)}</span>
                 )}
               </button>
             )}
-            <button
-              className="topbar-user"
-              onClick={() => navigate('account')}
-              aria-label={t('account')}
-            >
-              <span className="topbar-user-avatar">
-                {user ? (
-                  user.profile.full_name?.slice(0, 1).toUpperCase() || 'H'
-                ) : (
-                  <UserRound size={19} />
-                )}
-              </span>
-              <span className="topbar-user-copy">
-                <small>{t('account')}</small>
-                <strong>{user?.profile.full_name?.split(' ')[0] || 'Hamiya'}</strong>
-              </span>
-              <ChevronDown className="topbar-user-chevron" size={15} />
-            </button>
+            {!compact && (
+              <button
+                className="topbar-user"
+                onClick={() => navigate('account')}
+                aria-label={t('account')}
+              >
+                <span className="topbar-user-avatar">
+                  {user ? (
+                    user.profile.full_name?.slice(0, 1).toUpperCase() || 'H'
+                  ) : (
+                    <UserRound size={19} />
+                  )}
+                </span>
+                <span className="topbar-user-copy">
+                  <small>{t('account')}</small>
+                  <strong>{user?.profile.full_name?.split(' ')[0] || 'Hamiya'}</strong>
+                </span>
+                <ChevronDown className="topbar-user-chevron" size={15} />
+              </button>
+            )}
           </div>
         </header>
         {!online && (
