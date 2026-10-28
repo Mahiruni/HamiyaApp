@@ -1,6 +1,32 @@
 import { test, expect } from '@playwright/test';
 import { products, setup } from './fixtures';
 
+test('Android download gives a real file and recovers from a failed preflight', async ({
+  page,
+}) => {
+  await setup(page, { signedIn: false });
+  let unavailable = true;
+  await page.route('https://hamiyainvestmentgroup.vercel.app/api/android**', (route) => {
+    if (unavailable) return route.fulfill({ status: 503, body: 'Unavailable' });
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/vnd.android.package-archive',
+      headers: { 'Content-Disposition': 'attachment; filename="Hamiya.apk"' },
+      body: route.request().method() === 'HEAD' ? '' : Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+    });
+  });
+  await page.goto('/#settings');
+  const download = page.getByRole('button', { name: 'Download Android app', exact: true });
+  await expect(download).toBeVisible();
+  await download.click();
+  await expect(page.getByRole('alert')).toContainText('Could not start the download');
+  unavailable = false;
+  const downloaded = page.waitForEvent('download');
+  await download.click();
+  expect((await downloaded).suggestedFilename()).toBe('Hamiya.apk');
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
 for (const width of [320, 390, 768, 1280]) {
   test(`catalog and bounded sheet at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });

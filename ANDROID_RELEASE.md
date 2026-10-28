@@ -30,3 +30,9 @@ Signing configuration:
 - `HAMIYA_UPDATE_PRIVATE_KEY`: matching PEM private key, stored only in the trusted production web build environment. Never prefix this variable with `VITE_`, commit it, or paste it into chat.
 
 Without these signing settings, web and APK builds still work, but the native app refuses unsigned live packages and uses the existing signed APK release flow. Automatic updates remain off. A failed live bundle that does not confirm readiness within the updater's timeout rolls back. The first 1.2.0 APK and later native changes must use the existing Android signing identity.
+
+## Reliable Android downloads (1.2.1)
+
+Settings now uses `https://hamiyainvestmentgroup.vercel.app/api/android` instead of opening a GitHub new-window link. The endpoint serves the existing release APK as an attachment on the HAMIYA domain, after verifying its release identity, exact byte length and GitHub SHA-256 digest. Redirects are restricted to GitHub's release-asset hosts. It streams the verified file to avoid the buffered Vercel response limit and never needs a customer session or GitHub token. Failed preflight requests have translated retry feedback. The website also exposes the Android download when the web app is current, so an older APK can be updated through the website.
+
+The Android workflow checks that the public production endpoint returns a byte-identical copy of the signed APK it just built. Android still owns installation approval. Installed older APKs retain their bundled download button until they receive a compatible signed web update or a new APK.

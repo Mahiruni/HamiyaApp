@@ -29,8 +29,8 @@ Audited upstream `main` at `a38392adfad7cae30e4a35cab19088d7ac098d50`, including
 
 - `pnpm typecheck`: pass.
 - `pnpm lint`: pass.
-- `pnpm test`: 43 tests pass, including actual Postgres-compatible RLS/verification/order behavior in isolated PGlite and Android generator idempotence.
-- `pnpm test:browser`: 17 tests pass on Chromium, using isolated mocked Supabase responses. Widths: 320, 390, 768 and 1280 pixels. Covers all three languages, safe-area emulation, sheet bounds/dock access, 200-carton totals, cart editing, duplicate submission, stock blocking, search/filtering, auth recovery/timeouts, logout, registration validation, staff/customer separation, dragging/scroll separation, Back/focus restoration, reduced motion, catalog retry and delayed sign-in chunk handoff.
+- `pnpm test`: 47 tests pass, including actual Postgres-compatible RLS/verification/order behavior in isolated PGlite, Android generator idempotence and Android download integrity/redirect/size/failure checks.
+- `pnpm test:browser`: 18 tests pass on Chromium, using isolated mocked Supabase responses. Widths: 320, 390, 768 and 1280 pixels. Covers all three languages, safe-area emulation, sheet bounds/dock access, 200-carton totals, cart editing, duplicate submission, stock blocking, search/filtering, auth recovery/timeouts, logout, registration validation, staff/customer separation, dragging/scroll separation, Back/focus restoration, reduced motion, catalog retry, delayed sign-in chunk handoff and Android download failure/retry/file delivery.
 - `pnpm build`: pass, with lazy screen chunks and separate vendor chunks. Built update metadata honestly reports when release signing is absent.
 - Existing production public startup and standalone sign-in were inspected. No real authenticated customer/admin order or document mutation was performed against production.
 - Capacitor Android generation and sync: pass. Native application ID remains `com.hamiyainvestmentgroup.customer`; existing signing fingerprint validation is unchanged.
@@ -53,3 +53,9 @@ Audited upstream `main` at `a38392adfad7cae30e4a35cab19088d7ac098d50`, including
 - Regression coverage: `tests/production.test.mjs`, `tests/android-generation.test.mjs`, `tests/database.test.mjs`, `tests/browser/customer.spec.ts`, `tests/browser/fixtures.ts`.
 
 Generated native projects, dependencies, build output, test traces and signing material are excluded from the commit.
+
+## Android download repair — 1.2.1
+
+Replaced the bare GitHub new-window download link with a checked, normal external navigation to `/api/android` on the existing HAMIYA production domain. The Node.js function serves the published release APK after validating release identity, size, allowed redirects and SHA-256; its streamed response has Android MIME type and an attachment filename. Settings offers the download on the website even when the web app is current and gives translated failure/retry feedback. No native storage/install permission was added. An older installed APK retains its bundled button until upgraded, so the production website provides the bootstrap download.
+
+Focused tests cover downloads larger than Vercel's buffered response limit, HEAD preflight, changed/truncated/oversized files, untrusted redirects, missing releases, cancelled requests and browser retry through to a downloadable file. The Android workflow additionally downloads the production endpoint and compares its bytes to the signed APK it just built.

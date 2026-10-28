@@ -173,3 +173,6 @@ jobs:
           else
             gh release create "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt --target "$GITHUB_SHA" --title "Hamiya Android — build ${GITHUB_RUN_NUMBER}" --notes-file release-notes.md --latest --repo "$GITHUB_REPOSITORY"
           fi
+
+      - name: Verify production APK download
+        run: node scripts/verify-android-download.mjs release/Hamiya.apk

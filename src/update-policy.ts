@@ -1,6 +1,5 @@
 export const updateOrigin = 'https://hamiyainvestmentgroup.vercel.app';
-export const apkDownloadUrl =
-  'https://github.com/Mahiruni/HamiyaApp/releases/latest/download/Hamiya.apk';
+export const apkDownloadUrl = updateOrigin + '/api/android';
 export const updateAppId = 'com.hamiyainvestmentgroup.customer';
 export interface AppRelease {
   schema: 1;
