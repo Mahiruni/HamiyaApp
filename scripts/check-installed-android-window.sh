@@ -10,8 +10,26 @@ adb shell settings put system accelerometer_rotation 0
 adb shell settings put secure show_ime_with_hard_keyboard 1
 capture_window() {
   local stage="$1"
-  adb shell uiautomator dump /sdcard/hamiya-window.xml
-  adb pull /sdcard/hamiya-window.xml "$result_dir/window-$stage.xml"
+  # UiAutomation enables WebView accessibility asynchronously. Its first dump can
+  # contain only the WebView container even when the rendered form is ready.
+  # Wait for actual controls; the final verifier still rejects missing controls.
+  for attempt in 1 2 3 4 5 6; do
+    adb shell uiautomator dump /sdcard/hamiya-window.xml
+    adb pull /sdcard/hamiya-window.xml "$result_dir/window-$stage.xml"
+    if python3 - "$result_dir/window-$stage.xml" <<'PY'
+import sys
+import xml.etree.ElementTree as ET
+nodes = ET.parse(sys.argv[1]).iter('node')
+ready = any(n.get('class') in ('android.widget.Button', 'android.widget.EditText', 'android.widget.Spinner')
+            and n.get('package') == 'com.hamiyainvestmentgroup.customer' for n in nodes)
+sys.exit(0 if ready else 1)
+PY
+    then
+      break
+    fi
+    echo "Waiting for WebView accessibility controls: $stage, attempt $attempt/6"
+    sleep 2
+  done
   adb exec-out screencap -p > "$result_dir/window-$stage.png"
   adb shell dumpsys activity top > "$result_dir/activity-$stage.txt"
   adb shell dumpsys window > "$result_dir/insets-$stage.txt"
