@@ -1,0 +1,47 @@
+name: Installed Android window check
+
+on:
+  push:
+    branches: [qa/android-window]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installed-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [35, 36]
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Download the exact signed 1.2.2 APK
+        run: |
+          curl --fail --location --retry 2 https://github.com/Mahiruni/HamiyaApp/releases/download/android-build-13/Hamiya.apk --output Hamiya.apk
+          python3 - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          assert sha256(Path('Hamiya.apk').read_bytes()).hexdigest() == '712ebf06587041570f3d3b426c3357324e83261f40f06fc12d94e1ec3b07c1ca'
+          PY
+      - name: Enable emulator acceleration for the runner group
+        run: |
+          sudo chgrp "$(id -gn)" /dev/kvm
+          sudo chmod g+rw /dev/kvm
+      - name: Test the installed APK in Android
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash scripts/check-installed-android-window.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: installed-android-${{ matrix.api }}
+          path: android-window-results/
