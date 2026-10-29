@@ -7,6 +7,7 @@ self.addEventListener('install', (event) => {
       .then((cache) =>
         cache.addAll([
           '/',
+          '/app',
           '/icon-192.png',
           '/icon-512.png',
           '/startup.css',
@@ -50,19 +51,20 @@ self.addEventListener('fetch', (event) => {
   )
     return;
   if (event.request.mode === 'navigate') {
+    const shell = ['/', '/marketing.html'].includes(url.pathname) ? '/' : '/app';
     // The HTML shell contains no customer data. Never retain callback query tokens.
     event.respondWith(
       fetch(event.request)
         .then(async (response) => {
           if (response.ok) {
             const cache = await caches.open(CACHE);
-            await cache.put('/', response.clone());
+            await cache.put(shell, response.clone());
           }
           return response;
         })
         .catch(
           async () =>
-            (await caches.match('/')) ||
+            (await caches.match(shell)) ||
             new Response('Please reconnect to open Hamiya.', { status: 503 }),
         ),
     );

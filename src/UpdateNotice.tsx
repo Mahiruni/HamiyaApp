@@ -4,6 +4,7 @@ import { boundedFetch } from './async';
 import { installedRelease, nativeApp } from './native-updates';
 import { updateAction, updateOrigin, validateRelease } from './update-policy';
 import { useApp } from './state';
+import { androidUpdatesSupported, checkAndroidRelease } from './android-updates';
 
 export default function UpdateNotice() {
   const { t, navigate } = useApp();
@@ -22,6 +23,11 @@ export default function UpdateNotice() {
         return;
       lastCheck.current = Date.now();
       try {
+        if (androidUpdatesSupported()) {
+          const release = await checkAndroidRelease();
+          if (active) setAvailable(release.available);
+          return;
+        }
         const [response, current] = await Promise.all([
           boundedFetch(updateOrigin + '/updates/latest.json', {
             cache: 'no-store',

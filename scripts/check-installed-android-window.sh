@@ -85,3 +85,8 @@ PY
   capture_window "landscape-$mode"
 done
 adb shell settings put system user_rotation 0
+adb install -r android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+adb shell appops set com.hamiyainvestmentgroup.customer REQUEST_INSTALL_PACKAGES allow
+adb shell am instrument -w -r com.hamiyainvestmentgroup.customer.test/androidx.test.runner.AndroidJUnitRunner > "$result_dir/update-tests.txt"
+cat "$result_dir/update-tests.txt"
+grep -F 'OK (4 tests)' "$result_dir/update-tests.txt"

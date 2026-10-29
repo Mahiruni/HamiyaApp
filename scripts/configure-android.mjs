@@ -82,6 +82,20 @@ manifest = manifest.replace(
   /<application\b/,
   '<application android:allowBackup="false" android:usesCleartextTraffic="false"',
 );
+if (!manifest.includes('android.permission.REQUEST_INSTALL_PACKAGES'))
+  manifest = manifest.replace(
+    '</manifest>',
+    '<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /></manifest>',
+  );
+if (!manifest.includes('${applicationId}.updates'))
+  manifest = manifest.replace(
+    '</application>',
+    '<provider android:name=".HamiyaUpdateFileProvider" android:authorities="${applicationId}.updates" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/hamiya_update_paths" /></provider></application>',
+  );
+write(
+  join(res, 'xml/hamiya_update_paths.xml'),
+  '<paths xmlns:android="http://schemas.android.com/apk/res/android"><cache-path name="verified_update" path="hamiya-updates/" /></paths>',
+);
 writeFileSync(manifestPath, manifest);
 const findActivity = (path) => {
   for (const entry of readdirSync(path, { withFileTypes: true })) {
@@ -96,6 +110,29 @@ const activityPath = findActivity(join(root, 'app/src/main/java'));
 if (!activityPath) throw new Error('Generated MainActivity.java was not found.');
 const packageName = readFileSync(activityPath, 'utf8').match(/package\s+([\w.]+);/)?.[1];
 if (!packageName) throw new Error('Android activity package not found');
+writeFileSync(
+  join(resolve(activityPath, '..'), 'HamiyaUpdateFileProvider.java'),
+  `package ${packageName};\npublic class HamiyaUpdateFileProvider extends androidx.core.content.FileProvider {}\n`,
+);
+writeFileSync(
+  join(resolve(activityPath, '..'), 'HamiyaAppUpdatePlugin.java'),
+  readFileSync('native/HamiyaAppUpdatePlugin.java', 'utf8').replace(
+    'package com.hamiyainvestmentgroup.customer;',
+    `package ${packageName};`,
+  ),
+);
+write(
+  join(
+    root,
+    'app/src/androidTest/java',
+    packageName.replaceAll('.', '/'),
+    'HamiyaAppUpdateTest.java',
+  ),
+  readFileSync('native/HamiyaAppUpdateTest.java', 'utf8').replace(
+    'package com.hamiyainvestmentgroup.customer;',
+    `package ${packageName};`,
+  ),
+);
 writeFileSync(
   activityPath,
   `package ${packageName};
@@ -118,6 +155,7 @@ public class MainActivity extends BridgeActivity {
         // older WebViews get native padding + zero CSS insets; newer ones get real CSS insets.
         EdgeToEdge.enable(this);
         registerPlugin(HamiyaSystemUiPlugin.class);
+        registerPlugin(HamiyaAppUpdatePlugin.class);
         super.onCreate(savedInstanceState);
         // The app supplies floating controls; never add a native title/action bar.
         if (getActionBar() != null) getActionBar().hide();
@@ -202,8 +240,20 @@ const versionCode = 10000 + Number(process.env.GITHUB_RUN_NUMBER || 0);
 if (!Number.isSafeInteger(versionCode) || versionCode < 10000)
   throw new Error('Invalid Android version code');
 const gradlePath = join(root, 'app/build.gradle');
-const gradle = readFileSync(gradlePath, 'utf8')
+let gradle = readFileSync(gradlePath, 'utf8')
   .replace(/\bversionCode\s+\d+/, `versionCode ${versionCode}`)
   .replace(/\bversionName\s+['"][^'"]+['"]/, `versionName "${packageInfo.version}"`);
+if (!gradle.includes('// HAMIYA_UPDATE_TESTS'))
+  gradle += `
+// HAMIYA_UPDATE_TESTS
+android {
+    testBuildType "release"
+    defaultConfig { testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner" }
+}
+dependencies {
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+}
+`;
 writeFileSync(gradlePath, gradle);
 console.log(`Android version ${packageInfo.version}, build ${versionCode}`);

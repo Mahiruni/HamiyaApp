@@ -25,6 +25,20 @@ const en = {
   androidDownloadFailed: 'Could not start the download. Check your connection and try again.',
   updateAndRestart: 'Update & restart',
   updateDataSafe: 'Your account and saved cart stay in place. You do not need to uninstall.',
+  inAppUpdateHint:
+    'Your update is downloaded and verified here. Android will ask you to approve installation.',
+  installAppUpdate: 'Update app',
+  verifyingAppUpdate: 'Verifying your update…',
+  approveAppUpdate: 'Approve the Android update',
+  allowAppUpdates: 'Allow HAMIYA updates',
+  installPermissionHint: 'Allow HAMIYA to install updates when Android asks, then return here.',
+  installPermissionRequired:
+    'Android needs your permission to install this update. Tap Update app to try again.',
+  installationCancelled: 'Update cancelled. Your current app and data are unchanged.',
+  nativeBuild: 'Android build',
+  inAppUpdateUnavailable:
+    'This older installed build needs a one-time installation from the HAMIYA website to enable updates inside the app.',
+  hamiyaWebsite: 'HAMIYA website',
   businessSettings: 'Business settings',
 };
 export const updateCopy: Record<Language, Record<keyof typeof en, string>> = {
@@ -54,6 +68,18 @@ export const updateCopy: Record<Language, Record<keyof typeof en, string>> = {
     androidDownloadFailed: 'ማውረድ መጀመር አልተቻለም። ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።',
     updateAndRestart: 'አዘምንና እንደገና ክፈት',
     updateDataSafe: 'መለያህና የተቀመጠው ጋሪህ ይጠበቃሉ። መተግበሪያውን ማስወገድ አያስፈልግም።',
+    inAppUpdateHint: 'ዝማኔው እዚህ ይወርዳል፣ ይረጋገጣል። አንድሮይድ መጫኑን እንድትፈቅድ ይጠይቃል።',
+    installAppUpdate: 'መተግበሪያውን አዘምን',
+    verifyingAppUpdate: 'ዝማኔውን በማረጋገጥ ላይ…',
+    approveAppUpdate: 'የአንድሮይድ ዝማኔውን ፍቀድ',
+    allowAppUpdates: 'የሐሚያ ዝማኔዎችን ፍቀድ',
+    installPermissionHint: 'አንድሮይድ ሲጠይቅ ሐሚያ ዝማኔዎችን እንዲጭን ፍቀድ፣ ከዚያ ወደዚህ ተመለስ።',
+    installPermissionRequired:
+      'ዝማኔውን ለመጫን አንድሮይድ ፈቃድህን ይፈልጋል። እንደገና ለመሞከር መተግበሪያውን አዘምን የሚለውን ተጫን።',
+    installationCancelled: 'ዝማኔው ተሰርዟል። አሁን ያለው መተግበሪያና መረጃህ አልተቀየረም።',
+    nativeBuild: 'የአንድሮይድ ስሪት',
+    inAppUpdateUnavailable: 'ይህ የቆየ ስሪት በመተግበሪያው ውስጥ ማዘመን እንዲችል ከሐሚያ ድረ ገጽ አንድ ጊዜ መጫን ያስፈልገዋል።',
+    hamiyaWebsite: 'የሐሚያ ድረ ገጽ',
     businessSettings: 'የንግድ ቅንብሮች',
   },
   om: {
@@ -83,6 +109,21 @@ export const updateCopy: Record<Language, Record<keyof typeof en, string>> = {
       'Buufama jalqabuun hin dandaʼamne. Walqunnamtii kee mirkaneessii irra deebiʼii yaali.',
     updateAndRestart: 'Haaromsi fi irra deebiʼii bani',
     updateDataSafe: 'Herregnii fi garii kee kuufame ni eegamu. Appii haquun hin barbaachisu.',
+    inAppUpdateHint:
+      'Haaromsi kee asitti buufamee mirkanaaʼa. Android feʼuu akka eeyyamtu si gaafata.',
+    installAppUpdate: 'Appii haaromsi',
+    verifyingAppUpdate: 'Haaromsa mirkaneessaa jira…',
+    approveAppUpdate: 'Haaromsa Android eeyyami',
+    allowAppUpdates: 'Haaromsa Hamiya eeyyami',
+    installPermissionHint:
+      'Yeroo Android gaafatu Hamiyaan haaromsa akka feʼu eeyyami, achiis asitti deebiʼi.',
+    installPermissionRequired:
+      'Haaromsa feʼuuf Android eeyyama kee barbaada. Irra deebiʼuuf Appii haaromsi tuqi.',
+    installationCancelled: 'Haaromsi haqameera. Appii fi odeeffannoon kee hin jijjiiramne.',
+    nativeBuild: 'Gosa Android',
+    inAppUpdateUnavailable:
+      'Gosti durii kun appii keessaa haaromsuuf yeroo tokko marsariitii Hamiya irraa feʼamuu qaba.',
+    hamiyaWebsite: 'Marsariitii Hamiya',
     businessSettings: 'Qindaaʼina daldalaa',
   },
 };

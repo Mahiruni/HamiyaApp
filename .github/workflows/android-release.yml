@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'native/**'
       - 'public/**'
       - 'index.html'
       - 'vite.config.ts'
       - 'scripts/package-updates.mjs'
+      - 'scripts/package-android-release.mjs'
       - 'capacitor.config.ts'
       - 'package.json'
       - 'pnpm-lock.yaml'
@@ -16,6 +18,7 @@ on:
       - 'scripts/verify-android-signature.mjs'
       - 'scripts/check-installed-android-window.sh'
       - 'scripts/verify-android-window.py'
+      - 'scripts/build-android-update-tests.sh'
       - '.github/workflows/android-release.yml'
   workflow_dispatch:
 
@@ -151,6 +154,13 @@ jobs:
           "$AAPT" dump badging "$APK" > "$RUNNER_TEMP/hamiya-apk-info.txt"
           grep -F "package: name='com.hamiyainvestmentgroup.customer'" "$RUNNER_TEMP/hamiya-apk-info.txt"
 
+      - name: Build native update security and installer tests
+        env:
+          HAMIYA_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.HAMIYA_ANDROID_KEYSTORE_PASSWORD }}
+          HAMIYA_ANDROID_KEY_ALIAS: ${{ secrets.HAMIYA_ANDROID_KEY_ALIAS }}
+          HAMIYA_ANDROID_KEY_PASSWORD: ${{ secrets.HAMIYA_ANDROID_KEY_PASSWORD }}
+        run: bash scripts/build-android-update-tests.sh
+
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -204,18 +214,19 @@ jobs:
           mkdir -p release
           cp android/app/build/outputs/apk/release/*.apk release/Hamiya.apk
           cp android/app/build/outputs/bundle/release/*.aab release/Hamiya.aab
+          node scripts/package-android-release.mjs
           cd release
           sha256sum Hamiya.apk Hamiya.aab > SHA256SUMS.txt
           cat > release-notes.md <<'NOTES'
-          Hamiya Android with App settings → App updates.
+          Hamiya Android with updates inside App settings → App updates.
 
-          Compatible web releases can be installed in-app only when signed with the configured HAMIYA update key. Native Android upgrades install over this app and preserve its data. Keep the same signing identity for future releases.
+          Tap Update app to download and verify the signed release inside HAMIYA. Android asks you to approve installation; no browser or external download page is opened. Updates preserve your data and existing signing identity. Compatible signed web releases also support Update & restart.
           NOTES
           tag="android-build-${GITHUB_RUN_NUMBER}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt android-release.json --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt --target "$GITHUB_SHA" --title "Hamiya Android — build ${GITHUB_RUN_NUMBER}" --notes-file release-notes.md --latest --repo "$GITHUB_REPOSITORY"
+            gh release create "$tag" Hamiya.apk Hamiya.aab SHA256SUMS.txt android-release.json --target "$GITHUB_SHA" --title "Hamiya Android — build ${GITHUB_RUN_NUMBER}" --notes-file release-notes.md --latest --repo "$GITHUB_REPOSITORY"
           fi
 
       - name: Verify production APK download

@@ -74,6 +74,7 @@ export default defineConfig(({ mode, command }) => {
       sourcemap: false,
       target: 'es2022',
       rolldownOptions: {
+        input: { app: resolve('index.html'), marketing: resolve('marketing.html') },
         output: {
           codeSplitting: {
             groups: [

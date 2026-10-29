@@ -5,13 +5,9 @@ import { Button } from './components';
 import { languages } from './i18n';
 import { verifyReleaseSignature } from './update-signature';
 import { useApp } from './state';
-import {
-  apkDownloadUrl,
-  updateOrigin,
-  updateAction,
-  validateRelease,
-  type AppRelease,
-} from './update-policy';
+import InAppAndroidUpdates from './AndroidUpdates';
+import { androidUpdatesSupported } from './android-updates';
+import { updateOrigin, updateAction, validateRelease, type AppRelease } from './update-policy';
 import {
   applyLiveRelease,
   installedRelease,
@@ -66,6 +62,9 @@ export default function Settings() {
   );
 }
 function Updates() {
+  return androidUpdatesSupported() ? <InAppAndroidUpdates /> : <WebUpdates />;
+}
+function WebUpdates() {
   const { t, online, language } = useApp();
   const [status, setStatus] = useState<'checking' | 'current' | 'available' | 'error' | 'applying'>(
     'checking',
@@ -75,9 +74,6 @@ function Updates() {
   const [progress, setProgress] = useState(0);
   const [installError, setInstallError] = useState(false);
   const [nativeRequired, setNativeRequired] = useState(false);
-  const [downloadingApk, setDownloadingApk] = useState(false);
-  const [apkError, setApkError] = useState(false);
-  const downloadRequest = useRef<AbortController | null>(null);
   const active = useRef(true);
   const applying = useRef(false);
   const request = useRef<AbortController | null>(null);
@@ -134,7 +130,6 @@ function Updates() {
     return () => {
       active.current = false;
       request.current?.abort();
-      downloadRequest.current?.abort();
       window.removeEventListener('online', onOnline);
       document.removeEventListener('visibilitychange', onVisible);
     };
@@ -159,38 +154,6 @@ function Updates() {
       }
     } finally {
       applying.current = false;
-    }
-  }
-  async function downloadAndroid() {
-    if (downloadRequest.current) return;
-    const controller = new AbortController();
-    downloadRequest.current = controller;
-    const timer = setTimeout(() => controller.abort(), 15000);
-    setDownloadingApk(true);
-    setApkError(false);
-    try {
-      const response = await fetch(apkDownloadUrl, {
-        method: 'HEAD',
-        cache: 'no-store',
-        credentials: 'omit',
-        signal: controller.signal,
-      });
-      if (
-        !response.ok ||
-        !response.headers.get('content-type')?.includes('android.package-archive')
-      )
-        throw new Error('Download unavailable');
-      if (active.current && !controller.signal.aborted) {
-        // A normal external navigation reaches Capacitor's ACTION_VIEW handler.
-        // A new-window link can be ignored by Android WebViews.
-        window.location.assign(apkDownloadUrl + '?lang=' + language);
-      }
-    } catch {
-      if (active.current) setApkError(true);
-    } finally {
-      clearTimeout(timer);
-      downloadRequest.current = null;
-      if (active.current) setDownloadingApk(false);
     }
   }
   const busy = status === 'checking' || status === 'applying';
@@ -262,22 +225,12 @@ function Updates() {
             {t('updateAndRestart')}
           </Button>
         )}
-        {(nativeRequired || !nativeApp() || status === 'error') && (
-          <Button
-            busy={downloadingApk}
-            disabled={downloadingApk || !online}
-            onClick={() => void downloadAndroid()}
-          >
-            <Download size={17} />
-            {t(nativeApp() ? 'downloadAndroidUpdate' : 'downloadAndroidApp')}
-          </Button>
-        )}
+        <a className="button secondary" href={updateOrigin + '/#get-app'}>
+          <Download size={17} />
+          {t('hamiyaWebsite')}
+        </a>
       </div>
-      {apkError && (
-        <p className="error" role="alert">
-          {t('androidDownloadFailed')}
-        </p>
-      )}
+      {nativeApp() && <p className="update-footnote">{t('inAppUpdateUnavailable')}</p>}
       <p className="update-footnote">{t('updateDataSafe')}</p>
     </section>
   );

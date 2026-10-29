@@ -1,5 +1,15 @@
 # HAMIYA Android release (APK + AAB)
 
+## Website and installation inside HAMIYA (1.2.5)
+
+The public website is served at `/`; the existing customer portal is `/app`. Old hash routes and authentication callbacks are forwarded to the portal. The website's Android download uses the existing GitHub release asset directly. The private app shell, safe areas, customer dock, Supabase flows and native application ID remain intact.
+
+Android 1.2.5 adds `HamiyaAppUpdate`: Settings and the update notice check the published Android release internally. **Update app** downloads into private cache, reports real byte progress, checks the exact SHA-256 and size, and verifies package ID, strictly newer version code, version name and the existing installed signing certificate before handing a restricted content URI to Android's installer. It opens no browser or download page. Permission is requested only after the user starts an update. Android requires installation approval and may ask the user to allow HAMIYA to install packages once. Cancellation and failures leave the current app intact.
+
+Older binaries need one installation of 1.2.5 or later to acquire the native updater; a website deployment cannot add a native plugin to them. Future complete Android releases use this internal flow. This does not enable unsigned Capacitor live updates: that separate mechanism continues to require its pinned web signing key and signed manifest.
+
+Before publication, CI runs browser regressions plus four native instrumentation tests on each of Android 15 and 16: accept a newer package signed with the existing key; reject other signers, package IDs, versions and untrusted addresses; protect other private files; and verify that the installer handoff opens the on-device package installer. A temporary test-only certificate creates a rejection fixture and never replaces the production signing key. Test packages are excluded from public releases.
+
 ## Production hardening (1.2.4)
 
 See `docs/PRODUCTION_UPGRADE_1.2.4.md` for the audited scope and verification. This release protects the real status-area surface while scrolling, handles keyboard/panned product-sheet viewports, bounds lazy-screen recovery, fixes HTML/React startup ownership and delays live-bundle readiness until the actual screen renders. Optional confirmation haptics respect the Android setting without adding permissions. Android backup and cleartext traffic are disabled; installing over the existing signed app preserves local data and sessions.

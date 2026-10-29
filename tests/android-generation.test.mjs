@@ -69,6 +69,12 @@ test('Android generation is repeatable and retains edge-to-edge, system surfaces
     assert.match(before[3], /enableOnBackInvokedCallback="true"/);
     assert.match(before[3], /allowBackup="false"/);
     assert.match(before[3], /usesCleartextTraffic="false"/);
+    assert.match(before[3], /REQUEST_INSTALL_PACKAGES/);
+    assert.match(before[3], /android:name=".HamiyaUpdateFileProvider"/);
+    assert.match(
+      readFileSync(join(root, 'app/src/main/res/xml/hamiya_update_paths.xml'), 'utf8'),
+      /path="hamiya-updates\/"/,
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
