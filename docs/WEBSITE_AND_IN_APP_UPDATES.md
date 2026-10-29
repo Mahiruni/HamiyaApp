@@ -18,7 +18,7 @@ The requested behavior is a public HAMIYA marketing/download website and app upd
 
 ## Verification
 
-Local checks: lint, type checking, production build, 53 unit/database tests, and 41 production browser tests pass. The browser suite covers all existing ordering/admin/safe-area regressions plus marketing widths 320/390/768/1280, language persistence into the portal, direct-file downloads, legacy deep links, update progress, no browser navigation, duplicate protection, cancellation, permission denial and retry.
+Local checks: lint, type checking, production build, 54 unit/database tests, and 41 production browser tests pass. Native entry preparation rejects a marketing page, and native archives are checked to boot the application. The browser suite covers all existing ordering/admin/safe-area regressions plus marketing widths 320/390/768/1280, language persistence into the portal, direct-file downloads, legacy deep links, update progress, no browser navigation, duplicate protection, cancellation, permission denial and retry.
 
 The signed Android workflow gates publication on existing safe-area tests and four native update/security/installer tests on both API 35 and 36. Actual CI results and release links are recorded in GitHub Actions and the published release; local checks alone are not evidence of an Android pass.
 

@@ -1,4 +1,12 @@
-import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { resolve, join } from 'node:path';
 
 // Run after cap add/sync. Replace the generated template's artwork with the approved logo.
@@ -110,6 +118,15 @@ const activityPath = findActivity(join(root, 'app/src/main/java'));
 if (!activityPath) throw new Error('Generated MainActivity.java was not found.');
 const packageName = readFileSync(activityPath, 'utf8').match(/package\s+([\w.]+);/)?.[1];
 if (!packageName) throw new Error('Android activity package not found');
+const sampleTest = join(
+  root,
+  'app/src/androidTest/java/com/getcapacitor/myapp/ExampleInstrumentedTest.java',
+);
+if (existsSync(sampleTest))
+  writeFileSync(
+    sampleTest,
+    readFileSync(sampleTest, 'utf8').replace('"com.getcapacitor.app"', `"${packageName}"`),
+  );
 writeFileSync(
   join(resolve(activityPath, '..'), 'HamiyaUpdateFileProvider.java'),
   `package ${packageName};\npublic class HamiyaUpdateFileProvider extends androidx.core.content.FileProvider {}\n`,

@@ -5,7 +5,7 @@ test('web settings directs first-time Android installation to the official websi
   page,
 }) => {
   await setup(page, { signedIn: false });
-  await page.goto('/#settings');
+  await page.goto('/app#settings');
   await expect(page.getByRole('link', { name: 'HAMIYA website', exact: true })).toHaveAttribute(
     'href',
     'https://hamiyainvestmentgroup.vercel.app/#get-app',
@@ -19,7 +19,7 @@ for (const width of [320, 390, 768, 1280]) {
   test(`catalog and bounded sheet at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await setup(page);
-    await page.goto('/#catalog');
+    await page.goto('/app#catalog');
     await page.getByRole('button', { name: 'Product details: Banana', exact: true }).click();
     const sheet = page.locator('.product-sheet');
     await expect(sheet).toBeVisible();
@@ -91,7 +91,7 @@ test('quantity 200, cart editing, duplicate submission protection and order hist
   page,
 }) => {
   const { submitted } = await setup(page);
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await page.getByRole('button', { name: 'Product details: Banana', exact: true }).click();
   await page.locator('.product-sheet input[type=number]').fill('200');
   await expect(page.locator('.sheet-total')).toContainText('143,000');
@@ -114,7 +114,7 @@ test('out-of-stock products cannot be purchased; search and category filters wor
   page,
 }) => {
   await setup(page);
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await page.getByRole('button', { name: 'Product details: Apple', exact: true }).click();
   await expect(page.locator('.product-sheet-footer .button')).toBeDisabled();
   await page.keyboard.press('Escape');
@@ -134,7 +134,7 @@ for (const language of ['en', 'am', 'om']) {
         document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px');
       });
     }, language);
-    await page.goto('/#home');
+    await page.goto('/app#home');
     await expect(page.locator('.division-card')).toHaveCount(3);
     await expect(page.locator('html')).toHaveAttribute('lang', language);
     const controlTop = await page
@@ -155,7 +155,7 @@ for (const language of ['en', 'am', 'om']) {
 
 test('startup failure offers retry and a healthy retry reaches the dashboard', async ({ page }) => {
   await setup(page, { authFailure: true });
-  await page.goto('/');
+  await page.goto('/app');
   await expect(page.locator('.startup-recovery')).toBeVisible({ timeout: 18000 });
   await expect(page.locator('.startup-recovery button')).toBeEnabled();
   await page.route('**/auth/v1/user', (route) =>
@@ -175,7 +175,7 @@ test('startup failure offers retry and a healthy retry reaches the dashboard', a
 
 test('administrator navigation remains separate from the customer dock', async ({ page }) => {
   await setup(page, { role: 'admin' });
-  await page.goto('/#admin');
+  await page.goto('/app#admin');
   await expect(page.locator('.admin-app-shell')).toBeVisible();
   await expect(page.locator('.mobile-nav')).toHaveCount(0);
   await expect(page.locator('.admin-page')).toBeVisible();
@@ -185,11 +185,11 @@ test('logout returns to standalone sign-in; guest dashboard links stay protected
   page,
 }) => {
   await setup(page);
-  await page.goto('/#account');
+  await page.goto('/app#account');
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.locator('.account-auth')).toBeVisible();
   await expect(page.locator('.mobile-nav')).toHaveCount(0);
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await expect(page.locator('.account-auth')).toBeVisible();
 });
 
@@ -198,7 +198,7 @@ test('dragging, internal scrolling, Back dismissal and reduced motion keep the d
 }) => {
   await setup(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await page.getByRole('button', { name: 'Product details: Banana', exact: true }).click();
   const grip = page.locator('.product-sheet-grip');
   const bounds = await grip.boundingBox();
@@ -222,14 +222,14 @@ test('dragging, internal scrolling, Back dismissal and reduced motion keep the d
 test('a stalled authentication request leaves loading and offers recovery', async ({ page }) => {
   await setup(page);
   await page.route('**/auth/v1/user', () => new Promise(() => {}));
-  await page.goto('/');
+  await page.goto('/app');
   await expect(page.locator('.startup-recovery')).toBeVisible({ timeout: 16000 });
   await expect(page.locator('.startup-progress')).toHaveCount(0);
 });
 
 test('registration validates required fields outside the dashboard', async ({ page }) => {
   await setup(page, { signedIn: false });
-  await page.goto('/#register');
+  await page.goto('/app#register');
   await expect(page.locator('.account-auth')).toBeVisible();
   await expect(page.locator('.mobile-nav')).toHaveCount(0);
   await expect(page.locator('input[required]')).not.toHaveCount(0);
@@ -243,7 +243,7 @@ test('catalog request failures show recovery and retry replaces the empty state 
 }) => {
   const options = { catalogFailure: true };
   await setup(page, options);
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await expect(
     page.locator('.catalog-page').getByRole('button', { name: 'Try again', exact: true }),
   ).toBeVisible();
@@ -272,7 +272,7 @@ test('sign-in chunk loading retains the branded splash until the entry screen is
       await route.continue();
     },
   );
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.startup-splash')).toBeVisible();
   await expect(page.locator('.loading-state')).toHaveCount(0);
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#193b4d');

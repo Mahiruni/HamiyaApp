@@ -23,7 +23,7 @@ for (const { width, native } of [
         document.documentElement.style.setProperty('--safe-area-inset-bottom', '24px');
       });
     }, native);
-    await page.goto('/#home');
+    await page.goto('/app#home');
     await expect(page.locator('.division-card')).toHaveCount(3);
     const header = page.locator('.topbar');
     await expect(header.locator('.mobile-wordmark')).toHaveCount(0);
@@ -75,7 +75,7 @@ test('administrator phone header keeps a usable menu without the HAMIYA wordmark
   page,
 }) => {
   await setup(page, { role: 'admin' });
-  await page.goto('/#admin');
+  await page.goto('/app#admin');
   const header = page.locator('.topbar');
   await expect(page.locator('.admin-page')).toBeVisible();
   await expect(header.locator('.mobile-wordmark')).toHaveCount(0);

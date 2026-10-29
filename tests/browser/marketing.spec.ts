@@ -5,7 +5,7 @@ for (const width of [320, 390, 768, 1280])
     page,
   }) => {
     await page.setViewportSize({ width, height: 844 });
-    await page.goto('/marketing.html');
+    await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Food. Coffee.');
     await expect(page.locator('.site-division')).toHaveCount(3);
     const downloads = page.locator('a.site-button');
@@ -48,7 +48,7 @@ test('website download yields the APK and language carries into the customer por
         body: Buffer.from([0x50, 0x4b, 0x03, 0x04]),
       }),
   );
-  await page.goto('/marketing.html');
+  await page.goto('/');
   const downloaded = page.waitForEvent('download');
   await page.getByRole('link', { name: 'Download for Android', exact: true }).first().click();
   expect((await downloaded).suggestedFilename()).toBe('Hamiya.apk');
@@ -63,7 +63,7 @@ test('website download yields the APK and language carries into the customer por
 });
 
 test('existing customer deep links are preserved by the marketing entry', async ({ page }) => {
-  await page.goto('/marketing.html#catalog/coffee');
+  await page.goto('/#catalog/coffee');
   await expect(page).toHaveURL(/\/app#catalog\/coffee$/);
   await expect(page.locator('.account-auth')).toBeVisible();
 });

@@ -8,9 +8,11 @@ on:
       - 'native/**'
       - 'public/**'
       - 'index.html'
+      - 'app.html'
       - 'vite.config.ts'
       - 'scripts/package-updates.mjs'
       - 'scripts/package-android-release.mjs'
+      - 'scripts/prepare-native-web.mjs'
       - 'capacitor.config.ts'
       - 'package.json'
       - 'pnpm-lock.yaml'
@@ -83,6 +85,7 @@ jobs:
 
       - name: Generate Android native project
         run: |
+          node scripts/prepare-native-web.mjs
           pnpm exec cap add android
           pnpm exec cap sync android
           node scripts/configure-android.mjs

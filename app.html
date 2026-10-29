@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="theme-color" content="#193b4d" />
+    <meta name="color-scheme" content="light" />
+    <meta name="application-name" content="HAMIYA" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="HAMIYA" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta
+      name="description"
+      content="The Hamiya Investment Group customer portal. Order food products, enquire about Hawinet coffee exports and explore premium vehicles."
+    />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/startup.css" />
+    <link rel="preload" href="/brand/hamiya-food-icon-192.png" as="image" />
+    <title>Hamiya Investment Group — Customer Portal</title>
+  </head>
+  <body>
+    <div id="root">
+      <div id="hamiya-startup" class="startup-splash" role="status" aria-label="Loading HAMIYA">
+        <img
+          src="/brand/hamiya-food-icon-192.png"
+          alt=""
+          width="88"
+          height="88"
+          fetchpriority="high"
+        /><strong>HAMIYA</strong><span>Hamiya Investment Group</span
+        ><span class="startup-progress" aria-hidden="true"></span>
+      </div>
+    </div>
+    <script src="/boot.js" defer></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -4,6 +4,11 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+const appEntry = (request: IncomingMessage, _response: ServerResponse, next: () => void) => {
+  if (request.url?.split('?')[0] === '/app') request.url = request.url.replace('/app', '/app.html');
+  next();
+};
 export default defineConfig(({ mode, command }) => {
   const commit =
     process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -35,6 +40,12 @@ export default defineConfig(({ mode, command }) => {
       react(),
       {
         name: 'hamiya-production-policy',
+        configureServer(server) {
+          server.middlewares.use(appEntry);
+        },
+        configurePreviewServer(server) {
+          server.middlewares.use(appEntry);
+        },
         transformIndexHtml() {
           return command === 'build'
             ? [
@@ -74,7 +85,7 @@ export default defineConfig(({ mode, command }) => {
       sourcemap: false,
       target: 'es2022',
       rolldownOptions: {
-        input: { app: resolve('index.html'), marketing: resolve('marketing.html') },
+        input: { app: resolve('app.html'), marketing: resolve('index.html') },
         output: {
           codeSplitting: {
             groups: [

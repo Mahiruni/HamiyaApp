@@ -26,6 +26,11 @@ const walk = (path) => {
   }
 };
 walk(root);
+// Public index.html is the marketing site; native web bundles always boot the app.
+if (!files['app.html']?.[0].includes('hamiya-startup'))
+  throw new Error('Native application entry is missing');
+files['index.html'] = files['app.html'];
+delete files['app.html'];
 // Capacitor serves native assets; a browser service worker must not pin an old live bundle.
 files['sw.js'] = [
   Buffer.from(

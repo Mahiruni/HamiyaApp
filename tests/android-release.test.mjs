@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 test('Android release metadata binds the APK bytes to the exact version, repository and commit', () => {
@@ -30,6 +31,27 @@ test('Android release metadata binds the APK bytes to the exact version, reposit
       'https://github.com/Mahiruni/HamiyaApp/releases/download/android-build-20/Hamiya.apk',
     );
     assert.throws(() => run('main'));
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('native preparation selects the app entry and refuses a marketing page', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'hamiya-entry-'));
+  const script = resolve('scripts/prepare-native-web.mjs');
+  try {
+    mkdirSync(join(directory, 'dist'));
+    const app = join(directory, 'dist/app.html'),
+      index = join(directory, 'dist/index.html');
+    writeFileSync(index, '<main id="marketing-root">Public website</main>');
+    writeFileSync(app, '<div id="hamiya-startup">Customer app</div>');
+    execFileSync(process.execPath, [script], { cwd: directory, stdio: 'pipe' });
+    assert.equal(readFileSync(index, 'utf8'), readFileSync(app, 'utf8'));
+    writeFileSync(app, '<main id="marketing-root">Public website</main>');
+    assert.throws(() =>
+      execFileSync(process.execPath, [script], { cwd: directory, stdio: 'pipe' }),
+    );
+    assert.match(readFileSync(index, 'utf8'), /hamiya-startup/);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

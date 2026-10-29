@@ -44,7 +44,7 @@ test('a live bundle confirms native readiness only after the sign-in chunk rende
       await route.continue();
     },
   );
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.entry-screen .startup-splash')).toBeVisible();
   await page.clock.fastForward(1000);
   expect(
@@ -73,7 +73,7 @@ test('a stalled sign-in screen offers recovery while preserving the branded star
       await route.continue();
     },
   );
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.startup-splash')).toBeVisible();
   await page.clock.fastForward(21000);
   await expect(page.locator('.startup-recovery')).toContainText('taking too long');
@@ -97,7 +97,7 @@ test('a stalled customer screen offers retry with the dock still accessible', as
       await route.continue();
     },
   );
-  await page.goto('/#catalog', { waitUntil: 'domcontentloaded' });
+  await page.goto('/app#catalog', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.loading-state')).toBeVisible();
   await page.clock.fastForward(21000);
   await expect(page.locator('.loading-recovery')).toContainText('taking too long');
@@ -110,7 +110,7 @@ test('keyboard visual resizing and changing native insets keep the sheet bounded
   page,
 }) => {
   await setup(page);
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await page.getByRole('button', { name: 'Product details: Banana', exact: true }).click();
   const sheet = page.locator('.product-sheet');
   await page.evaluate(() => {
@@ -171,7 +171,7 @@ test('available filter excludes stock below the minimum and search accepts trans
       ),
     }),
   );
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await page.getByRole('textbox', { name: 'Search products', exact: true }).fill('ሙዝ');
   await expect(page.locator('.product-card')).toHaveCount(1);
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
@@ -196,7 +196,7 @@ test('cart follows the selected language and signing out clears the previous cus
       ),
     }),
   );
-  await page.goto('/#catalog');
+  await page.goto('/app#catalog');
   await page.getByRole('button', { name: 'Product details: Banana', exact: true }).click();
   await page.getByRole('button', { name: 'Add to cart', exact: true }).click();
   await page.locator('.topbar select').selectOption('am');
@@ -222,7 +222,7 @@ test('the status-area surface follows real insets without adding clearance twice
       document.documentElement.style.setProperty('--safe-area-inset-top', '44px');
     }),
   );
-  await page.goto('/#home');
+  await page.goto('/app#home');
   await expect(page.locator('.division-card')).toHaveCount(3);
   expect(await page.evaluate(() => getComputedStyle(document.body, '::before').height)).toBe(
     '44px',
