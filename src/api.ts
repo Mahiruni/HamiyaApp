@@ -148,6 +148,8 @@ export async function authenticate(
 }
 export async function uploadDocument(file: File, kind: string) {
   if (!supabase) throw new AppError('servicePending');
+  if (!['profile_photo', 'national_id', 'trade_license'].includes(kind))
+    throw new AppError('invalid_document');
   await validateUpload(file, kind === 'profile_photo');
   const user = check(await supabase.auth.getUser()).user;
   if (!user) throw new AppError('sign_in_required');
@@ -157,6 +159,7 @@ export async function uploadDocument(file: File, kind: string) {
     .eq('owner_id', user.id)
     .eq('kind', kind)
     .maybeSingle();
+  if (previous.error) throw previous.error;
   const extension =
     file.type === 'application/pdf' ? 'pdf' : file.type === 'image/png' ? 'png' : 'jpg';
   const path = `${user.id}/${kind}/${crypto.randomUUID()}.${extension}`;
@@ -199,6 +202,7 @@ export async function uploadProductImage(file: File, id: string) {
   await rpc('admin_image', { id, path });
 }
 async function validateUpload(file: File, photo = false) {
+  if (file.size === 0) throw new AppError('invalid_document');
   if (file.size > 8 * 1024 * 1024) throw new AppError('file_too_large');
   const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
   const png = [137, 80, 78, 71, 13, 10, 26, 10].every((v, i) => bytes[i] === v);
