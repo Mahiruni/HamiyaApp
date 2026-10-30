@@ -62,7 +62,14 @@ export default function Settings() {
   );
 }
 function Updates() {
-  return androidUpdatesSupported() ? <InAppAndroidUpdates /> : <WebUpdates />;
+  // Native APK upgrades and signed web-asset updates serve different purposes.
+  // Show both in Android builds rather than hiding live updates behind the APK updater.
+  return (
+    <>
+      <WebUpdates />
+      {androidUpdatesSupported() && <InAppAndroidUpdates />}
+    </>
+  );
 }
 function WebUpdates() {
   const { t, online, language } = useApp();
@@ -104,9 +111,7 @@ function WebUpdates() {
       setRelease(latest);
       setNative(current.native);
       setNativeRequired(needsNative);
-      setStatus(
-        action === 'current' && !(nativeApp() && !liveUpdatesSupported()) ? 'current' : 'available',
-      );
+      setStatus(action === 'current' ? 'current' : 'available');
     } catch {
       if (active.current && request.current === controller) setStatus('error');
     } finally {
@@ -225,12 +230,16 @@ function WebUpdates() {
             {t('updateAndRestart')}
           </Button>
         )}
-        <a className="button secondary" href={updateOrigin + '/#get-app'}>
-          <Download size={17} />
-          {t('hamiyaWebsite')}
-        </a>
+        {!nativeApp() && (
+          <a className="button secondary" href={updateOrigin + '/#get-app'}>
+            <Download size={17} />
+            {t('hamiyaWebsite')}
+          </a>
+        )}
       </div>
-      {nativeApp() && <p className="update-footnote">{t('inAppUpdateUnavailable')}</p>}
+      {nativeApp() && nativeRequired && (
+        <p className="update-footnote">{t('inAppUpdateUnavailable')}</p>
+      )}
       <p className="update-footnote">{t('updateDataSafe')}</p>
     </section>
   );
