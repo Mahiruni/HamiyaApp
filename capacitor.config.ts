@@ -4,7 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.hamiyainvestmentgroup.customer',
   appName: 'Hamiya Investment Group – HIG',
   webDir: 'dist',
-  backgroundColor: '#193b4d',
+  backgroundColor: '#ffffff',
   zoomEnabled: true,
   plugins: {
     CapacitorUpdater: {
@@ -24,7 +24,7 @@ const config: CapacitorConfig = {
   },
   android: {
     allowMixedContent: false,
-    backgroundColor: '#f4f7fa',
+    backgroundColor: '#ffffff',
   },
 };
 
