@@ -248,3 +248,97 @@ body:has(.compact-app-shell .sidebar.open) {
   margin-inline-start: auto;
   font-weight: 700;
 }
+
+/* HAMIYA reference-inspired entry experience; scoped away from signed-in navigation. */
+.entry-auth:has(.hamiya-welcome) {
+  background: #fff;
+}
+.entry-main:has(.hamiya-welcome) {
+  padding: 0 !important;
+  min-height: 100dvh;
+}
+.hamiya-welcome {
+  min-height: 100dvh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #152d3d;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.hamiya-welcome-hero {
+  height: clamp(160px, 38svh, 390px);
+  flex: 0 1 auto;
+  overflow: hidden;
+  background: #e9eff2;
+}
+.hamiya-welcome-hero img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.hamiya-welcome-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: min(100%, 480px);
+  margin-inline: auto;
+  padding: clamp(18px, 3svh, 30px) 24px 18px;
+}
+.hamiya-welcome-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+.hamiya-welcome-brand h1 {
+  font-size: clamp(26px, 4svh, 36px);
+  letter-spacing: .14em;
+  line-height: 1.2;
+  margin: 8px 0 0;
+  color: #142f41;
+}
+.hamiya-welcome-brand p { margin: 0; color: #617684; font-size: 14px; }
+.hamiya-welcome-actions { width: 100%; display: grid; gap: 12px; margin-top: auto; }
+.hamiya-welcome-actions .button { min-height: 50px; border-radius: 12px; }
+.hamiya-welcome-language {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #506779;
+  min-height: 44px;
+}
+.hamiya-welcome-language select { background: transparent; border: 0; color: inherit; font: inherit; }
+.hamiya-auth-entry { position: relative; }
+.hamiya-auth-back {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  left: 16px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #142f41;
+  cursor: pointer;
+}
+@media (max-height: 600px) {
+  .hamiya-welcome-hero { height: 28svh; min-height: 112px; }
+  .hamiya-welcome-content { gap: 8px; padding-top: 12px; padding-bottom: 8px; }
+  .hamiya-welcome-brand h1 { font-size: 24px; margin-top: 2px; }
+  .hamiya-welcome-actions { gap: 8px; }
+  .hamiya-welcome-actions .button { min-height: 44px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hamiya-welcome { animation: hamiya-entry-appear .24s ease-out both; }
+  @keyframes hamiya-entry-appear { from { opacity: .5; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+}
