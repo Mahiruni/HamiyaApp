@@ -280,8 +280,8 @@ export default function Account() {
   if (!recovery && !user && (route === 'home' || route === 'welcome')) {
     return (
       <section className="hamiya-welcome" aria-label="Hamiya Investment Group">
-        <div className="hamiya-welcome-hero">
-          <img src="/brand/hamiya-food-processing.jpg" alt="" />
+        <div className="hamiya-welcome-hero" aria-hidden="true">
+          <div className="hamiya-welcome-sunrise" />
         </div>
         <div className="hamiya-welcome-content">
           <div className="hamiya-welcome-brand">
@@ -291,10 +291,14 @@ export default function Account() {
           </div>
           <div className="hamiya-welcome-actions">
             <button className="button primary full" onClick={() => navigate('signin')}>
-              {t('signIn')}
+              <UserRound size={19} aria-hidden="true" />
+              <span>{t('signIn')}</span>
+              <ArrowRight size={20} aria-hidden="true" />
             </button>
             <button className="button secondary full" onClick={() => navigate('register')}>
-              {t('signUp')}
+              <UserRound size={19} aria-hidden="true" />
+              <span>{t('signUp')}</span>
+              <ArrowRight size={20} aria-hidden="true" />
             </button>
           </div>
           <label className="hamiya-welcome-language">
