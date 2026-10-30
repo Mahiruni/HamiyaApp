@@ -36,6 +36,8 @@ const en = {
   createAccount: 'Create an account',
   welcome: 'Welcome to Hamiya',
   welcomeBack: 'Welcome back',
+  confirmPassword: 'Confirm password',
+  passwordMismatch: 'Passwords do not match',
   greeting: 'Hello',
   businessHome: 'A home for your business',
   businessHomeText: 'One account brings every Hamiya business closer to you.',
