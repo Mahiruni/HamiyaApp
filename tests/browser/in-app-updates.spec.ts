@@ -79,7 +79,7 @@ test('Android updates download, verify and reach system approval without navigat
       updateRequests.push(request.url());
   });
   await page.goto('/app#settings');
-  const button = page.getByRole('button', { name: 'Update app', exact: true });
+  const button = page.locator('[aria-labelledby="android-updates-title"]').getByRole('button', { name: 'Update app', exact: true });
   await expect(button).toBeVisible();
   await expect(page.getByRole('link', { name: 'HAMIYA website', exact: true })).toHaveCount(0);
   const address = page.url();
@@ -129,7 +129,7 @@ test('Android updates download, verify and reach system approval without navigat
     (window as unknown as { finishUpdate(code: string): void }).finishUpdate('INSTALL_CANCELLED'),
   );
   await expect(button).toBeEnabled();
-  await expect(page.locator('.update-footnote')).toContainText([
+  await expect(page.locator('[aria-labelledby="android-updates-title"] .update-footnote')).toContainText([
     'Update cancelled',
     'Your account',
   ]);
@@ -144,13 +144,13 @@ test('update checks recover and Android permission denial offers a retry inside 
   await nativeUpdater(page, true);
   await page.goto('/app#settings');
   await expect(
-    page.getByRole('heading', { name: 'Could not check for updates', exact: true }),
+    page.locator('[aria-labelledby="android-updates-title"]').getByRole('heading', { name: 'Could not check for updates', exact: true }),
   ).toBeVisible();
   await page.evaluate(() => {
     (window as unknown as { failUpdateCheck: boolean }).failUpdateCheck = false;
   });
-  await page.getByRole('button', { name: 'Check for updates', exact: true }).click();
-  const update = page.getByRole('button', { name: 'Update app', exact: true });
+  await page.locator('[aria-labelledby="android-updates-title"]').getByRole('button', { name: 'Check for updates', exact: true }).click();
+  const update = page.locator('[aria-labelledby="android-updates-title"]').getByRole('button', { name: 'Update app', exact: true });
   await expect(update).toBeEnabled();
   await update.click();
   await page.evaluate(() =>
@@ -158,7 +158,7 @@ test('update checks recover and Android permission denial offers a retry inside 
       'INSTALL_PERMISSION_REQUIRED',
     ),
   );
-  await expect(page.locator('.update-status')).toContainText('Android needs your permission');
+  await expect(page.locator('[aria-labelledby="android-updates-title"] .update-status')).toContainText('Android needs your permission');
   await expect(update).toBeEnabled();
 });
 
@@ -172,9 +172,9 @@ for (const language of ['am', 'om'])
     await page.setViewportSize({ width: 320, height: 740 });
     await page.goto('/app#settings');
     await expect(page.locator('html')).toHaveAttribute('lang', language);
-    await expect(page.locator('.update-actions button')).toHaveCount(2);
+    await expect(page.locator('[aria-labelledby="android-updates-title"] .update-actions button')).toHaveCount(2);
     await expect(
-      page.getByRole('button', {
+      page.locator('[aria-labelledby="android-updates-title"]').getByRole('button', {
         name: language === 'am' ? 'መተግበሪያውን አዘምን' : 'Appii haaromsi',
         exact: true,
       }),
