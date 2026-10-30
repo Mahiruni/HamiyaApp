@@ -163,10 +163,10 @@ function WebUpdates() {
   }
   const busy = status === 'checking' || status === 'applying';
   return (
-    <section className="panel update-panel" aria-labelledby="updates-title">
+    <section className="panel update-panel" aria-labelledby="web-updates-title">
       <div className="settings-panel-heading">
         <Smartphone size={23} />
-        <h2 id="updates-title">{t('appUpdates')}</h2>
+        <h2 id="web-updates-title">{t('appUpdates')}</h2>
       </div>
       <div className={'update-status update-status-' + status} role="status" aria-live="polite">
         <span className="update-status-icon">
