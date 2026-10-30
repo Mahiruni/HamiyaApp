@@ -279,7 +279,7 @@ export default function Account() {
   }
   if (!recovery && !user && (route === 'home' || route === 'welcome')) {
     return (
-      <section className="hamiya-welcome" aria-label={t('groupName')}>
+      <section className="hamiya-welcome" aria-label="Hamiya Investment Group">
         <div className="hamiya-welcome-hero">
           <img src="/brand/hamiya-food-processing.jpg" alt="" />
         </div>
@@ -287,7 +287,7 @@ export default function Account() {
           <div className="hamiya-welcome-brand">
             <HamiyaMark size="md" />
             <h1>HAMIYA</h1>
-            <p>{t('groupName')}</p>
+            <p>Hamiya Investment Group</p>
           </div>
           <div className="hamiya-welcome-actions">
             <button className="button primary full" onClick={() => navigate('signin')}>
@@ -356,7 +356,7 @@ export default function Account() {
 
           <div className="auth-heading">
             <h1 id="auth-title">
-              {t(resetting ? 'resetPassword' : registering ? 'register' : 'signIn')}
+              {t(resetting ? 'resetPassword' : registering ? 'register' : 'welcomeBackTitle')}
             </h1>
             <p>
               {t(
@@ -366,7 +366,7 @@ export default function Account() {
                     ? 'resetIntro'
                     : registering
                       ? 'registerIntro'
-                      : 'loginIntro',
+                      : 'welcomeBackSubtitle',
               )}
             </p>
           </div>
@@ -445,7 +445,7 @@ export default function Account() {
                 </AuthField>
                 <label className="hamiya-auth-consent">
                   <input type="checkbox" name="accept_terms" required />
-                  <span>{t('terms')}</span>
+                  <span>{t('acceptTerms')} · <button type="button" className="hamiya-auth-terms-link" onClick={() => navigate('terms')}>{t('terms')}</button></span>
                 </label>
               </>
             )}
