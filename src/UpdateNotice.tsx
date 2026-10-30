@@ -23,11 +23,10 @@ export default function UpdateNotice() {
         return;
       lastCheck.current = Date.now();
       try {
-        if (androidUpdatesSupported()) {
-          const release = await checkAndroidRelease();
-          if (active) setAvailable(release.available);
-          return;
-        }
+        // Check both update channels: APK availability must not mask a live UI update.
+        const nativeUpgrade = androidUpdatesSupported()
+          ? checkAndroidRelease().then((release) => release.available).catch(() => false)
+          : Promise.resolve(false);
         const [response, current] = await Promise.all([
           boundedFetch(updateOrigin + '/updates/latest.json', {
             cache: 'no-store',
@@ -36,10 +35,13 @@ export default function UpdateNotice() {
           }),
           installedRelease(),
         ]);
-        if (!response.ok) return;
+        if (!response.ok) {
+          if (active) setAvailable(await nativeUpgrade);
+          return;
+        }
         const release = validateRelease(await response.json());
-        if (active)
-          setAvailable(updateAction(release, current.commit, current.native) !== 'current');
+        const webUpgrade = updateAction(release, current.commit, current.native) !== 'current';
+        if (active) setAvailable(webUpgrade || (await nativeUpgrade));
       } catch {
         /* Settings provides an explicit retry if an automatic check cannot complete. */
       }
