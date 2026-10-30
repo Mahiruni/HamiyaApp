@@ -32,7 +32,7 @@ write(
 );
 write(
   join(res, 'values/hamiya.xml'),
-  '<resources><color name="hamiya_surface">#193b4d</color></resources>',
+  '<resources><color name="hamiya_surface">#ffffff</color></resources>',
 );
 write(
   join(res, 'drawable/hamiya_launcher_foreground.xml'),
@@ -69,7 +69,7 @@ styles = styles.replace(
 );
 styles = styles.replace(
   /<style name="AppTheme.NoActionBarLaunch"[\s\S]*?<\/style>/,
-  '<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"><item name="android:windowNoTitle">true</item><item name="android:windowActionBar">false</item><item name="android:windowActionBarOverlay">false</item><item name="windowNoTitle">true</item><item name="windowActionBar">false</item><item name="windowSplashScreenBackground">@color/hamiya_surface</item><item name="windowSplashScreenAnimatedIcon">@drawable/hamiya_launcher_foreground</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item><item name="android:windowLightStatusBar">false</item><item name="android:windowLightNavigationBar">false</item></style>',
+  '<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen"><item name="android:windowNoTitle">true</item><item name="android:windowActionBar">false</item><item name="android:windowActionBarOverlay">false</item><item name="windowNoTitle">true</item><item name="windowActionBar">false</item><item name="windowSplashScreenBackground">@color/hamiya_surface</item><item name="windowSplashScreenAnimatedIcon">@drawable/hamiya_launcher_foreground</item><item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item><item name="android:windowLightStatusBar">true</item><item name="android:windowLightNavigationBar">true</item></style>',
 );
 writeFileSync(stylesPath, styles);
 const manifestPath = join(root, 'app/src/main/AndroidManifest.xml');
@@ -219,7 +219,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 @CapacitorPlugin(name = "HamiyaSystemUi")
 public class HamiyaSystemUiPlugin extends Plugin {
-    private static boolean darkSurface = true;
+    private static boolean darkSurface = false;
     @PluginMethod
     public void setSurface(PluginCall call) {
         darkSurface = call.getBoolean("dark", false);
