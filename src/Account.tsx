@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState, type FormEvent } from 'react';
 import {
   ArrowRight,
+  ArrowLeft,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -266,11 +267,45 @@ export default function Account() {
       />
     );
   }
+  if (!recovery && !user && (route === 'home' || route === 'welcome')) {
+    return (
+      <section className="hamiya-welcome" aria-label={t('groupName')}>
+        <div className="hamiya-welcome-hero">
+          <img src="/brand/hamiya-food-processing.jpg" alt="" />
+        </div>
+        <div className="hamiya-welcome-content">
+          <div className="hamiya-welcome-brand">
+            <HamiyaMark size="md" />
+            <h1>HAMIYA</h1>
+            <p>{t('groupName')}</p>
+          </div>
+          <div className="hamiya-welcome-actions">
+            <button className="button primary full" onClick={() => navigate('signin')}>
+              {t('signIn')}
+            </button>
+            <button className="button secondary full" onClick={() => navigate('register')}>
+              {t('signUp')}
+            </button>
+          </div>
+          <label className="hamiya-welcome-language">
+            <Globe2 size={18} aria-hidden="true" />
+            <select aria-label={t('language')} value={language}
+              onChange={(event) => setLanguage(event.target.value as typeof language)}>
+              {languages.map((item) => (
+                <option key={item.code} value={item.code}>{item.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </section>
+    );
+  }
   if (recovery || !user) {
     const registering = !recovery && mode === 'register';
     const resetting = recovery || mode === 'forgot';
     return (
-      <section className="account-auth" aria-labelledby="auth-title">
+      <section className="account-auth hamiya-auth-entry" aria-labelledby="auth-title">
+        <button className="hamiya-auth-back" type="button" onClick={() => navigate('welcome')} aria-label={t('back')}><ArrowLeft size={21} /></button>
         <div className="auth-story">
           <span className="eyebrow">{t('groupName')}</span>
           <h2>
@@ -534,7 +569,7 @@ export default function Account() {
                 if (result?.error) throw result.error;
                 setUser(null);
                 setEditing(false);
-                navigate('signin');
+                navigate('welcome');
               } catch (error) {
                 notifyError(error);
               }
