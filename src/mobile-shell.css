@@ -401,3 +401,192 @@ body:has(.startup-splash)::before { background: #fff; }
   .hamiya-auth-entry .auth-heading { margin-bottom: 12px; }
   .hamiya-auth-entry .auth-field { margin-bottom: 8px; }
 }
+
+
+/* HAMIYA compact authentication system — mobile-first, shared by login/register/recovery.
+   Override legacy oversized card styles without changing signed-in screens. */
+.entry-main > .account-auth.hamiya-auth-entry {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100svh;
+  margin: 0;
+  padding: calc(68px + var(--safe-top, 0px)) max(20px, var(--safe-left, 0px))
+    calc(28px + var(--safe-bottom, 0px)) max(20px, var(--safe-right, 0px));
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #f8fafb !important;
+  overflow-x: hidden;
+}
+.entry-main > .account-auth.hamiya-auth-entry::before { content: none !important; display: none !important; }
+.hamiya-auth-entry .auth-card {
+  box-sizing: border-box;
+  width: min(100%, 410px);
+  max-width: 410px;
+  padding: 0 !important;
+  margin: 0 auto;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-width: 0;
+}
+.hamiya-auth-entry .auth-brand {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0 0 26px !important;
+  min-height: 46px;
+  text-align: left;
+}
+.hamiya-auth-entry .auth-brand > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 16px !important;
+  font-weight: 750;
+  letter-spacing: .10em;
+  line-height: 1.2;
+  color: #193b4d;
+}
+.hamiya-auth-entry .auth-brand > span small {
+  display: block;
+  font-size: 11px !important;
+  letter-spacing: 0;
+  font-weight: 450;
+  color: #637785;
+}
+.hamiya-auth-entry .auth-heading { margin: 0 0 22px !important; text-align: left; }
+.hamiya-auth-entry .auth-heading h1 {
+  margin: 0;
+  font-size: clamp(25px, 6.5vw, 30px) !important;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+  color: #193b4d;
+}
+.hamiya-auth-entry .auth-heading > p {
+  margin: 6px 0 0;
+  font-size: 13px !important;
+  line-height: 1.5;
+  color: #627785;
+}
+.hamiya-auth-entry .auth-card form { margin: 0 !important; width: 100%; }
+.hamiya-auth-entry .auth-field { margin: 0 0 14px !important; }
+.hamiya-auth-entry .auth-field-label {
+  display: block;
+  margin: 0 0 6px;
+  color: #243e4e;
+  font-size: 13px !important;
+  line-height: 1.4;
+  font-weight: 650;
+}
+.hamiya-auth-entry .auth-field-control {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px !important;
+  height: 48px;
+  gap: 10px;
+  padding: 0 13px !important;
+  border: 1px solid #d6e1e7 !important;
+  border-radius: 12px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.hamiya-auth-entry .auth-field-control:focus-within {
+  border-color: #52778c !important;
+  box-shadow: 0 0 0 3px #52778c1c !important;
+}
+.hamiya-auth-entry .auth-field-control > svg { width: 18px; height: 18px; flex: 0 0 auto; color: #718897; }
+.hamiya-auth-entry .auth-field-control input {
+  display: block;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px !important;
+  height: 44px;
+  margin: 0;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #193b4d;
+  font-size: 16px !important; /* prevents mobile browser zoom */
+  font-weight: 450;
+  line-height: normal;
+}
+.hamiya-auth-entry .auth-field-control input::placeholder { color: #8b9ca7; opacity: 1; }
+.hamiya-auth-entry .auth-field > small { margin: 5px 2px 0; font-size: 11px; line-height: 1.4; }
+.hamiya-auth-entry .password-toggle {
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  margin: 0 -10px 0 0;
+  padding: 0;
+  color: #526d7c;
+}
+.hamiya-auth-entry .auth-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  margin: 2px 0 16px !important;
+}
+.hamiya-auth-entry .remember-switch {
+  flex: 0 1 auto;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 12px !important;
+  white-space: nowrap;
+}
+.hamiya-auth-entry .remember-switch .switch-track { order: -1; flex: 0 0 auto; }
+.hamiya-auth-entry .auth-forgot { flex: 0 1 auto; min-height: 44px; font-size: 12px !important; font-weight: 650; color: #193b4d; white-space: nowrap; }
+.hamiya-auth-entry .auth-submit {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 50px !important;
+  margin: 6px 0 0 !important;
+  border-radius: 12px !important;
+  background: #193b4d;
+  color: white;
+  font-size: 15px !important;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 5px 12px #193b4d16;
+}
+.hamiya-auth-entry .auth-submit:active { transform: scale(.99); }
+.hamiya-auth-entry .auth-switch { margin: 18px 0 0 !important; text-align: center; font-size: 13px !important; color: #617684; }
+.hamiya-auth-entry .auth-switch button { min-height: 44px; font-size: 13px !important; font-weight: 700; color: #193b4d; }
+.hamiya-auth-entry .auth-legal { margin: 12px 0 0 !important; gap: 12px; }
+.hamiya-auth-entry .auth-legal button { min-height: 40px; padding: 8px 0; font-size: 11px !important; color: #617684; }
+.hamiya-auth-entry .hamiya-auth-consent { margin: 4px 0 12px; font-size: 12px; line-height: 1.45; }
+.hamiya-auth-entry .hamiya-auth-terms-link { padding: 5px 0; color: #193b4d; font-size: inherit; font-weight: 700; text-decoration: underline; }
+.hamiya-auth-entry .auth-language-icon { top: calc(14px + var(--safe-top, 0px)); right: max(20px, var(--safe-right, 0px)); }
+.hamiya-auth-entry .hamiya-auth-back { top: calc(14px + var(--safe-top, 0px)); left: max(16px, var(--safe-left, 0px)); }
+@media (max-width: 359px) {
+  .entry-main > .account-auth.hamiya-auth-entry { padding-inline: 16px; }
+  .hamiya-auth-entry .auth-brand { margin-bottom: 16px !important; }
+  .hamiya-auth-entry .auth-heading { margin-bottom: 16px !important; }
+  .hamiya-auth-entry .auth-options { gap: 6px; }
+  .hamiya-auth-entry .remember-switch, .hamiya-auth-entry .auth-forgot { font-size: 11px !important; }
+}
+@media (max-height: 650px) {
+  .entry-main > .account-auth.hamiya-auth-entry { padding-top: calc(54px + var(--safe-top, 0px)); }
+  .hamiya-auth-entry .auth-brand { margin-bottom: 14px !important; }
+  .hamiya-auth-entry .auth-heading { margin-bottom: 14px !important; }
+  .hamiya-auth-entry .auth-field { margin-bottom: 10px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hamiya-auth-entry .auth-field-control, .hamiya-auth-entry .auth-submit { transition: none; }
+}
