@@ -780,3 +780,72 @@ body:has(.startup-splash)::before { background: #fff; }
 @media (prefers-reduced-motion: reduce) {
   .hamiya-welcome { animation: none !important; }
 }
+
+
+/* Auth viewport-fit refinement: no unnecessary scrolling on standard phones.
+   Preserve vertical scrolling when text zoom, short displays, or keyboard require it. */
+.entry-main:has(.hamiya-auth-entry) {
+  min-height: 100svh;
+  padding: 0 !important;
+  overflow-x: clip;
+}
+.entry-main > .account-auth.hamiya-auth-entry {
+  min-height: 100svh;
+  padding-top: calc(58px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  background:
+    radial-gradient(ellipse at 100% 0%, #e4f3e975 0, transparent 42%),
+    linear-gradient(160deg, #ffffff 0%, #f8faf7 100%) !important;
+}
+.hamiya-auth-entry .auth-card { max-width: 390px; }
+.hamiya-auth-entry .auth-brand { margin-bottom: 16px !important; }
+.hamiya-auth-entry .auth-heading { margin-bottom: 16px !important; }
+.hamiya-auth-entry .auth-heading h1 { font-size: clamp(23px, 6vw, 28px) !important; }
+.hamiya-auth-entry .auth-heading > p { font-size: 13px !important; }
+.hamiya-auth-entry .auth-field { margin-bottom: 11px !important; }
+.hamiya-auth-entry .auth-field-label { font-size: 12px !important; margin-bottom: 4px; }
+.hamiya-auth-entry .auth-field-control { height: 46px; min-height: 46px !important; }
+.hamiya-auth-entry .auth-field-control input { font-size: 16px !important; }
+.hamiya-auth-entry .auth-options { margin-bottom: 9px !important; }
+.hamiya-auth-entry .auth-submit {
+  min-height: 48px !important;
+  background: linear-gradient(105deg, #075747, #007a58) !important;
+  box-shadow: 0 5px 14px #00694c1e;
+}
+.hamiya-auth-entry .auth-switch { margin-top: 8px !important; }
+.hamiya-auth-entry .auth-legal { margin-top: 4px !important; }
+.hamiya-auth-entry .auth-legal button { min-height: 36px; }
+.hamiya-auth-entry .hamiya-auth-consent { margin: 1px 0 6px; }
+/* Registration has more fields than login: reduce decoration, not tap-target size. */
+.hamiya-auth-register .auth-brand { margin-bottom: 10px !important; }
+.hamiya-auth-register .auth-heading { margin-bottom: 10px !important; }
+.hamiya-auth-register .auth-field { margin-bottom: 8px !important; }
+.hamiya-auth-register .auth-field > small { margin-top: 3px; }
+.hamiya-auth-register .auth-options { margin-bottom: 5px !important; }
+.hamiya-auth-register .auth-submit { margin-top: 2px !important; }
+.hamiya-auth-register .auth-switch { margin-top: 4px !important; }
+.hamiya-auth-register .auth-legal { margin-top: 0 !important; }
+/* Only use viewport-fitting alignment where sufficient height is available. */
+@media (min-height: 760px) and (max-width: 600px) {
+  .entry-main > .account-auth.hamiya-auth-entry { justify-content: center; }
+}
+@media (max-height: 759px) {
+  .entry-main > .account-auth.hamiya-auth-entry {
+    justify-content: flex-start;
+    padding-top: calc(54px + env(safe-area-inset-top, 0px));
+  }
+  .hamiya-auth-entry .auth-brand { margin-bottom: 8px !important; }
+  .hamiya-auth-entry .auth-heading { margin-bottom: 9px !important; }
+  .hamiya-auth-entry .auth-field { margin-bottom: 7px !important; }
+  .hamiya-auth-entry .auth-legal { margin-top: 0 !important; }
+}
+/* The OS keyboard and accessibility text scaling must never trap form fields. */
+.keyboard-open .entry-main > .account-auth.hamiya-auth-entry {
+  min-height: 100%;
+  height: auto;
+  overflow-y: visible;
+}
+@media (max-width: 360px) {
+  .hamiya-auth-entry .auth-options { flex-wrap: wrap; }
+  .hamiya-auth-entry .auth-heading h1 { font-size: 23px !important; }
+}
