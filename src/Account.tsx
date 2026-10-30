@@ -55,6 +55,7 @@ export default function Account() {
   } = useApp();
   const mode = authMode(route);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [remember, setRemember] = useState(authStorage.remembers);
   const [busy, setBusy] = useState(false);
   const [confirmation, setConfirmation] = useState(false);
@@ -69,6 +70,7 @@ export default function Account() {
   const profileId = user?.id;
   function changeMode(next: AuthMode) {
     setShowPassword(false);
+    setShowConfirmation(false);
     setConfirmation(false);
     setInlineError('');
     navigate(authRoutes[next]);
@@ -101,6 +103,14 @@ export default function Account() {
     setInlineError('');
     const data = new FormData(event.currentTarget);
     try {
+      if (mode === 'register' && String(data.get('password')) !== String(data.get('confirm_password'))) {
+        setInlineError(t('passwordMismatch'));
+        return;
+      }
+      if (mode === 'register' && !data.get('accept_terms')) {
+        setInlineError(t('required'));
+        return;
+      }
       if (mode === 'forgot') {
         if (!supabase) return;
         const { error } = await supabase.auth.resetPasswordForEmail(String(data.get('email')), {
@@ -343,7 +353,7 @@ export default function Account() {
               HAMIYA <small>{t('groupName')}</small>
             </span>
           </div>
-          <AuthIllustration register={registering} />
+
           <div className="auth-heading">
             <h1 id="auth-title">
               {t(resetting ? 'resetPassword' : registering ? 'register' : 'signIn')}
@@ -413,6 +423,31 @@ export default function Account() {
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
               </AuthField>
+            )}
+            {registering && (
+              <>
+                <AuthField
+                  icon={LockKeyhole}
+                  label={t('confirmPassword')}
+                  name="confirm_password"
+                  type={showConfirmation ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  minLength={12}
+                  maxLength={128}
+                >
+                  <button type="button" className="password-toggle"
+                    aria-label={t(showConfirmation ? 'hidePassword' : 'showPassword')}
+                    aria-pressed={showConfirmation}
+                    onClick={() => setShowConfirmation((value) => !value)}>
+                    {showConfirmation ? <EyeOff size={19} /> : <Eye size={19} />}
+                  </button>
+                </AuthField>
+                <label className="hamiya-auth-consent">
+                  <input type="checkbox" name="accept_terms" required />
+                  <span>{t('terms')}</span>
+                </label>
+              </>
             )}
             {!resetting && (
               <>
