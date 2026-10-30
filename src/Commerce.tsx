@@ -56,7 +56,7 @@ export function CatalogPage() {
   useEffect(() => {
     setSearch(routeSearch);
     setLimit(12);
-  }, [routeSearch]);
+  }, [routeSearch, category]);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [limit, setLimit] = useState(12);
