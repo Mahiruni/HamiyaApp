@@ -935,6 +935,11 @@ export type TranslationKey = keyof typeof en;
 export const dictionaries: Record<Language, Dictionary> = { en, am, om };
 const extras: Record<Language, Record<string, string>> = {
   en: {
+    confirmPassword: 'Confirm password',
+    passwordMismatch: 'Passwords do not match',
+    acceptTerms: 'I agree to the account terms',
+    welcomeBackTitle: 'Welcome back!',
+    welcomeBackSubtitle: 'Glad to see you again.',
     signUp: 'Sign up',
     connected: 'Connected',
     offlineShort: 'Offline',
@@ -998,6 +1003,11 @@ const extras: Record<Language, Record<string, string>> = {
     setupDraft: 'Provisional privacy and trading notices — awaiting company review.',
   },
   am: {
+    confirmPassword: 'የይለፍ ቃል ማረጋገጫ',
+    passwordMismatch: 'የይለፍ ቃላት አይዛመዱም',
+    acceptTerms: 'በመለያ ውሎች እስማማለሁ',
+    welcomeBackTitle: 'እንኳን ደህና መጡ!',
+    welcomeBackSubtitle: 'እንደገና ስናገኝዎ ደስ ብሎናል።',
     signUp: 'ይመዝገቡ',
     connected: 'ተገናኝቷል',
     offlineShort: 'ከመስመር ውጭ',
@@ -1058,6 +1068,11 @@ const extras: Record<Language, Record<string, string>> = {
     setupDraft: 'ጊዜያዊ የግላዊነት እና የንግድ ውሎች — የድርጅቱን ግምገማ ይጠብቃሉ።',
   },
   om: {
+    confirmPassword: 'Jecha icciitii mirkaneessi',
+    passwordMismatch: 'Jechoonni icciitii wal hin fakkaatan',
+    acceptTerms: 'Ulaagaalee herregaa nan fudhadha',
+    welcomeBackTitle: 'Baga nagaan deebitan!',
+    welcomeBackSubtitle: 'Irra deebinee isin arguun nu gammachiisa.',
     signUp: 'Galmaaʼi',
     connected: 'Walitti hidhameera',
     offlineShort: 'Toora irraa ala',
