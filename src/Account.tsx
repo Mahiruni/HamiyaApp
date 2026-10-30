@@ -318,7 +318,7 @@ export default function Account() {
     const registering = !recovery && mode === 'register';
     const resetting = recovery || mode === 'forgot';
     return (
-      <section className="account-auth hamiya-auth-entry" aria-labelledby="auth-title">
+      <section className={`account-auth hamiya-auth-entry ${registering ? 'hamiya-auth-register' : resetting ? 'hamiya-auth-recovery' : 'hamiya-auth-login'}`} aria-labelledby="auth-title">
         {!recovery && <button className="hamiya-auth-back" type="button" onClick={() => navigate('welcome')} aria-label={t('backToSignIn')}><ArrowLeft size={21} /></button>}
         <div className="auth-story">
           <span className="eyebrow">{t('groupName')}</span>
