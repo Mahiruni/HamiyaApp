@@ -185,7 +185,7 @@ export function ProductSheet({
               const target =
                 Math.abs(movement) > 24
                   ? (Math.max(45, Math.min(75, snap + (movement > 0 ? 15 : -15))) as SheetSnap)
-                  : nearestSheetSnap(height, geometry.usable);
+                  : nearestSheetSnap(dragHeight ?? height, geometry.usable);
               drag.current = null;
               setDragHeight(null);
               setSnap(target);
