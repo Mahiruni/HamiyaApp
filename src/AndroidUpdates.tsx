@@ -113,10 +113,10 @@ export default function InAppAndroidUpdates() {
             ? message || 'updateCheckFailed'
             : 'updateAvailable';
   return (
-    <section className="panel update-panel" aria-labelledby="updates-title">
+    <section className="panel update-panel" aria-labelledby="android-updates-title">
       <div className="settings-panel-heading">
         <Smartphone size={23} />
-        <h2 id="updates-title">{t('appUpdates')}</h2>
+        <h2 id="android-updates-title">{t('appUpdates')} · Android</h2>
       </div>
       <div className={'update-status update-status-' + status} role="status" aria-live="polite">
         <span className="update-status-icon">
