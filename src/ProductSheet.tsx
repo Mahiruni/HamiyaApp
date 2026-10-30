@@ -182,10 +182,11 @@ export function ProductSheet({
             onPointerUp={(event) => {
               if (!drag.current) return;
               const movement = drag.current.y - event.clientY;
-              const target =
-                Math.abs(movement) > 24
-                  ? (Math.max(45, Math.min(75, snap + (movement > 0 ? 15 : -15))) as SheetSnap)
-                  : nearestSheetSnap(dragHeight ?? height, geometry.usable);
+              const releasedHeight = Math.max(
+                geometry.usable * 0.45,
+                Math.min(geometry.usable * 0.75, drag.current.height + movement),
+              );
+              const target = nearestSheetSnap(releasedHeight, geometry.usable);
               drag.current = null;
               setDragHeight(null);
               setSnap(target);
