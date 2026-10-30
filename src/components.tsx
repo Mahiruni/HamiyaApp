@@ -291,8 +291,7 @@ export function StartupSplash({
         height={88}
         fetchPriority="high"
       />
-      <strong>HAMIYA</strong>
-      <span>{t('groupName')}</span>
+
       {recovery ? (
         <div className="startup-recovery" role="alert">
           <p>{t(failed ? 'startupFailed' : 'screenLoadFailed')}</p>
