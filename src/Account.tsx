@@ -30,7 +30,7 @@ import {
   uploadDocument,
 } from './api';
 import { Badge, Button, Empty, Field, HamiyaMark } from './components';
-import { AuthField, AuthIllustration } from './Auth';
+import { AuthField } from './Auth';
 import { authStorage } from './auth-storage';
 import { afterSignIn, authMode, authRoutes, type AuthMode } from './navigation';
 import { languages } from './i18n';
