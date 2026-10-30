@@ -92,6 +92,13 @@ jobs:
           pnpm exec cap sync android
           node scripts/configure-android.mjs
 
+      - name: Verify in-app update plugins are registered
+        run: |
+          set -euo pipefail
+          grep -R -F 'registerPlugin(HamiyaAppUpdatePlugin.class)' android/app/src/main/java
+          grep -R -F 'registerPlugin(HamiyaSystemUiPlugin.class)' android/app/src/main/java
+          test -f android/app/src/main/assets/capacitor.config.json
+
       - name: Configure release signing
         env:
           KEYSTORE_BASE64: ${{ secrets.HAMIYA_ANDROID_KEYSTORE_BASE64 }}
