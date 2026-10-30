@@ -305,7 +305,7 @@ export default function Account() {
     const resetting = recovery || mode === 'forgot';
     return (
       <section className="account-auth hamiya-auth-entry" aria-labelledby="auth-title">
-        <button className="hamiya-auth-back" type="button" onClick={() => navigate('welcome')} aria-label={t('back')}><ArrowLeft size={21} /></button>
+        {!recovery && <button className="hamiya-auth-back" type="button" onClick={() => navigate('welcome')} aria-label={t('backToSignIn')}><ArrowLeft size={21} /></button>}
         <div className="auth-story">
           <span className="eyebrow">{t('groupName')}</span>
           <h2>
