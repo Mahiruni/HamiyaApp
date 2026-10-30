@@ -166,7 +166,17 @@ export default function Account() {
       setBusy(false);
     }
   }
+  function hasRequiredDocuments() {
+    return ['profile_photo', 'national_id', 'trade_license'].every((kind) =>
+      documents.some((document) => document.kind === kind),
+    );
+  }
   async function submitProfile() {
+    if (!hasRequiredDocuments()) {
+      setStep(2);
+      setInlineError(t('uploadHint'));
+      return;
+    }
     if (!(await save())) return;
     setBusy(true);
     try {
@@ -559,6 +569,11 @@ export default function Account() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
+                  setInlineError('');
+                  if (step === 2 && !hasRequiredDocuments()) {
+                    setInlineError(t('uploadHint'));
+                    return;
+                  }
                   if (step < 3) void save(step + 1);
                   else void submitProfile();
                 }}
@@ -739,6 +754,9 @@ export default function Account() {
                       {t('marketing')}
                     </label>
                   </>
+                )}
+                {inlineError && (
+                  <p className="field-error" role="alert">{inlineError}</p>
                 )}
                 <div className="form-actions">
                   <Button
